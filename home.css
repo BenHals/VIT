@@ -1,0 +1,42 @@
+html {
+    height: 100%;
+}
+body {
+    font-family: "PT Sans Caption", sans-serif;
+    height: 100%;
+}
+#contentContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+div.menutitle {
+  height:20%;
+  margin-top: 10%;
+}
+p.menutitle {
+  display: inline;
+  padding:0px;
+/*  margin-top: 25%;*/
+  font-size: 7vh;
+  font-family: "PT Sans Caption", sans-serif;
+  font-weight: 700;
+}
+p.t1 {
+  color: #18afe3;
+}
+p.t2 {
+  color: #094b85;
+}
+
+#discription {
+    display: block;
+    width: 50%;
+    text-align: center;
+}
+
+#buttonContainer {
+    display: block;
+    width: 50%;
+}

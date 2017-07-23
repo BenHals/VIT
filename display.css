@@ -1,0 +1,137 @@
+
+#moduleContent {
+  display: block;
+  height: 100%;
+}
+
+#controls {
+  display: block;
+  height: 100%;
+  padding: 5px;
+  color: #094b85;
+}
+
+#moduleName {
+  font-family: "PT Sans Caption", sans-serif;
+  font-weight: 700;
+}
+#display {
+  display: flex;
+  height: 100%;
+  padding:2px;
+}
+
+.local-file-button {
+    position: relative;
+    overflow: hidden;
+}
+.local-file-button input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+.exampleItems {
+  cursor: pointer;
+}
+.exampleItems:hover {
+  background-color: #ccc;
+}
+#variableSelect{
+  outline: none !important;
+  max-height:500px;
+ /* height:400px;*/
+  width: 100%;
+  padding:5px;
+}
+#focusSelect, #statisticSelect{
+  width:100%;
+}
+.varAlert {
+  padding:5px;
+
+  position: absolute;
+
+}
+#sampleSizeInput {
+  padding-right: 12px;
+}
+
+#prunedTable {
+  overflow-y: hidden;
+  display: block;
+  padding: 0px;
+  margin:0px;
+}
+
+#dataDisplay {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  overflow-x: hidden;
+/*  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;*/
+  padding: 0px;
+}
+#dataDisplay button{
+  outline: none !important;
+  border-color: #f5f5f5;
+  background-color: #f5f5f5;
+  margin: 0px;
+  padding-top:6px;
+}
+#dataDisplay button:hover{
+  border-color: white;
+}
+#dataDisplay button:focus{
+  border-color: #f5f5f5;
+  background-color: #f5f5f5;
+}
+.table-responsive {
+  overflow-y: hidden;
+}
+#dataDisplay table{
+  flex: 1;
+  display: table;
+  margin-bottom: 5px;
+  width: 100%;
+}
+#dataDisplay th{
+  text-align: center;
+}
+#dataDisplay td{
+  text-align: center;
+}
+#popStats {
+  display: block;
+  width: 100%;
+  height: auto;
+  padding: 0px;
+  margin-bottom:0px;
+}
+#popStats .panel-heading p{
+  margin:0px;
+  padding:0px;
+  text-align: center;
+}
+#visualisation {
+  display: block;
+  flex: 1;
+  background-color: white;
+  padding-left:5px;
+  padding-right:5px;
+}
+
+#dynamicCanvas {
+  position: absolute;
+  top: 0;
+}
