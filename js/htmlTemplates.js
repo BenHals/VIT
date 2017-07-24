@@ -149,10 +149,14 @@ function generatevisualisationViewHTML(){
       </div>
     </div>
     <div id="visControls">
-      <button type="button" class="btn btn-default" aria-label="Back" onclick="sampleOptionsSwitch()">
-        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-      </button>
-      <button id = "startVisButton" class = "btn btn-primary btn-block" onclick="startVisButtonClicked()">Go</button>
+      <div id="buttonBar">
+        <button type="button" class="btn btn-default" aria-label="Back" onclick="sampleOptionsSwitch()">
+          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="btn btn-default" aria-label="Back" onclick="selectedSampleChange(1)">
+          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
   </div>
   `;
