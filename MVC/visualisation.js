@@ -37,7 +37,7 @@ class visualisation {
         if(this.dimensions.length == 1 && this.module.name != "Randomisation Variation"){
             type = this.dimensions[0].type;
             return type == 0 ? this.singleNumericalStatistics : this.singleCategoricalStatistics;
-        }else if(this.dimensions.length == 2 && this.dimensions[1].categories.length == 2 || this.module == "Randomisation Variation"){
+        }else if(this.dimensions.length == 2 && this.dimensions[1].categories.length == 2 || this.module.name == "Randomisation Variation"){
             type = this.dimensions[0].type;
             return type == 0 ? this.dualNumericalStatistics : this.dualCategoricalStatistics;
         }else{
