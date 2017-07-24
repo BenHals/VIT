@@ -23,12 +23,14 @@ class visElement {
             this.text = "";
             this.drawSelf = drawText.bind(this, 'black', 'alphabetic', 'start');
         }
+
+        this.visible = true;
     }
 
     setBoundingBox(x1,y1,x2,y2){
         this.boundingBox = [x1,y1,x2,y2];
         this.centerX = (x2-x1)/2 + x1;
-        this.centerX = (y2-y1)/2 + y1;
+        this.centerY = (y2-y1)/2 + y1;
 
         this.bbWidth = x2-x1;
         this.bbHeight = y2-y1;
@@ -67,7 +69,7 @@ class visElement {
         this.centerY = y;
 
         this.boundingBox = [x-this.bbWidth/2, y-this.bbHeight/2,
-                            x+this.bbWidth/2, y+this.bbHeight/2]
+                            x+this.bbWidth/2, y+this.bbHeight/2];
     }
 
     update(){
@@ -83,7 +85,15 @@ class visElement {
         for(var i =0; i < this.elements.length; i++){
             this.elements[i].draw();
         }
-        this.drawSelf();
+        if(this.visible){
+            this.drawSelf();
+        }
+    }
+    show(){
+        this.visible = true;
+    }
+    hide(){
+        this.visible = false;
     }
     drawSelf(){
         //this.renderBB();
@@ -149,6 +159,11 @@ function createSections(canvas, ctx, marginHorizontal, marginVertical){
     }
     return sections;
 }
+function clearScreen(ctx){
+    var canvas = $('#popCanvas');
+    if(!ctx) return;
+    ctx.clearRect(0,0, canvas.attr("width"), canvas.attr("height"));
+}
 
 function drawProportionBar(color){
     this.ctx.save();
@@ -166,6 +181,35 @@ function drawText(color, baseline, align, text, bb){
     this.ctx.textAlign = align;
     this.ctx.fillStyle = color;
     this.ctx.fillText(text, bb[0], bb[3] - 2);
+    this.ctx.restore();
+}
+
+function drawLine(color, dash, bb){
+    if(!bb) bb = this.boundingBox;
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    if(dash) this.ctx.setLineDash([5, 15]);
+    this.ctx.beginPath();
+    this.ctx.moveTo(bb[0], bb[1]);
+    this.ctx.lineTo(bb[2],bb[3]);
+    this.ctx.closePath();
+    this.ctx.stroke();
+    this.ctx.restore();
+}
+
+function drawArrow(color, arrowHeadSize, bb){
+    if(!bb) bb = this.boundingBox;
+    var direction = bb[2] > bb[0] ? 1 : -1;
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.beginPath();
+    this.ctx.moveTo(bb[0], bb[1]);
+    this.ctx.lineTo(bb[2],bb[3]);
+    this.ctx.lineTo(bb[2] - (arrowHeadSize * direction), bb[3] - arrowHeadSize);
+    this.ctx.moveTo(bb[2],bb[3]);
+    this.ctx.lineTo(bb[2] - (arrowHeadSize * direction), bb[3] + arrowHeadSize);
+    this.ctx.closePath();
+    this.ctx.stroke();
     this.ctx.restore();
 }
 

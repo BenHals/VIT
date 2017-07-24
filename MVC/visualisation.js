@@ -1,37 +1,46 @@
+/*jshint esversion: 6 */
 class visualisation {
     constructor(){
 
     }
     setup(population, module){
         this.canvas = document.getElementById('popCanvas');
+        this.dynamicCanvas = document.getElementById('dynamicCanvas');
         this.ctx = this.canvas.getContext('2d');
+        this.dynamicCtx = this.dynamicCanvas.getContext('2d');
         this.population = population;
         this.dimensions = population.dimensions;
-        this.sections = createSections($('.mainCanvas'), this.ctx, 5, 10);
-        this.module = module.name;
+        this.sections = createSections($('#popCanvas'), this.ctx, 5, 10);
+        this.dynamicSections = createSections($('#dynamicCanvas'), this.dynamicCtx, 5, 10);
+        this.module = module;
 
         this.singleNumericalStatistics = ['Mean', 'Median'];
         this.singleCategoricalStatistics = ['Proportion'];
         this.dualNumericalStatistics = ['Diff'];
         this.dualCategoricalStatistics = ['Diff'];
-        this.multiNumericalStatistics = ['Variance', 'FStat'];
-        this.multiCategoricalStatistics = ['Variance', 'FStat'];
+        this.multiNumericalStatistics = ['AvgDeviation', 'FStat'];
+        this.multiCategoricalStatistics = ['AvgDeviation', 'FStat'];
     }
     sampleSizeMax(){
         return this.population ? this.population.allDataPoints.length : 0;
     }
+    sampleSizeMin(){
+        // either use the full range availiable, or only use the population size.
+        return this.module.sampleSize == sampleSizeOptions.fullRange ? 1 : this.population.allDataPoints.length;
+    }
     sampleSizeDefault(){
-        return this.module != "Sampling Variation" ? this.sampleSizeMax() : Math.min(Math.ceil(this.population.allDataPoints.length / 2), 40);
+        return this.module.name != "Sampling Variation" ? this.sampleSizeMax() : Math.min(Math.ceil(this.population.allDataPoints.length / 2), 40);
     }
     getStatisticsOptions(){
+        var type;
         if(this.dimensions.length == 1){
-            var type = this.dimensions[0].type;
+            type = this.dimensions[0].type;
             return type == 0 ? this.singleNumericalStatistics : this.singleCategoricalStatistics;
         }else if(this.dimensions.length == 2 && this.dimensions[1].categories.length == 2){
-            var type = this.dimensions[0].type;
+            type = this.dimensions[0].type;
             return type == 0 ? this.dualNumericalStatistics : this.dualCategoricalStatistics;
         }else{
-            var type = this.dimensions[0].type;
+            type = this.dimensions[0].type;
             return type == 0 ? this.multiNumericalStatistics : this.multiCategoricalStatistics;
         }
     }
@@ -52,8 +61,46 @@ class visualisation {
 
         var popSectionAxisArea = this.sections.s1.elements[2];
         setupPopAxis(popSectionAxisArea, popScale, this.ctx);
+        var popLabelArea = this.sections.s1.elements[0];
+        setupLabel(this.module.labels[0], popLabelArea, this.ctx);
 
-    }  
+        getStatisticsOptions();
+        setupPopStatistic(this.population, popSectionDisplayArea, popScale, true,  this.ctx);
+
+        // Save scale
+        this.popScale = popScale;
+
+    }
+    setupSampleElements(){
+        var sampleSectionAxisArea = this.sections.s2.elements[2];
+        setupPopAxis(sampleSectionAxisArea, this.popScale, this.ctx);
+        var sampleLabelArea = this.sections.s2.elements[0];
+        setupLabel(this.module.labels[1], sampleLabelArea, this.ctx);
+
+        this.distScale = getDistributionScale();
+        var distSectionAxisArea = this.sections.s3.elements[2];
+        setupPopAxis(distSectionAxisArea, this.distScale, this.ctx);
+        var distLabelArea = this.sections.s3.elements[0];
+        setupLabel(this.module.labels[2], distLabelArea, this.ctx);
+
+        var distSectionDisplayArea = this.dynamicSections.s3.elements[1];
+        setupDistribution(state.sampleData.distribution, this.dynamicCtx, distSectionDisplayArea, this.distScale);
+        this.drawPop();
+    }
+    setupSample(sampleID){
+        this.clearSample();
+        var sampleSectionDisplayArea = this.dynamicSections.s2.elements[1];
+        var distElement = vis.dynamicSections.s3.elements[1].elements[0].elements[sampleID];
+        var sampleSections = setupSection(state.sampleData.samples[sampleID], this.dynamicCtx, sampleSectionDisplayArea);
+        if(state.sampleData.dimensions[0].type == 0){
+            setupNumerical(state.sampleData.samples[sampleID], this.dynamicCtx, sampleSectionDisplayArea, this.popScale, sampleSections);
+        }else if(state.sampleData.dimensions[0].type == 1){
+            setupProportional(state.sampleData.samples[sampleID], this.dynamicCtx, sampleSectionDisplayArea, this.popScale, sampleSections);
+        }
+        setupPopStatistic(state.sampleData.samples[sampleID], sampleSectionDisplayArea, this.popScale, false,  this.dynamicCtx);
+        distElement.show();
+        this.drawDynamic();
+    }
     scale(x){
         if(this.ctx){
             this.ctx.scale(x, 1);
@@ -61,8 +108,38 @@ class visualisation {
     }
 
     draw(){
+        this.clearScreen(this.dynamicCtx);
+        for (var s in this.sections){
+            this.sections[s].draw();
+        }
+        for (s in this.dynamicSections){
+            this.dynamicSections[s].draw();
+        }
+    }
+    drawPop(){
+        this.clearScreen(this.ctx);
         for (var s in this.sections){
             this.sections[s].draw();
         }
     }
+    drawDynamic(){
+        this.clearScreen(this.dynamicCtx);
+        for (var s in this.dynamicSections){
+            this.dynamicSections[s].draw();
+        }
+    }
+    nextSample(index){
+        this.setupSample(index);
+    }
+    clearScreen(ctx){
+        clearScreen(ctx);
+    }
+    clearSample(){
+        // Clear sample section elements
+        if(this.dynamicSections){
+            this.dynamicSections.s2.elements[1].elements = [];
+        }
+    }
+
+
 }

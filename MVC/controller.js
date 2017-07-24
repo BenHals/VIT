@@ -2,7 +2,10 @@ var state = {variables_selected: new Set(), dimensions: [], numSamples:1000};
 
 var numericalStatistics = ['Mean', 'Median'];
 var categoricalStatistics = ['Proportion'];
+var sampleSizeOptions = {"fullRange":0, "popSize":1};
 // Options for modules.
+// allowed variables should be a list of variable types acceptable, [0, 1] means
+// dimension 1 is numeretical and dimension 2 is categorical.
 // generateSample should return a function to generate 1 sample from the population.
 var modules = {
     "Home": {
@@ -15,6 +18,8 @@ var modules = {
     "Sampling Variation": {
         name: "Sampling Variation",
         baseHTML: generateModuleHTML,
+        allowedVariables:[[0, null], [1, null], [0, 1], [1,1]],
+        sampleSize:sampleSizeOptions['fullRange'],
         generateSample:function(data, sampleSize, pop){
             // Each sample should be sampleSize elements taken from the pop
             // without replacement (can't take the same element twice).
@@ -23,32 +28,84 @@ var modules = {
             d3.shuffle(sample);
             sample = sample.slice(0, sampleSize);
             return sample;
-        }
+        },
+        labels:["Population", "Sample", "Sample Distribution"]
     },
     "Bootstrapping": {
         name: "Bootstrapping",
         baseHTML: generateModuleHTML,
+        allowedVariables:[[0, null], [1, null], [0, 1], [1,1]],
+        sampleSize:sampleSizeOptions['fullRange'],
         generateSample:function(data, sampleSize, pop){
+            // Each sample should be sampleSize elements taken from the pop
+            // with replacement (CAN take the same element twice).
             var population = pop ? pop : data.allDataPoints;
-            return population.slice(0, sampleSize);
-        }
+            var sample = [];
+            for(var i = 0; i < sampleSize; i++){
+                // Pick a random element
+                var popIndex = d3.randomUniform(sampleSize)();
+                sample = sample.concat(population.slice(popIndex,popIndex+1));
+
+            }
+            return sample;
+        },
+        labels:['Data','Re-Sample','Bootstrap Distribution']
     },
     "Randomisation Variation": {
         name: "Randomisation Variation",
         baseHTML: generateModuleHTML,
+        allowedVariables:[[0, null]],
+        sampleSize:sampleSizeOptions['popSize'],
         generateSample:function(data, sampleSize, pop){
+            // Sample Elements are the same as the population elements,
+            // but with either A or B set as the group.
             var population = pop ? pop : data.allDataPoints;
-            return population.slice(0, sampleSize);
-        }
+            var sample = [];
+            for(var i = 0; i < sampleSize; i++){
+                // Pick a random element and copy it.
+                var popItem = $.extend(true, {}, population.slice(i,i+1)[0]);
+                var group = Math.random();
+                popItem.dimensionValues.push(group < 0.5 ? "A" : "B");
+                sample.push(popItem);
+
+            }
+            return sample;
+        },
+        labels:['Data','Random Variation','Randomisation Distribution']
     },
     "Randomisation Test": {
         name: "Randomisation Test",
         baseHTML: generateModuleHTML,
+        allowedVariables:[[0, 1], [1,1]],
+        sampleSize:sampleSizeOptions['popSize'],
         generateSample:function(data, sampleSize, pop){
+            // Sample Elements are the same as the population elements,
+            // but with the second dimension randomised, keeping the number of elements in 
+            // each the same.
             var population = pop ? pop : data.allDataPoints;
-            return population.slice(0, sampleSize);
-        }
-    },
+            var sample = [];
+            var categories = state.prunedData.dimensions[1].categories;
+            // Get the number of elements in each category
+            var newCategories = [];
+            for(var c in categories){
+                var category = categories[c];
+                var numInCategory = population.filter(function(element){return element.dimensionValues[1] == category}).length;
+                newCategories = newCategories.concat(Array(numInCategory).fill(c));
+            }
+            d3.shuffle(newCategories);
+            for(var i = 0; i < sampleSize; i++){
+                // Pick a random element and copy it.
+                var popItem = $.extend(true, {}, population.slice(i,i+1)[0]);
+                
+                var group = newCategories[i];
+                popItem.dimensionValues[1] = categories[group];
+                sample.push(popItem);
+
+            }
+            return sample;
+        },
+        labels:['Data','Re-Randomised Data','Re-Randomisation Distribution']
+    }
 };
 
 var view = new viewClass();
@@ -192,12 +249,13 @@ function varSelected(e, fromButton){
         return;
     }
 
+    var tempDimensions = [];
     // Get the names any types
     for(var i in variableArray){
         var variableWhole = variableArray[i];
         var variableName = variableWhole.substring(0, variableWhole.length-4);
         var variableType = variableWhole.substring(variableWhole.length-2, variableWhole.length-1) == 'n' ? 0 : 1;
-        state.dimensions.push({name:variableName, type:variableType});
+        tempDimensions.push({name:variableName, type:variableType});
 
         // Set our url parameter to reload here.
         var vLetter = variableType == 0 ? 'n' : 'c';
@@ -207,11 +265,19 @@ function varSelected(e, fromButton){
     }
 
     // We cannot handle numerical data on the second dimension.
-    if(state.dimensions.length > 1 && state.dimensions[1].type == 0){
+    if(tempDimensions.length > 1 && tempDimensions[1].type == 0){
         view.numericalSecondDim();
         return;
     }
-    model.setDimensions(state.dimensions);
+
+    // Check if the selected variables are allowed for the selected module (randomisation variation 
+    // cant take a second dimension for example).
+    var selectedTypes = [tempDimensions[0].type, tempDimensions[1] ? tempDimensions[1].type : null];
+    if(!state.selectedModule.allowedVariables.some(function(element){return element[0] == selectedTypes[0] && element[1] == selectedTypes[1]})){
+        view.wrongModule();
+        return;
+    }
+    model.setDimensions(tempDimensions);
 
     // If the first dimension is categorical, create the focus selector
     if(state.dimensions[0].type == 1){
@@ -254,7 +320,7 @@ function setupPopulation(){
     view.setupPopulation(state.prunedData);
     vis.setup(state.prunedData, state.selectedModule);
     vis.setupPopulationElements();
-    vis.draw();
+    vis.drawPop();
 
 }
 
@@ -277,7 +343,9 @@ function fileOptionsSwitch(){
 function getSampleSizeMax(){
     return vis.sampleSizeMax();
 }
-
+function getSampleSizeMin(){
+    return vis.sampleSizeMin();
+}
 function getSampleSizeDefault(){
     return state.sampleSize != null ? state.sampleSize : vis.sampleSizeDefault();
 }
@@ -296,8 +364,11 @@ function validateSampleSize(){
     }
 
     var ssMax = getSampleSizeMax();
-    if(ssInt < 1 || ssInt > ssMax){
-        view.sampleSizeAlert("Sample size must be between 0 and the size of the population (" + ssMax +")");
+    var ssMin = getSampleSizeMin();
+    if(ssInt < ssMin || ssInt > ssMax){
+        var alertText = ssMax != ssMin ? "Sample size must be between "+ssMin+" and the size of the population (" + ssMax +")" :
+                                        "This module only allows the sample size to be the same as the population (" + ssMax +")";
+        view.sampleSizeAlert(alertText);
         state.sampleSize = null;
         return
     }
@@ -312,7 +383,7 @@ function validateSampleSize(){
 
 function getStatisticsOptions(){
     var statisticsOptions = vis.getStatisticsOptions();
-    setStatistic(state.statistic ? state.statistic : statisticsOptions[0]);
+    setStatistic(state.statistic && $.inArray(state.statistic, statisticsOptions) != -1 ? state.statistic : statisticsOptions[0]);
     return statisticsOptions;
 }
 function setStatistic(stat){
@@ -333,21 +404,24 @@ function statisticSelected(e){
 function takeSamplesButtonClicked(){
     view.visualisationViewSwitch();
     model.setState(state);
-    model.takeSamples();
+    setTimeout(function(){model.takeSamples()}, 500);
+    
 }
 
 function takeSamplesProgressUpdate(progress){
-    if(progress < 100){
-        view.takeSamplesProgressUpdate(progress);
-    }else{
-        takeSamplesFin();
-    }
+    view.takeSamplesProgressUpdate(progress);
+        
 }
 
 function takeSamplesFin(){
     state.selectedSample = 0;
     // Give some delay to see loading bar :)
-    setTimeout(function(){view.takeSamplesFin()}, 500);
+    setTimeout(function(){
+        view.takeSamplesFin();    
+        vis.setupSampleElements();
+        vis.setupSample(state.selectedSample);
+    }, 500);
+
 }
 
 function selectedSampleChange(change){
@@ -359,6 +433,9 @@ function selectedSampleChange(change){
 
         // Refresh table values
         view.setupSampleTableValues();
+
+        // Refresh vis
+        vis.nextSample(state.selectedSample);
     }
 }
 function startVisButtonClicked(){
@@ -367,4 +444,8 @@ function startVisButtonClicked(){
 
 function sampleOptionsSwitch(){
     view.sampleOptionsSwitch();
+}
+
+function getDistributionScale(){
+    return model.getDistributionScale();
 }

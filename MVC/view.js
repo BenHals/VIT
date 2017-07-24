@@ -61,6 +61,9 @@ class viewClass {
     numericalSecondDim(){
         $('#variablePanel').append(`<div id="numericalSecondDim" class="alert alert-danger pull-right varAlert">Second variable must be categorical (c)</div>`);
     }
+    wrongModule(){
+        $('#variablePanel').append(`<div id="wrongModule" class="alert alert-danger pull-right varAlert">Selected variables not allowed for this module</div>`);     
+    }
 
     setupFocus(categories, focus){
         $('#focusPanel').removeClass('invisible');
@@ -192,6 +195,7 @@ class viewClass {
         $('#sampleSizePanel .glyphicon').removeClass('glyphicon-ok');
         $('#sampleSizePanel').addClass('has-error');
         $('#sampleSizePanel .glyphicon').addClass('glyphicon-warning-sign');
+        $('#takeSamplesButton').hide();
     }
 
     sampleSizeValid(){
@@ -199,12 +203,14 @@ class viewClass {
         $('#sampleSizePanel .glyphicon').removeClass('glyphicon-warning-sign');
         $('#sampleSizePanel').addClass('has-success');
         $('#sampleSizePanel .glyphicon').addClass('glyphicon-ok');
+        $('#takeSamplesButton').show();
         
     }
 
     setupStatistic(){
         var avaliableStatistics = getStatisticsOptions();
         var selectedStat = state.statistic ? state.statistic : "";
+        $('#statisticPanel .panel-body option').remove();
         for(var c in avaliableStatistics){
             $('#statisticPanel .panel-body').append(`<option class="list-group-item" ${selectedStat == avaliableStatistics[c] ? "selected='selected'" : ""}>${avaliableStatistics[c]}</option>`);
         }
@@ -238,19 +244,19 @@ class viewClass {
     }
     setupSampleTableValues(){
         $('.sampleTableValue').remove();
-        $('#sampleNum').append(`<th class="sampleTableValue" colspan=${state.prunedData.dimensions.length}>Sample ${state.selectedSample + 1}</th>`);
-        for(var c in state.prunedData.dimensions){
+        $('#sampleNum').append(`<th class="sampleTableValue" colspan=${state.sampleData.dimensions.length}>Sample ${state.selectedSample + 1}</th>`);
+        for(var c in state.sampleData.dimensions){
 
-            $('#tableHeadings').append(`<th class="sampleTableValue">${state.prunedData.dimensions[c].name}</th>`);
+            $('#tableHeadings').append(`<th class="sampleTableValue">${state.sampleData.dimensions[c].name}</th>`);
         }
         $('#prunedTable tbody tr').each(function(index){
             var tr = $(this);
-            for(var c in state.prunedData.dimensions){
+            for(var c in state.sampleData.dimensions){
 
-                var td = $(`<td class="sampleTableValue">${state.samples[state.selectedSample].sampleDataPoints[index].dimensionValues[c]}</td>`);
+                var td = $(`<td class="sampleTableValue">${state.sampleData.samples[state.selectedSample].allDataPoints[index].dimensionValues[c]}</td>`);
                 tr.append(td);
-                if(state.prunedData.dimensions[c].type == 1){
-                    var colorIndex = state.prunedData.dimensions[c].categories.indexOf(state.samples[state.selectedSample].sampleDataPoints[index].dimensionValues[c]);
+                if(state.sampleData.dimensions[c].type == 1){
+                    var colorIndex = state.sampleData.dimensions[c].categories.indexOf(state.sampleData.samples[state.selectedSample].allDataPoints[index].dimensionValues[c]);
                     td.css("color", c == 0 ? proportionColorsList[colorIndex] : groupColorsList[colorIndex]);
                 }
                 tr.append(td);

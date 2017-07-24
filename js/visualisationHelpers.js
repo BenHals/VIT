@@ -18,7 +18,7 @@ function setupSection(dataset, ctx, displayArea){
         for(var cat = 0; cat < numCategories; cat++){
             var catagoryName = categories[cat];
             var bbox = [0, sectionHeight * cat, displayArea.bbWidth, sectionHeight * (cat + 1)];
-            var data = dataset.allDataPoints.filter(function(d){return d.dimensionValues[1] == catagoryName});
+            var data = dataset.allDataPoints.filter(function(d){return d.dimensionValues[1] == catagoryName;});
             populationSections.push({data:data, boundingBox:bbox, statistics:dataset.statistics.grouped[catagoryName], name:catagoryName});
         }
     }
@@ -40,7 +40,7 @@ function setupProportional(dataset, ctx, displayArea, proportionScale, populatio
         focusBar.setRelativeBoundingBox(0, sectionElement.bbHeight*(1/4),focusBarWidth,sectionElement.bbHeight*(3/4), sectionElement.boundingBox);
         focusBar.drawSelf = drawProportionBar.bind(focusBar, proportionColorsList[0]);
         var focusBarLabel = new visElement('text', 'populationSection' + s +'focusLabel', ctx);
-        focusBarLabel.setText(focusProportion > 0.001 ? dataset.focus : "");
+        focusBarLabel.setText(focusProportion > 0.001 ? dataset.dimensions[0].categories[0] : "");
         focusBarLabel.setTextColor(proportionColorsList[0]);
         focusBar.addChild(focusBarLabel);
         focusBarLabel.setRelativeBoundingBox(0, sectionElement.bbHeight*(1/4) + sectionElement.bbHeight/8, 20 ,sectionElement.bbHeight*(1/4), sectionElement.boundingBox);
@@ -69,16 +69,41 @@ function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSec
         var sectionElement = new visElement('rect', 'populationSection' + s, ctx);
         displayArea.addChild(sectionElement);
         sectionElement.setRelativeBoundingBox(section.boundingBox[0],section.boundingBox[1],section.boundingBox[2],section.boundingBox[3], displayArea.boundingBox);
+        var datapoints = [];
         for(var d in section.data){
             var datapoint = section.data[d];
             var dataElement = new visElement('rect', 'populationDP' + s, ctx);
             sectionElement.addChild(dataElement);
-            dataElement.setBoundingBox(0,0,10,10);
+            dataElement.setBoundingBox(0,0,5,5);
             dataElement.setRelativeCenter(numericalScale(datapoint.dimensionValues[0]) - numericalScale(numericalScale.domain()[0]),sectionElement.bbHeight*(1/2), sectionElement.boundingBox);
             dataElement.drawSelf = dataElement.renderBB;
+            datapoints.push(dataElement);
         }
-        
+        if(datapoints.length > 1) numericalHeap(datapoints, sectionElement);
         labelSection(sectionElement, ctx, section.name, s);
+    }
+    var distElement = vis.dynamicSections.s3.elements[1][0];
+}
+
+function numericalHeap(datapoints, area){
+    var numBuckets = 300;
+    var bucketScale = d3.scaleQuantize().range(Array.from(Array(numBuckets).keys()));
+    bucketScale.domain([area.boundingBox[0], area.boundingBox[2]]);
+    var buckets = {};
+    var tallestBucketHeight = 0;
+    for(var d in datapoints){
+        var datapoint = datapoints[d];
+        var bucket = bucketScale(datapoint.centerX);
+        if(!(bucket in buckets)) buckets[bucket] = [];
+        buckets[bucket].push(datapoint);
+        if(buckets[bucket].length > tallestBucketHeight) tallestBucketHeight = buckets[bucket].length;
+    }
+    var spaceAvaliable = area.boundingBox[3] - area.boundingBox[1];
+    var spacePerElement = Math.min(spaceAvaliable/tallestBucketHeight, datapoints[0].bbHeight);
+    for(var b in buckets){
+        for(var e in buckets[b]){
+            buckets[b][e].setCenter(buckets[b][e].centerX,  buckets[b][e].centerY - spacePerElement * e );
+        }
     }
 }
 
@@ -96,4 +121,92 @@ function setupPopAxis(popSectionAxisArea, popScale, ctx){
     popSectionAxisArea.addChild(popAxis);
     popAxis.setRelativeBoundingBox(0, 0, popSectionAxisArea.bbWidth, popSectionAxisArea.bbHeight, popSectionAxisArea.boundingBox);
     popAxis.drawSelf = drawAxis.bind(popAxis);
+}
+
+function setupLabel(label, labelArea, ctx){
+    var sectionLabel = new visElement('text', "popLabel", ctx);
+    sectionLabel.setText(label);
+    labelArea.addChild(sectionLabel);
+    sectionLabel.setRelativeBoundingBox(0, 0, 10, 10, labelArea.boundingBox);
+    sectionLabel.drawSelf = drawText.bind(sectionLabel, 'black', 'hanging', 'start');
+}
+
+function setupPopStatistic(population, popSection, popScale, isPop, ctx){
+    var statMarker;
+    var statisticOfInterest;
+    var stats, category, stat, section;
+    if(population.dimensions.length == 1){
+        // For 1 dimensional data just draw a marker at desired statistic
+        statMarker = new visElement('line', 'popStatMarker', ctx);
+        popSection.addChild(statMarker);
+        var desiredStatistic = population.statistics.overall[state.statistic ? state.statistic : getStatisticsOptions()[0]];
+        statMarker.setRelativeBoundingBox(popScale(desiredStatistic) - popSection.boundingBox[0], 0, popScale(desiredStatistic)- popSection.boundingBox[0], popSection.bbHeight, popSection.boundingBox);
+        statMarker.drawSelf = drawLine.bind(statMarker, 'black', false);
+        return;
+    }else if(population.dimensions[1].categories.length == 2){
+        // For 2 diminsional data with 2 groups, show the difference
+        statisticOfInterest = state.prunedData.dimensions[0].type == 0 ? "Mean" : "Proportion";
+        stats = [];
+        for(var c in state.prunedData.dimensions[1].categories){
+            category = state.prunedData.dimensions[1].categories[c];
+            stat = population.statistics.grouped[category][statisticOfInterest];
+            stats.push(stat);
+            section = popSection.elements[c];
+            statMarker = new visElement('line', 'popStatMarker'+c, ctx);
+            section.addChild(statMarker);
+            statMarker.setRelativeBoundingBox(popScale(stat) - section.boundingBox[0], 0, popScale(stat)- section.boundingBox[0], section.bbHeight, section.boundingBox);
+            statMarker.drawSelf = drawLine.bind(statMarker, 'black', false);
+        }
+        statMarker = new visElement('arrow', 'popStatMarker', ctx);
+        popSection.addChild(statMarker);
+        statMarker.setRelativeBoundingBox(popScale(stats[0]) - popSection.boundingBox[0], popSection.bbHeight/2, popScale(stats[1])- popSection.boundingBox[0], popSection.bbHeight/2, popSection.boundingBox);
+        statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
+        return;
+    }else{
+        // for 2 dimensional data with multiple groups, we want the
+        // total variation from the mean.
+        statisticOfInterest = state.prunedData.dimensions[0].type == 0 ? "Mean" : "Proportion";
+        var overallStatistic = state.prunedData.statistics.overall[statisticOfInterest];
+        stats = [];
+        for(var cat in state.prunedData.dimensions[1].categories){
+            category = state.prunedData.dimensions[1].categories[cat];
+            stat = population.statistics.grouped[category][statisticOfInterest];
+            stats.push(stat);
+            section = popSection.elements[cat];
+            statMarker = new visElement('line', 'popStatMarker'+cat, ctx);
+            section.addChild(statMarker);
+            statMarker.setRelativeBoundingBox(popScale(stat) - section.boundingBox[0], 0, popScale(stat)- section.boundingBox[0], section.bbHeight, section.boundingBox);
+            statMarker.drawSelf = drawLine.bind(statMarker, 'black', false);
+            
+            statMarker = new visElement('arrow', 'popStatArrow'+cat, ctx);
+            section.addChild(statMarker);
+            statMarker.setRelativeBoundingBox(popScale(stat) - section.boundingBox[0], section.bbHeight*(3/4), popScale(overallStatistic)- section.boundingBox[0], section.bbHeight*(3/4), section.boundingBox);
+            statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
+        }
+        if(isPop){
+            var popStatLine = new visElement('line', 'popStatMarker', ctx);
+            popSection.addChild(popStatLine);
+            popStatLine.setRelativeBoundingBox(popScale(overallStatistic) - popSection.boundingBox[0], 0, popScale(overallStatistic)- popSection.boundingBox[0], popSection.bbHeight*2 + popSection.parent.elements[0].bbHeight + popSection.parent.elements[2].bbHeight, popSection.boundingBox);
+            popStatLine.drawSelf = drawLine.bind(popStatLine, 'black', true);
+            return;
+        }
+    }
+}
+
+function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale){
+    var sectionElement = new visElement('rect', 'distribution', ctx);
+    distSectionDisplayArea.addChild(sectionElement);
+    sectionElement.setRelativeBoundingBox(0,0,distSectionDisplayArea.bbWidth, distSectionDisplayArea.bbHeight, distSectionDisplayArea.boundingBox);
+    var datapoints = [];
+    for(var d in distribution){
+        var datapoint = distribution[d];
+        var dataElement = new visElement('rect', 'distElem' + d, ctx);
+        sectionElement.addChild(dataElement);
+        dataElement.setBoundingBox(0,0,5,5);
+        dataElement.setRelativeCenter(distScale(datapoint) - distScale(distScale.domain()[0]),sectionElement.bbHeight, sectionElement.boundingBox);
+        dataElement.drawSelf = dataElement.renderBB;
+        dataElement.hide();
+        datapoints.push(dataElement);
+    }
+    if(datapoints.length > 1) numericalHeap(datapoints, sectionElement);
 }
