@@ -43,7 +43,7 @@ var modules = {
             var sample = [];
             for(var i = 0; i < sampleSize; i++){
                 // Pick a random element
-                var popIndex = d3.randomUniform(sampleSize)();
+                var popIndex = Math.floor(d3.randomUniform(population.length)());
                 sample = sample.concat(population.slice(popIndex,popIndex+1));
 
             }

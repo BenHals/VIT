@@ -33,10 +33,11 @@ class visualisation {
     }
     getStatisticsOptions(){
         var type;
-        if(this.dimensions.length == 1){
+        // We must check for Randomisation Variation, as we add anouther dimension to the data.
+        if(this.dimensions.length == 1 && this.module.name != "Randomisation Variation"){
             type = this.dimensions[0].type;
             return type == 0 ? this.singleNumericalStatistics : this.singleCategoricalStatistics;
-        }else if(this.dimensions.length == 2 && this.dimensions[1].categories.length == 2){
+        }else if(this.dimensions.length == 2 && this.dimensions[1].categories.length == 2 || this.module == "Randomisation Variation"){
             type = this.dimensions[0].type;
             return type == 0 ? this.dualNumericalStatistics : this.dualCategoricalStatistics;
         }else{
@@ -72,6 +73,7 @@ class visualisation {
 
     }
     setupSampleElements(){
+        this.clearAll();
         var sampleSectionAxisArea = this.sections.s2.elements[2];
         setupPopAxis(sampleSectionAxisArea, this.popScale, this.ctx);
         var sampleLabelArea = this.sections.s2.elements[0];
@@ -133,6 +135,12 @@ class visualisation {
     }
     clearScreen(ctx){
         clearScreen(ctx);
+    }
+    clearAll(){
+        if(this.dynamicSections){
+            this.dynamicSections.s2.elements[1].elements = [];
+            this.dynamicSections.s3.elements[1].elements = [];
+        }
     }
     clearSample(){
         // Clear sample section elements

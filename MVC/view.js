@@ -251,6 +251,7 @@ class viewClass {
         }
         $('#prunedTable tbody tr').each(function(index){
             var tr = $(this);
+            if(index >= state.sampleSize) return;
             for(var c in state.sampleData.dimensions){
 
                 var td = $(`<td class="sampleTableValue">${state.sampleData.samples[state.selectedSample].allDataPoints[index].dimensionValues[c]}</td>`);

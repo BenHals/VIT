@@ -79,16 +79,18 @@ function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSec
             dataElement.drawSelf = dataElement.renderBB;
             datapoints.push(dataElement);
         }
-        if(datapoints.length > 1) numericalHeap(datapoints, sectionElement);
+        var boxHeight = sectionElement.boundingBox[3] - sectionElement.boundingBox[1];
+        var heapBB = [sectionElement.boundingBox[0], sectionElement.boundingBox[1] + boxHeight/2, sectionElement.boundingBox[2], sectionElement.boundingBox[3]];
+        if(datapoints.length > 1) numericalHeap(datapoints, heapBB);
         labelSection(sectionElement, ctx, section.name, s);
     }
-    var distElement = vis.dynamicSections.s3.elements[1][0];
+
 }
 
-function numericalHeap(datapoints, area){
+function numericalHeap(datapoints, boundingBox){
     var numBuckets = 300;
     var bucketScale = d3.scaleQuantize().range(Array.from(Array(numBuckets).keys()));
-    bucketScale.domain([area.boundingBox[0], area.boundingBox[2]]);
+    bucketScale.domain([boundingBox[0], boundingBox[2]]);
     var buckets = {};
     var tallestBucketHeight = 0;
     for(var d in datapoints){
@@ -98,7 +100,7 @@ function numericalHeap(datapoints, area){
         buckets[bucket].push(datapoint);
         if(buckets[bucket].length > tallestBucketHeight) tallestBucketHeight = buckets[bucket].length;
     }
-    var spaceAvaliable = area.boundingBox[3] - area.boundingBox[1];
+    var spaceAvaliable = boundingBox[3] - boundingBox[1];
     var spacePerElement = Math.min(spaceAvaliable/tallestBucketHeight, datapoints[0].bbHeight);
     for(var b in buckets){
         for(var e in buckets[b]){
@@ -208,5 +210,5 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale)
         dataElement.hide();
         datapoints.push(dataElement);
     }
-    if(datapoints.length > 1) numericalHeap(datapoints, sectionElement);
+    if(datapoints.length > 1) numericalHeap(datapoints, sectionElement.boundingBox);
 }

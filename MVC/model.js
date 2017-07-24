@@ -192,7 +192,7 @@ class modelClass {
         var s = upto;
         for(; s < upto+100 && s < state.numSamples; s++){
             var sample = state.selectedModule.generateSample(state.prunedData, state.sampleSize);
-            var sampleStatistics = calculateDataSetStatistics(sample, state.dimensions, state.focus);
+            var sampleStatistics = calculateDataSetStatistics(sample, state.sampleData.dimensions, state.focus);
             distributionStatistics.push(sampleStatistics.overall[state.statistic]);
             newSamples.push({allDataPoints:sample, id:s, statistics:sampleStatistics, dimensions:state.sampleData.dimensions});
       
@@ -216,12 +216,12 @@ class modelClass {
         // If we have multiple groups, the average deviation has the same scale but 0 is at the start.
         var distScale;
         var domain;
-        if(state.dimensions.length == 1){
+        if(state.sampleData.dimensions.length == 1){
             return vis.popScale.copy();
-        }else if(state.dimensions[1].categories.length == 2){
+        }else if(state.sampleData.dimensions[1].categories.length == 2){
             distScale = vis.popScale.copy();
             domain = distScale.domain();
-            var mid = (domain[1] - domain[0])/2;
+            var mid = (domain[1] - domain[0])/2 + domain[0];
             var midDistanceToZero = 0 - mid;
             distScale.domain([domain[0] + midDistanceToZero, domain[1] + midDistanceToZero]);
             return distScale;
