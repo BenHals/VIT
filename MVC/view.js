@@ -25,7 +25,13 @@ class viewClass {
             if(e.which == 37){
                 selectedSampleChange(-1);
             }
-        })
+        });
+        $(document).on('input', '#visAnimProgress', function(e){
+            visAnimUserInput(e);
+        });
+        $(document).on('change', '#visAnimProgress', function(e){
+            visAnimUserRelease(e);
+        });
         this.showingDataDisplay = true;
     }
     switchModule(moduleHTML){
@@ -266,6 +272,41 @@ class viewClass {
         this.toggleDataDisplay();
         this.toggleDataDisplay();
     }
+    toPause(){
+        $('#pausePlay span').removeClass('glyphicon-play');
+        $('#pausePlay span').addClass('glyphicon-pause');
+    }
+    toUnPause(){
+        $('#pausePlay span').removeClass('glyphicon-pause');
+        $('#pausePlay span').addClass('glyphicon-play');
+    }
+    visAnimDraggableInit(animation){
+        state.animDraggableMap = {};
+        var datalist = $('#stages');
+        datalist.html("");
+        var sum = 0;
+        for(var s in animation.stages){
+            var duration = animation.stages[s].duration;
+            var range = [sum, sum + duration];
+            datalist.append(`<option value=${sum}>`);
+            state.animDraggableMap[s] = {range:range, width:duration};
+            sum += duration;
+        }
+        var bar = $('#visAnimProgress');
+        
+        bar.attr("max", sum);
+    }
+    visAnimDraggableProgress(animation, stageProgress){
+        var bar = $('#visAnimProgress');
+        var stage = animation.getStage();
+        if(stage){
+            var timeFromStageStart = (stageProgress == 1 ? 0 : stageProgress) * stage.duration;
+            var stageStart = state.animDraggableMap[animation.currentStage].range[0];
+            bar.val(stageStart+timeFromStageStart);
+            bar.css('-webkit-slider-runnable-track ', 'background:linear-gradient(to right, #3f51b5 0%, #3f51b5 50%, #515151 100%)');
+        }
+    }
+
 
 }
 

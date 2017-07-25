@@ -153,10 +153,15 @@ function generatevisualisationViewHTML(){
         <button type="button" class="btn btn-default" aria-label="Back" onclick="sampleOptionsSwitch()">
           <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
         </button>
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="selectedSampleChange(1)">
+        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(10)">
           <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
         </button>
+        <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
+          <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+        </button>
       </div>
+      <input id="visAnimProgress" type="range" min="0" list="stages">
+      <datalist id="stages"></datalist>
     </div>
   </div>
   `;

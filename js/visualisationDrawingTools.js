@@ -1,10 +1,11 @@
 var groupColorsList = [ "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
 var proportionColorsList = ["#3366cc", "#dc3912",'#1b9e77','#d95f02','#7570b3'];
 class visElement {
-    constructor(type, id, ctx){
+    constructor(type, id, ctx, popId){
         this.elements = [];
         this.type = type;
         this.id = id;
+        this.popId = popId;
         this.ctx = ctx;
 
         this.boundingBox = [0,0,0,0];
@@ -16,6 +17,7 @@ class visElement {
 
         this.centerX = 0;
         this.centerY = 0;
+        this.alternateCenters = [];
 
         this.parent = null;
 
@@ -25,6 +27,39 @@ class visElement {
         }
 
         this.visible = true;
+        this.transitions = [];
+        this.lastTransitionAnim = null;
+        this.lastTransitionStage = null;
+        this.stageDuration = null;
+    }
+    resetStage(anim, stage, duration){
+        this.transitions = [];
+        this.lastTransitionAnim = anim;
+        this.lastTransitionStage = stage;
+        this.stageDuration = duration;
+    }
+    loadTransition(stageName, animName, attr, attrFrom, changeTo, start, end, duration) {
+        if(stageName != this.lastTransitionStage && animName != this.lastTransitionAnim){
+            // Loading a transition for a new stage.
+            this.resetStage(animName, stageName, duration);
+        }
+        if(attrFrom != null) this[attr] = attrFrom;
+        this.setCenter(this.centerX, this.centerY);
+        // create interpolator for the atribute.
+        // d3 interpolators run from 0 at the start to 1 at the end,
+        // whereas the transition could be from [0.5, 0.75] for exaple
+        // so when we are passed in stage progree [0,1] we need to find
+        // transition progress, and if the transition should be running pass this 
+        // to the interpolator.
+        var stageToTransitionScale = d3.scaleLinear().range([0,1]).domain([start,end]);
+        var transitionProgress = function(stageProgress){
+            if(stageProgress < start) return 0;
+            if(stageProgress > end) return 1;
+            return stageToTransitionScale(stageProgress);
+        };
+        var attrInterpolator = d3.interpolate(this[attr], changeTo);
+
+        this.transitions.push({attr:attr, changeTo:changeTo, start:start, end:end, transitionProg:transitionProgress, interpolator:attrInterpolator});
     }
 
     setBoundingBox(x1,y1,x2,y2){
@@ -72,14 +107,18 @@ class visElement {
                             x+this.bbWidth/2, y+this.bbHeight/2];
     }
 
-    update(){
+    update(stageProgress){
         for(var i =0; i < this.elements.length; i++){
-            this.elements[i].update();
+            this.elements[i].update(stageProgress);
         }
-        this.updateSelf();
+        this.updateSelf(stageProgress);
     }
-    updateSelf(){
-
+    updateSelf(stageProgress){
+        for(var t in this.transitions){
+            var transition = this.transitions[t];
+            this[transition.attr] = transition.interpolator(transition.transitionProg(stageProgress));
+        }
+        this.setCenter(this.centerX, this.centerY);
     }
     draw(){
         for(var i =0; i < this.elements.length; i++){
@@ -119,6 +158,9 @@ class visElement {
 
     setScale(scale){
         this.scale = scale;
+    }
+    setAlternativeCenter(center){
+        this.alternateCenters.push(center);
     }
 }
 

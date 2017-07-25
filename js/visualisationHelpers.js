@@ -26,8 +26,9 @@ function setupSection(dataset, ctx, displayArea){
 }
 
 function setupProportional(dataset, ctx, displayArea, proportionScale, populationSections){
-
+    var dynamicElements = [];
     for(var s in populationSections){
+        dynamicElements.push([]);
         var section = populationSections[s];
         var sectionElement = new visElement('rect', 'populationSection' + s, ctx);
         displayArea.addChild(sectionElement);
@@ -59,12 +60,15 @@ function setupProportional(dataset, ctx, displayArea, proportionScale, populatio
         otherBarLabel.setRelativeBoundingBox(focusBarWidth, sectionElement.bbHeight*(1/4) + sectionElement.bbHeight/8, focusBarWidth + 20 , sectionElement.bbHeight*(1/4), sectionElement.boundingBox);
     
         labelSection(sectionElement, ctx, section.name, s);
+        dynamicElements[s].push(sectionElement.elements);
     }
+    return dynamicElements;
 }
 
 function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSections){
-    
+    var dynamicElements = [];
     for(var s in populationSections){
+        dynamicElements.push([]);
         var section = populationSections[s];
         var sectionElement = new visElement('rect', 'populationSection' + s, ctx);
         displayArea.addChild(sectionElement);
@@ -72,22 +76,24 @@ function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSec
         var datapoints = [];
         for(var d in section.data){
             var datapoint = section.data[d];
-            var dataElement = new visElement('rect', 'populationDP' + s, ctx);
+            var dataElement = new visElement('rect', 'populationDP' + s, ctx, datapoint.id);
             sectionElement.addChild(dataElement);
             dataElement.setBoundingBox(0,0,5,5);
             dataElement.setRelativeCenter(numericalScale(datapoint.dimensionValues[0]) - numericalScale(numericalScale.domain()[0]),sectionElement.bbHeight*(1/2), sectionElement.boundingBox);
             dataElement.drawSelf = dataElement.renderBB;
             datapoints.push(dataElement);
         }
+        dynamicElements[s] = datapoints;
         var boxHeight = sectionElement.boundingBox[3] - sectionElement.boundingBox[1];
         var heapBB = [sectionElement.boundingBox[0], sectionElement.boundingBox[1] + boxHeight/2, sectionElement.boundingBox[2], sectionElement.boundingBox[3]];
-        if(datapoints.length > 1) numericalHeap(datapoints, heapBB);
+        if(datapoints.length > 1) numericalHeap(datapoints, heapBB, true);
         labelSection(sectionElement, ctx, section.name, s);
     }
+    return dynamicElements;
 
 }
 
-function numericalHeap(datapoints, boundingBox){
+function numericalHeap(datapoints, boundingBox, changeValue){
     var numBuckets = 300;
     var bucketScale = d3.scaleQuantize().range(Array.from(Array(numBuckets).keys()));
     bucketScale.domain([boundingBox[0], boundingBox[2]]);
@@ -104,7 +110,9 @@ function numericalHeap(datapoints, boundingBox){
     var spacePerElement = Math.min(spaceAvaliable/tallestBucketHeight, datapoints[0].bbHeight);
     for(var b in buckets){
         for(var e in buckets[b]){
-            buckets[b][e].setCenter(buckets[b][e].centerX,  buckets[b][e].centerY - spacePerElement * e );
+            buckets[b][e].setAlternativeCenter([buckets[b][e].centerX, buckets[b][e].centerY]);
+            buckets[b][e].setAlternativeCenter([buckets[b][e].centerX,  buckets[b][e].centerY - spacePerElement * e ]);
+            if(changeValue) buckets[b][e].setCenter(buckets[b][e].centerX,  buckets[b][e].centerY - spacePerElement * e );
         }
     }
 }
@@ -196,6 +204,7 @@ function setupPopStatistic(population, popSection, popScale, isPop, ctx){
 }
 
 function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale){
+    var dynamicElements = [];
     var sectionElement = new visElement('rect', 'distribution', ctx);
     distSectionDisplayArea.addChild(sectionElement);
     sectionElement.setRelativeBoundingBox(0,0,distSectionDisplayArea.bbWidth, distSectionDisplayArea.bbHeight, distSectionDisplayArea.boundingBox);
@@ -210,5 +219,9 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale)
         dataElement.hide();
         datapoints.push(dataElement);
     }
-    if(datapoints.length > 1) numericalHeap(datapoints, sectionElement.boundingBox);
+    if(datapoints.length > 1) {
+        numericalHeap(datapoints, sectionElement.boundingBox, true);
+        dynamicElements = datapoints;
+    }
+    return dynamicElements;
 }

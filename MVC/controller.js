@@ -1,4 +1,4 @@
-var state = {variables_selected: new Set(), dimensions: [], numSamples:1000};
+var state = {variables_selected: new Set(), dimensions: [], numSamples:1000, paused:false};
 
 var numericalStatistics = ['Mean', 'Median'];
 var categoricalStatistics = ['Proportion'];
@@ -370,7 +370,7 @@ function validateSampleSize(){
                                         "This module only allows the sample size to be the same as the population (" + ssMax +")";
         view.sampleSizeAlert(alertText);
         state.sampleSize = null;
-        return
+        return;
     }
     state.sampleSize = ssInt;
     view.sampleSizeValid();
@@ -419,7 +419,9 @@ function takeSamplesFin(){
     setTimeout(function(){
         view.takeSamplesFin();    
         vis.setupSampleElements();
-        vis.setupSample(state.selectedSample);
+        vis.initVisualisation();
+        //vis.setupSample(state.selectedSample);
+        vis.beginAnimationSequence(5, function(d){return fallDown(d, 0.1);});
     }, 500);
 
 }
@@ -438,6 +440,18 @@ function selectedSampleChange(change){
         vis.nextSample(state.selectedSample);
     }
 }
+function visSampleChange(change){
+    if(state.selectedSample != undefined){
+
+        // Refresh table values
+        view.setupSampleTableValues();
+
+    }
+}
+function distSequence(num){
+    unpause();
+    vis.beginAnimationSequence(5, fallDown);
+}
 function startVisButtonClicked(){
     return;
 }
@@ -448,4 +462,45 @@ function sampleOptionsSwitch(){
 
 function getDistributionScale(){
     return model.getDistributionScale();
+}
+
+function pause(){
+    state.paused = true;
+    vis.pause();
+    view.toUnPause();
+}
+function unpause(){
+    state.paused = false;
+    vis.unpause();
+    view.toPause();
+}
+function pauseToggle(){
+    if(state.paused){
+        unpause();
+    }else{
+        pause();
+    }
+    //state.paused = !state.paused;
+}
+
+function visAnimDraggableInit(animation){
+    view.visAnimDraggableInit(animation);
+}
+function visAnimDraggableProgress(animation, stageProgress){
+    view.visAnimDraggableProgress(animation, stageProgress);
+}
+function visAnimUserInput(e){
+    this.pause();
+    var animProgress = $('#visAnimProgress').val();
+    for(var stage in state.animDraggableMap){
+        if(animProgress < state.animDraggableMap[stage].range[1] && animProgress >= state.animDraggableMap[stage].range[0]){
+            var syntheticStartTimeDiff = (animProgress - state.animDraggableMap[stage].range[0]);
+            var stageProgress = syntheticStartTimeDiff/state.animDraggableMap[stage].width;
+            console.log(stage + " : " + stageProgress + " : " + syntheticStartTimeDiff);
+            vis.setAnimProgress(stage, stageProgress, syntheticStartTimeDiff);
+        }
+    }
+}
+function visAnimUserRelease(e){
+    return;
 }
