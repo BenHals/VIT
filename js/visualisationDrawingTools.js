@@ -202,9 +202,11 @@ function createSections(canvas, ctx, marginHorizontal, marginVertical){
     return sections;
 }
 function clearScreen(ctx){
-    var canvas = $('#popCanvas');
-    if(!ctx) return;
-    ctx.clearRect(0,0, canvas.attr("width"), canvas.attr("height"));
+    if(ctx){
+        var canvas = $('#popCanvas');
+        if(!ctx) return;
+        ctx.clearRect(0,0, canvas.attr("width")/state.scaleX, canvas.attr("height"));
+    }
 }
 
 function drawProportionBar(color){

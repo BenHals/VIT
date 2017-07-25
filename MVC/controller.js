@@ -329,6 +329,7 @@ function toggleDataDisplay(){
 }
 
 function canvasRedraw(scaleX){
+    state.scaleX = scaleX;
     vis.scale(scaleX);
     vis.draw();
 }
