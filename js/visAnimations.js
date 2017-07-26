@@ -99,6 +99,90 @@ function createSquareAnim(element){
 	return moveSquare;
 }
 
+// return a function that takes in all dynamic elements (sample points, distribution etc) and returns and animation.
+function getAnimation(module, dimensions, statisticsDimensions, repititions, includeDistribution, speedMultiplier){
+	return function(d){
+		if(!speedMultiplier) speedMultiplier = 1;
+		var animation = new visAnim('animation');
+		var inclueSelectedPoints = module.name == "Sampling Variation";
+		if(inclueSelectedPoints){
+			animation.addStage(samplePointsFadeInStage(d, animation, speedMultiplier, "fadeSelectedPoints"));
+		}
+		animation.addStage(samplePointsDropFromPop(d, animation, speedMultiplier, "pointsDrop", true));
+		animation.addStage(statMarkersFadeInStage(d, animation, speedMultiplier, "statMarkersFade"));
+		animation.addStage(singleNumericalDistDrop(d, animation, speedMultiplier, "singleNumericalDistDrop"));
+		animation.addStage(distElementsFadeInStage(d, animation, speedMultiplier, "distElementsFade"));
+		return animation;
+	};
+}
+
+// ***********************Stage Constructors************************8
+function samplePointsFadeInStage(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var count = 0;
+	var totalNumPoints = state.sampleSize;
+	var fadeTimeEachPoint = 0.9/totalNumPoints;
+	
+	selectAllSamplePoints(d, function(element, sampleCategory, categoryIndex){
+		var startPos = vis.allPopElements[element.popId].centerY;
+		stage.setTransition(element, 'centerY', startPos, startPos, 0, 1);
+		stage.setTransition(element, 'color', "#000000", "#FF0000", fadeTimeEachPoint * count, fadeTimeEachPoint * (count+1));
+		count++;
+	});
+	selectAllStatMarkers(d, function(element, index){
+		stage.setTransition(element, 'opacity', 0, 0, 0,1);
+	});
+	stage.setTransition(d.selectedDistElements[0], 'opacity', 0, 0, 0,1);
+	return stage;
+}
+
+function samplePointsDropFromPop(d, animation, speedMultiplier, name, toStacked){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var midPoint = (vis.dynamicSections.s2.elements[1].bbHeight/2) + vis.dynamicSections.s2.elements[1].boundingBox[1];
+	selectAllSamplePoints(d, function(element, sampleCategory, categoryIndex){
+		var endPos = toStacked ? element.centerY : midPoint;
+		var startPos = vis.allPopElements[element.popId].centerY;
+		stage.setTransition(element, 'centerY', startPos, endPos, 0, 1);
+		if(toStacked) stage.setTransition(element, 'color', null, "#FF0000", 0, 1);
+	});
+	return stage;
+}
+function statMarkersFadeInStage(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var count = 0;
+	var totalNumPoints = state.sampleSize;
+	var fadeTimeEachPoint = 1/totalNumPoints;
+	selectAllSamplePoints(d, function(element, sampleCategory, categoryIndex){
+		stage.setTransition(element, 'color', "#FF0000", "#000000", 0, 1);
+		count++;
+	});
+	selectAllStatMarkers(d, function(element, index){
+		stage.setTransition(element, 'color', "#000000", "#000000", 0, 1);
+		stage.setTransition(element, 'opacity', 0, 1, 0, 1);
+	});
+	return stage;
+}
+function singleNumericalDistDrop(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var statMark = d.sample.statMarkers[0];
+	stage.setTransition(statMark, 'color', "#000000", "#FF0000", 0, 0.25);
+	var start = statMark.alternateBB[0];
+	var end = d.selectedDistElements[0];
+	stage.setTransition(statMark, 'boundingBox', start, [end.centerX, end.centerY, end.centerX, end.centerY], 0, 1);
+	stage.setTransition(statMark, 'opacity', 1, 0, 0.5, 1);
+	return stage;
+}
+function distElementsFadeInStage(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var count = 0;
+	var totalNumPoints = state.sampleSize;
+	var fadeTimeEachPoint = 1/totalNumPoints;
+	
+	for(var dist in d.selectedDistElements){
+		stage.setTransition(d.selectedDistElements[dist], 'opacity', 0, 1, 0,1);
+	}
+	return stage;
+}
 // Animation Constructors
 // take in dynamic elements and return the animation.
 function SquareTest(dynamicElements){
@@ -108,8 +192,13 @@ function SquareTest(dynamicElements){
 function selectAllSamplePoints(dynamicElements, func){
 	for(var sc in dynamicElements.sample.datapoints){
 		for (var i in dynamicElements.sample.datapoints[sc]){
-			func(dynamicElements.sample.datapoints[sc][i]);
+			func(dynamicElements.sample.datapoints[sc][i], sc, i);
 		}
+	}
+}
+function selectAllStatMarkers(dynamicElements, func){
+	for(var sc in dynamicElements.sample.statMarkers){
+		func(dynamicElements.sample.statMarkers[sc], sc,);
 	}
 }
 function fallDown(dynamicElements, speedMulti){
@@ -128,6 +217,7 @@ function fallDown(dynamicElements, speedMulti){
 	selectAllSamplePoints(dynamicElements, function(element){
 		var startPos = vis.allPopElements[element.popId].centerY;
 		dropToCenter.setTransition(element, 'centerY', startPos, midPoint, 0, 1);
+		dropToCenter.setTransition(element, 'color', null, '#FF0000', 0, 1);
 	});
 	fallDown.addStage(dropToCenter);
 

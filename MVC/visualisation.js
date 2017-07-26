@@ -24,6 +24,7 @@ class visualisation {
         this.animation = null;
         this.paused = false;
         this.pauseTime = 0;
+
     }
     sampleSizeMax(){
         return this.population ? this.population.allDataPoints.length : 0;
@@ -104,6 +105,7 @@ class visualisation {
         this.clearSample();
         var sampleSectionDisplayArea = this.dynamicSections.s2.elements[1];
         var distElement = this.dynamicElements.distribution.datapoints[sampleID];
+        this.dynamicElements.selectedDistElements = [distElement];
         var sampleSections = setupSection(state.sampleData.samples[sampleID], this.dynamicCtx, sampleSectionDisplayArea);
         this.dynamicElements.sample = {container: sampleSectionDisplayArea};
         if(state.sampleData.dimensions[0].type == 0){
@@ -113,7 +115,7 @@ class visualisation {
             this.dynamicElements.sample.datapoints = 
                 setupProportional(state.sampleData.samples[sampleID], this.dynamicCtx, sampleSectionDisplayArea, this.popScale, sampleSections);
         }
-        setupPopStatistic(state.sampleData.samples[sampleID], sampleSectionDisplayArea, this.popScale, false,  this.dynamicCtx);
+        this.dynamicElements.sample.statMarkers = setupPopStatistic(state.sampleData.samples[sampleID], sampleSectionDisplayArea, this.popScale, false,  this.dynamicCtx);
         distElement.show();
 
         var testAnimElement = new visElement('rect', 'test', this.dynamicCtx);
@@ -152,6 +154,7 @@ class visualisation {
         }
         this.lastTimeStamp = timestamp;
         var stageTime = timestamp - this.stageStartTime;
+        var stageProgress = 0;
         var timeSinceLastUpdate = timestamp - this.updateTime ;
         var update = false;
         if(timeSinceLastUpdate > 1){
@@ -183,10 +186,10 @@ class visualisation {
                 if(this.animation.done){
                     stageLoaded = false;
                 }
-
+                var shouldLoadNext = false;
                 if(stageLoaded){
                     // check stage progress
-                    var stageDuration, stageProgress, currentStage;
+                    var stageDuration, currentStage;
                     stageDuration = this.animation.getStageDuration();
                     stageProgress = stageTime/stageDuration;
                     currentStage = this.animation.getStage(); 
@@ -195,7 +198,8 @@ class visualisation {
                     if(stageProgress > 1){
                         if(this.animation.nextStageAvailiable()){
                             currentStage = this.animation.getStage();
-                            this.animation.nextStage();
+                            shouldLoadNext = true;
+                            //this.animation.nextStage();
                             this.stageStartTime = timestamp;
                             stageTime = 0;
                             stageProgress = 1;
@@ -214,13 +218,16 @@ class visualisation {
                         for (var e in updatingElements){
                             updatingElements[e].update(stageProgress);
                         }
+                        if(shouldLoadNext){
+                            this.animation.nextStage();
+                        }
                         visAnimDraggableProgress(this.animation, stageProgress);
+
                     }
                 }
             }
         }
-
-        this.drawDynamic();
+        if(state.shouldDraw != false && this.animation.currentStage != null) this.drawDynamic();
         requestAnimationFrame(this.visPrepFrame.bind(this));
     }
 
@@ -230,7 +237,7 @@ class visualisation {
             this.sections[s].draw();
         }
         for (s in this.dynamicSections){
-            this.dynamicSections[s].draw();
+           // this.dynamicSections[s].draw();
         }
     }
     drawPop(){
@@ -287,13 +294,17 @@ class visualisation {
             if(count > repititions) return;
             state.selectedSample++;
             state.selectedSample = ((state.selectedSample%state.numSamples)+state.numSamples)%state.numSamples;
+            state.shouldDraw = false;
             this.setupSample(state.selectedSample);
+
 
             //create animation;
             this.animation = animationConstructor(this.dynamicElements);
+            
             this.animDone = false;
             visSampleChange(1);
             visAnimDraggableInit(this.animation);
+            state.shouldDraw = true;
         }.bind(this);
 
         this.endAnimRepeator = endAnimRepeator;
@@ -306,7 +317,13 @@ class visualisation {
                 updating[e].update(0);
             }
         }
-        if(this.animation.currentStage != stage || this.animation.done) this.animation.startStage(stage);
+        if(this.animation.currentStage != stage || this.animation.done) {
+            var updatingElements = this.animation.getStage().elements;
+            for (var e in updatingElements){
+                updatingElements[e].update(stageProgress > 0.5 ? 0 : 1);
+            }
+            this.animation.startStage(stage);
+        }
         this.animation.playing = true;
         this.animation.done = false;
         this.animation.currentStage = stage;

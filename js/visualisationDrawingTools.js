@@ -18,6 +18,7 @@ class visElement {
         this.centerX = 0;
         this.centerY = 0;
         this.alternateCenters = [];
+        this.alternateBB = [];
 
         this.parent = null;
 
@@ -31,6 +32,7 @@ class visElement {
         this.lastTransitionAnim = null;
         this.lastTransitionStage = null;
         this.stageDuration = null;
+        this.opacity = 1;
     }
     resetStage(anim, stage, duration){
         this.transitions = [];
@@ -43,7 +45,13 @@ class visElement {
             // Loading a transition for a new stage.
             this.resetStage(animName, stageName, duration);
         }
-        if(attrFrom != null) this[attr] = attrFrom;
+        if(attrFrom != null) {
+            if(attr == "boundingBox"){
+                this.setBoundingBox(attrFrom[0], attrFrom[1], attrFrom[2], attrFrom[3]);
+            }else{
+                this[attr] = attrFrom;
+            }
+        }
         this.setCenter(this.centerX, this.centerY);
         // create interpolator for the atribute.
         // d3 interpolators run from 0 at the start to 1 at the end,
@@ -70,6 +78,9 @@ class visElement {
         this.bbWidth = x2-x1;
         this.bbHeight = y2-y1;
         this.refreshChildPosition();
+    }
+    setAlternateBB(){
+        this.alternateBB.push(this.boundingBox);
     }
     refreshChildPosition(){
         for(var i =0; i < this.elements.length; i++){
@@ -116,7 +127,12 @@ class visElement {
     updateSelf(stageProgress){
         for(var t in this.transitions){
             var transition = this.transitions[t];
-            this[transition.attr] = transition.interpolator(transition.transitionProg(stageProgress));
+            if(transition.attr == "boundingBox"){
+                var newBB = transition.interpolator(transition.transitionProg(stageProgress));
+                this.setBoundingBox(newBB[0], newBB[1], newBB[2], newBB[3]);
+            }else{
+                this[transition.attr] = transition.interpolator(transition.transitionProg(stageProgress));
+            }
         }
         this.setCenter(this.centerX, this.centerY);
     }
@@ -208,7 +224,18 @@ function clearScreen(ctx){
         ctx.clearRect(0,0, canvas.attr("width")/state.scaleX, canvas.attr("height"));
     }
 }
-
+function drawDataPoint(){
+    var color = d3.color(this.color ? this.color : '#000000');
+    color.opacity = this.opacity;
+    
+    if(this.fill){
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(this.boundingBox[0], this.boundingBox[1], this.bbWidth, this.bbHeight); 
+    }else{
+        this.ctx.strokeStyle = color;
+        this.ctx.strokeRect(this.boundingBox[0], this.boundingBox[1], this.bbWidth, this.bbHeight);
+    }
+}
 function drawProportionBar(color){
     this.ctx.save();
     this.ctx.fillStyle = color;
@@ -228,7 +255,10 @@ function drawText(color, baseline, align, text, bb){
     this.ctx.restore();
 }
 
-function drawLine(color, dash, bb){
+function drawLine(c, dash, bb){
+    c = d3.color(this.color ? this.color : c);
+    var color = d3.color(c);
+    color.opacity = this.opacity;
     if(!bb) bb = this.boundingBox;
     this.ctx.save();
     this.ctx.strokeStyle = color;
@@ -241,7 +271,9 @@ function drawLine(color, dash, bb){
     this.ctx.restore();
 }
 
-function drawArrow(color, arrowHeadSize, bb){
+function drawArrow(c, arrowHeadSize, bb){
+    var color = d3.color(c);
+    color.opacity = this.opacity;
     if(!bb) bb = this.boundingBox;
     var direction = bb[2] > bb[0] ? 1 : -1;
     this.ctx.save();

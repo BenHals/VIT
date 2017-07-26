@@ -422,7 +422,7 @@ function takeSamplesFin(){
         vis.setupSampleElements();
         vis.initVisualisation();
         //vis.setupSample(state.selectedSample);
-        vis.beginAnimationSequence(5, function(d){return fallDown(d, 0.1);});
+        vis.beginAnimationSequence(5, getAnimation(state.selectedModule, state.prunedData.dimensions, state.sampleData.dimensions, 5, true, 0.5));
     }, 500);
 
 }
@@ -451,7 +451,8 @@ function visSampleChange(change){
 }
 function distSequence(num){
     unpause();
-    vis.beginAnimationSequence(5, fallDown);
+    vis.beginAnimationSequence(5, getAnimation(state.selectedModule, state.prunedData.dimensions, state.sampleData.dimensions, 5, true, 0.1));
+
 }
 function startVisButtonClicked(){
     return;
