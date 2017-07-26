@@ -422,7 +422,7 @@ function takeSamplesFin(){
         vis.setupSampleElements();
         vis.initVisualisation();
         //vis.setupSample(state.selectedSample);
-        vis.beginAnimationSequence(5, getAnimation(state.selectedModule, state.prunedData.dimensions, state.sampleData.dimensions, 5, true, 0.5));
+        vis.beginAnimationSequence(5, getAnimation(state.selectedModule, state.prunedData.dimensions, state.sampleData.dimensions, 5, false, 0.5));
     }, 500);
 
 }

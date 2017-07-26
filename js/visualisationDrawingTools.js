@@ -68,6 +68,7 @@ class visElement {
         var attrInterpolator = d3.interpolate(this[attr], changeTo);
 
         this.transitions.push({attr:attr, changeTo:changeTo, start:start, end:end, transitionProg:transitionProgress, interpolator:attrInterpolator});
+        this.updateSelf(0);
     }
 
     setBoundingBox(x1,y1,x2,y2){

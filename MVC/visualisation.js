@@ -75,7 +75,7 @@ class visualisation {
         setupLabel(this.module.labels[0], popLabelArea, this.ctx);
 
         getStatisticsOptions();
-        setupPopStatistic(this.population, popSectionDisplayArea, popScale, true,  this.ctx);
+        setupPopStatistic(this.population, popSectionDisplayArea, popSectionDisplayArea, popScale,  true,  this.ctx);
 
         // Save scale
         this.popScale = popScale;
@@ -98,6 +98,7 @@ class visualisation {
         this.dynamicElements.distribution = {container:distSectionDisplayArea};
         this.dynamicElements.distribution.datapoints = 
             setupDistribution(state.sampleData.distribution, this.dynamicCtx, distSectionDisplayArea, this.distScale);
+
         
         this.drawPop();
     }
@@ -115,7 +116,13 @@ class visualisation {
             this.dynamicElements.sample.datapoints = 
                 setupProportional(state.sampleData.samples[sampleID], this.dynamicCtx, sampleSectionDisplayArea, this.popScale, sampleSections);
         }
-        this.dynamicElements.sample.statMarkers = setupPopStatistic(state.sampleData.samples[sampleID], sampleSectionDisplayArea, this.popScale, false,  this.dynamicCtx);
+         var statMarkers = setupPopStatistic(state.sampleData.samples[sampleID], sampleSectionDisplayArea, this.dynamicSections.s3.elements[1], this.popScale, false,  this.dynamicCtx);
+        this.dynamicElements.sample.statMarkers = statMarkers[0];
+        this.dynamicElements.sample.distStatMarkers = statMarkers[1];
+        if(statMarkers[1].length > 0){
+            this.dynamicElements.selectedDistStatMarker = statMarkers[1][0];
+        }
+
         distElement.show();
 
         var testAnimElement = new visElement('rect', 'test', this.dynamicCtx);
@@ -227,7 +234,7 @@ class visualisation {
                 }
             }
         }
-        if(state.shouldDraw != false && this.animation.currentStage != null) this.drawDynamic();
+        if(state.shouldDraw) this.drawDynamic();
         requestAnimationFrame(this.visPrepFrame.bind(this));
     }
 
@@ -292,14 +299,23 @@ class visualisation {
         var endAnimRepeator = function(){
             count++;
             if(count > repititions) return;
+            state.shouldDraw = false;
             state.selectedSample++;
             state.selectedSample = ((state.selectedSample%state.numSamples)+state.numSamples)%state.numSamples;
-            state.shouldDraw = false;
+            
             this.setupSample(state.selectedSample);
 
 
             //create animation;
             this.animation = animationConstructor(this.dynamicElements);
+            if(this.animation.getStage() == null) {
+                this.animation.nextStage();
+                var updating = this.animation.getStage().elements;
+                for (var e in updating){
+                    updating[e].update(0);
+                }
+                this.stageStartTime = this.curTime;
+            }
             
             this.animDone = false;
             visSampleChange(1);

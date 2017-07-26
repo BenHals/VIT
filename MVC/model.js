@@ -129,10 +129,11 @@ class modelClass {
 
         var columns = state.parsedData.columns;
         var numRows = state.parsedData.length;
-
+        var rejected = 0;
         for(var i = 0; i < numRows; i++){
             var row = state.parsedData[i];
             var prunedDimensionValues = [];
+            var categoryOk = true;
             for(var d in state.dimensions){
                 var dimension = state.dimensions[d];
                 var dimensionValue;
@@ -140,10 +141,15 @@ class modelClass {
                     dimensionValue = +row[dimension.name];
                 }else{
                     dimensionValue = row[dimension.name];
+
+                    if($.inArray(dimensionValue, dimension.categories) == -1) {
+                        categoryOk = false;
+                        rejected++;
+                    }
                 }
                 prunedDimensionValues.push(dimensionValue);
             }
-            allDataPoints.push({id:i, dimensionValues:prunedDimensionValues});
+            if(categoryOk) allDataPoints.push({id:i-rejected, dimensionValues:prunedDimensionValues});
         }
         state.prunedData.allDataPoints = allDataPoints;
         state.prunedData.statistics = calculateDataSetStatistics(allDataPoints, state.dimensions, state.focus);

@@ -105,13 +105,20 @@ function getAnimation(module, dimensions, statisticsDimensions, repititions, inc
 		if(!speedMultiplier) speedMultiplier = 1;
 		var animation = new visAnim('animation');
 		var inclueSelectedPoints = module.name == "Sampling Variation";
+		var inclueSelectedPoints = dimensions[0].type != 1;
+		var secondStageMultiSize = dimensions.length <= 1 ? 0 : dimensions[1].categories.length;
 		if(inclueSelectedPoints){
 			animation.addStage(samplePointsFadeInStage(d, animation, speedMultiplier, "fadeSelectedPoints"));
+			animation.addStage(samplePointsDropFromPop(d, animation, speedMultiplier, "pointsDrop", secondStageMultiSize == 0));
 		}
-		animation.addStage(samplePointsDropFromPop(d, animation, speedMultiplier, "pointsDrop", true));
+		if(secondStageMultiSize > 1){
+			animation.addStage(samplePointsSplitToGroups(d, animation, speedMultiplier, "samplePointsSplitToGroups"));
+		}
 		animation.addStage(statMarkersFadeInStage(d, animation, speedMultiplier, "statMarkersFade"));
-		animation.addStage(singleNumericalDistDrop(d, animation, speedMultiplier, "singleNumericalDistDrop"));
-		animation.addStage(distElementsFadeInStage(d, animation, speedMultiplier, "distElementsFade"));
+		if(includeDistribution){
+			animation.addStage(singleNumericalDistDrop(d, animation, speedMultiplier, "singleNumericalDistDrop"));
+			animation.addStage(distElementsFadeInStage(d, animation, speedMultiplier, "distElementsFade"));
+		}
 		return animation;
 	};
 }
@@ -133,6 +140,8 @@ function samplePointsFadeInStage(d, animation, speedMultiplier, name){
 		stage.setTransition(element, 'opacity', 0, 0, 0,1);
 	});
 	stage.setTransition(d.selectedDistElements[0], 'opacity', 0, 0, 0,1);
+
+	if(d.selectedDistStatMarker) stage.setTransition(d.selectedDistStatMarker, 'opacity', 0, 0, 0, 1);
 	return stage;
 }
 
@@ -144,6 +153,15 @@ function samplePointsDropFromPop(d, animation, speedMultiplier, name, toStacked)
 		var startPos = vis.allPopElements[element.popId].centerY;
 		stage.setTransition(element, 'centerY', startPos, endPos, 0, 1);
 		if(toStacked) stage.setTransition(element, 'color', null, "#FF0000", 0, 1);
+	});
+	return stage;
+}
+function samplePointsSplitToGroups(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var midPoint = (vis.dynamicSections.s2.elements[1].bbHeight/2) + vis.dynamicSections.s2.elements[1].boundingBox[1];
+	selectAllSamplePoints(d, function(element, sampleCategory, categoryIndex){
+		var endPos = element.centerY;
+		stage.setTransition(element, 'centerY', midPoint, endPos, 0.5, 1);
 	});
 	return stage;
 }
@@ -159,7 +177,9 @@ function statMarkersFadeInStage(d, animation, speedMultiplier, name){
 	selectAllStatMarkers(d, function(element, index){
 		stage.setTransition(element, 'color', "#000000", "#000000", 0, 1);
 		stage.setTransition(element, 'opacity', 0, 1, 0, 1);
+
 	});
+	if(d.selectedDistStatMarker) stage.setTransition(d.selectedDistStatMarker, 'opacity', 0, 1, 0, 1);
 	return stage;
 }
 function singleNumericalDistDrop(d, animation, speedMultiplier, name){
