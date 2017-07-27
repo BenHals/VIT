@@ -156,14 +156,20 @@ function generatevisualisationViewHTML(){
         <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
           <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
         </button>
+        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, false)">
+          <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+        </button>
         <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, false)">
-          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, true)">
+          <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
         </button>
         <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, true)">
-          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
         </button>
         <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
-          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+          <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
         </button>
       </div>
       <input id="visAnimProgress" type="range" min="0" list="stages">

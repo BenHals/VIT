@@ -204,14 +204,16 @@ class visualisation {
                 var shouldLoadNext = false;
                 if(stageLoaded){
                     // check stage progress
-                    var stageDuration, currentStage;
+                    var stageDuration, currentStage, numToSkip;
                     stageDuration = this.animation.getStageDuration();
                     stageProgress = stageTime/stageDuration;
                     currentStage = this.animation.getStage(); 
 
                     // If we have done this stage, check if we can load the next
                     if(stageProgress > 1){
-                        if(this.animation.nextStageAvailiable()){
+                        numToSkip = Math.floor(stageProgress);
+                        if(this.animation.stages.length > parseInt(this.animation.currentStage) + numToSkip){
+                        //if(this.animation.nextStageAvailiable()){
                             currentStage = this.animation.getStage();
                             shouldLoadNext = true;
                             //this.animation.nextStage();
@@ -234,7 +236,7 @@ class visualisation {
                             updatingElements[e].update(stageProgress);
                         }
                         if(shouldLoadNext){
-                            this.animation.nextStage();
+                            this.animation.nextStage(numToSkip);
                         }
                         visAnimDraggableProgress(this.animation, stageProgress);
 
@@ -302,14 +304,18 @@ class visualisation {
     animationFinished(){
         this.endAnimRepeator();
     }
-    beginAnimationSequence(repititions, animationConstructor){
+    beginAnimationSequence(repititions, animationConstructor, reset = false){
         var count = 0;
-        if(state.selectedSample >= 990 || repititions >= 99){
+        if(state.selectedSample >= 990 || state.resetDist){
             for(var d in this.dynamicElements.distribution.datapoints){
                 this.dynamicElements.distribution.datapoints[d].hide();
+
             }
+            this.dynamicElements.distribution.statMarkers = [];
+            this.dynamicSections.s3.elements[1].elements = this.dynamicSections.s3.elements[1].elements.slice(0,1);
             state.selectedSample = 0;
             state.lastSelectedSample = 0;
+            state.resetDist = false;
         }
         var endAnimRepeator = function(){
             count++;
@@ -323,7 +329,8 @@ class visualisation {
                 state.selectedSample = 0;
                 state.lastSelectedSample = 0;
             }
-            state.selectedSample += repititions < 99 ? 1 : 10;
+            //state.selectedSample += repititions < 99 ? 1 : 10;
+            state.selectedSample++;
             state.selectedSample = ((state.selectedSample%state.numSamples)+state.numSamples)%state.numSamples;
             
             this.setupSample(state.selectedSample, state.lastSelectedSample);

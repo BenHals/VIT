@@ -20,11 +20,12 @@ class visAnim {
 		this.done = false;
 		return true;
 	}
-	nextStage(){
+	nextStage(change){
+		change = change ? change : 1;
 		if(this.currentStage != null){
-			this.currentStage++;
+			this.currentStage = parseInt(this.currentStage) + change;
 		}else{
-			this.currentStage = 0;
+			this.currentStage = -1 + change;
 		}
 		return this.startStage(this.currentStage);
 	}
@@ -68,6 +69,9 @@ class animStage {
 
 		// The elements to update
 		this.elements = [];
+
+		// functions to call on load.
+		this.functions = [];
 	}
 	setTransition(element, attr, attrFrom, changeTo, start, end){
 		this.transitions.push({element:element, attr:attr, attrFrom:attrFrom, changeTo:changeTo, start:start, end:end});
@@ -81,6 +85,12 @@ class animStage {
 			var transition = this.transitions[t];
 			transition.element.loadTransition(this.name, this.animName, transition.attr, transition.attrFrom, transition.changeTo, transition.start, transition.end, this.duration);
 		}
+		for(var f in this.functions){
+			this.functions[f]();
+		}
+	}
+	setFunc(f){
+		this.functions.push(f);
 	}
 
 }
@@ -105,7 +115,7 @@ function getAnimation(module, dimensions, statisticsDimensions, repititions, inc
 		if(!speedMultiplier) speedMultiplier = 1;
 		var animation = new visAnim('animation');
 		var inclueSelectedPoints = module.name == "Sampling Variation";
-		var inclueSelectedPoints = dimensions[0].type != 1;
+		inclueSelectedPoints = dimensions[0].type != 1;
 		var secondStageMultiSize = dimensions.length <= 1 ? 0 : dimensions[1].categories.length;
 		var firstDimType = dimensions[0].type;
 		if(inclueSelectedPoints && firstDimType == 0){
@@ -130,6 +140,44 @@ function getAnimation(module, dimensions, statisticsDimensions, repititions, inc
 			}
 			animation.addStage(distDropStage(d, animation, speedMultiplier, "distDropStage"));
 			animation.addStage(distElementsFadeInStage(d, animation, speedMultiplier, "distElementsFade"));
+		}
+		return animation;
+	};
+}
+
+function getDistAnimation(module, dimensions, statisticsDimensions, speedMultiplier){
+	vis.dynamicSections.s2.elements[1].elements = [];
+
+	return function(d){
+		if(!speedMultiplier) speedMultiplier = 1;
+		var animation = new visAnim('animation');
+		var distributionElements = d.distribution.datapoints;
+		var time = 3000;
+		var timePerElement = time/distributionElements.length;
+		for(var ad in distributionElements){
+				var ade = distributionElements[ad];
+				ade.show();
+				ade.opacity = 0;
+			}
+		for(var dist in distributionElements){
+			var distElement = distributionElements[dist];
+			var stage = new animStage(dist, 'animation', timePerElement * speedMultiplier);
+			distElement.show();
+			distElement.opacity = 0;
+			
+			for(var allDist in distributionElements){
+				var allDistElement = distributionElements[allDist];
+				if (parseInt(dist) >= parseInt(allDist)){
+					allDistElement.show();
+					stage.setTransition(allDistElement, 'opacity', 1, 1, 0, 1);
+				}else{
+					allDistElement.show();
+					stage.setTransition(allDistElement, 'opacity', 0, 0, 0, 1);
+				}
+			}
+			var distNow = dist;
+			stage.setFunc(vis.setupSample.bind(vis, parseInt(dist), parseInt(dist)-1));
+			animation.addStage(stage);
 		}
 		return animation;
 	};

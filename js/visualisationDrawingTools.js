@@ -49,6 +49,9 @@ class visElement {
             if(attr == "boundingBox"){
                 this.setBoundingBox(attrFrom[0], attrFrom[1], attrFrom[2], attrFrom[3]);
             }else{
+                if(stageName == "distElementsFade"){
+                    console.log('test');
+                }
                 this[attr] = attrFrom;
             }
         }

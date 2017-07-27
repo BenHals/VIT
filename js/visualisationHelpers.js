@@ -232,6 +232,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
             statMarker.setCenter(end[0], statMarker.centerY);
             statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
             statMarker.setAlternateBB();
+            statMarker.opacity = 0;
             sampleStatMarkers.push(statMarker);
         }
         return [sampleStatMarkers, distStatMarkers];

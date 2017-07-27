@@ -184,6 +184,9 @@ class viewClass {
     sampleOptionsSwitch(){
         $('#fileOptions').hide();
         $('#visualisationView').hide();
+        $('#controls').detach().insertBefore("#display");
+        $("#controls").removeClass("col-sm-pull-9");
+        $("#display").removeClass("col-sm-push-3");
         var sampleOptions = $('#sampleOptions');
         if(!sampleOptions.length){
             var sampleOptionsHTML = generateSampleOptionsHTML(state.selectedModule.name, 0, false);
@@ -226,6 +229,9 @@ class viewClass {
         $('#fileOptions').hide();
         $('#sampleOptions').hide();
         var visualisationView = $('#visualisationView');
+        $('#controls').detach().insertAfter("#display");
+        $("#controls").addClass("col-sm-pull-9");
+        $("#display").addClass("col-sm-push-3");
         if(!visualisationView.length){
             var visualisationViewHTML = generatevisualisationViewHTML();
             $('#controls').append(visualisationViewHTML);
