@@ -106,16 +106,19 @@ function getAnimation(module, dimensions, statisticsDimensions, repititions, inc
 		var animation = new visAnim('animation');
 		var inclueSelectedPoints = module.name == "Sampling Variation";
 		var inclueSelectedPoints = dimensions[0].type != 1;
-		var secondStageMultiSize = dimensions.length > 1 ? 0 : dimensions[1].categories.length;
-		if(inclueSelectedPoints){
+		var secondStageMultiSize = dimensions.length <= 1 ? 0 : dimensions[1].categories.length;
+		var firstDimType = dimensions[0].type;
+		if(inclueSelectedPoints && firstDimType == 0){
 			animation.addStage(samplePointsFadeInStage(d, animation, speedMultiplier, "fadeSelectedPoints"));
 			animation.addStage(samplePointsDropFromPop(d, animation, speedMultiplier, "pointsDrop", secondStageMultiSize == 0));
+		}else{
+			animation.addStage(samplePropBarsFadeInStage(d, animation, speedMultiplier, "fadeSelectedPoints"));
 		}
 		var hasExtraStatMark = dimensions.length >= 2 && dimensions[1].categories.length > 2;
-		if(secondStageMultiSize > 1){
+		if(secondStageMultiSize > 1 && firstDimType == 0){
 			animation.addStage(samplePointsSplitToGroups(d, animation, speedMultiplier, "samplePointsSplitToGroups"));
 		}
-		animation.addStage(statMarkersFadeInStage(d, animation, speedMultiplier, "statMarkersFade", hasExtraStatMark));
+		animation.addStage(statMarkersFadeInStage(d, animation, speedMultiplier, "statMarkersFade", hasExtraStatMark, firstDimType));
 		if(includeDistribution){
 			var distDropStage;
 			if(dimensions.length < 2 || dimensions[1].categories.length < 2){
@@ -153,6 +156,28 @@ function samplePointsFadeInStage(d, animation, speedMultiplier, name){
 	if(d.selectedDistStatMarker) stage.setTransition(d.selectedDistStatMarker, 'opacity', 0, 0, 0, 1);
 	return stage;
 }
+function samplePropBarsFadeInStage(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var fade = speedMultiplier < 0.05 ? 1 : 0;
+	for(var section in d.sample.datapoints){
+		var barGroup = d.sample.datapoints[section][0];
+		var fb = barGroup.elements[0];
+		var fbLabel = fb.elements[0];
+		var ob = barGroup.elements[1];
+		var obLabel = ob.elements[0];
+		var sectionLabel = barGroup.elements[2];
+		for(var el in [fb,fbLabel,ob,obLabel,sectionLabel]){
+			var element = [fb,fbLabel,ob,obLabel,sectionLabel][el];
+			stage.setTransition(element, 'opacity', fade, 1, 0,1);
+		}
+	}
+	selectAllStatMarkers(d, function(element, index){
+		stage.setTransition(element, 'opacity', fade, 0, 0,1);
+	});
+	stage.setTransition(d.selectedDistElements[0], 'opacity', fade, 0, 0,1);
+	if(d.selectedDistStatMarker) stage.setTransition(d.selectedDistStatMarker, 'opacity', fade, 0, 0, 1);
+	return stage;
+}
 
 function samplePointsDropFromPop(d, animation, speedMultiplier, name, toStacked){
 	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
@@ -174,19 +199,24 @@ function samplePointsSplitToGroups(d, animation, speedMultiplier, name){
 	});
 	return stage;
 }
-function statMarkersFadeInStage(d, animation, speedMultiplier, name, except){
+function statMarkersFadeInStage(d, animation, speedMultiplier, name, except, type){
 	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
 	var count = 0;
 	var totalNumPoints = state.sampleSize;
 	var fadeTimeEachPoint = 1/totalNumPoints;
-	selectAllSamplePoints(d, function(element, sampleCategory, categoryIndex){
-		stage.setTransition(element, 'color', "#FF0000", "#000000", 0, 1);
-		count++;
-	});
+	if(type==0){
+		selectAllSamplePoints(d, function(element, sampleCategory, categoryIndex){
+			stage.setTransition(element, 'color', "#FF0000", "#000000", 0, 1);
+			count++;
+		});
+	}
 	selectAllStatMarkers(d, function(element, index){
-		if(except && index == d.sample.statMarkers.length-1) return;
-		stage.setTransition(element, 'color', "#000000", "#000000", 0, 1);
-		stage.setTransition(element, 'opacity', 0, 1, 0, 1);
+		if(!(except && index == d.sample.statMarkers.length-1)){
+			stage.setTransition(element, 'color', "#000000", "#000000", 0, 1);
+			stage.setTransition(element, 'opacity', 0, 1, 0, 1);
+		}else{
+			stage.setTransition(element, 'opacity', 0, 0, 0, 1);
+		}
 
 	});
 	if(d.selectedDistStatMarker) stage.setTransition(d.selectedDistStatMarker, 'opacity', 0, 1, 0, 1);
@@ -198,6 +228,7 @@ function singleNumericalDistDrop(d, animation, speedMultiplier, name){
 	stage.setTransition(statMark, 'color', "#000000", "#FF0000", 0, 0.25);
 	var start = statMark.alternateBB[0];
 	var end = d.selectedDistElements[0];
+	if(!end) console.log('error');
 	stage.setTransition(statMark, 'boundingBox', start, [end.centerX, end.centerY, end.centerX, end.centerY], 0, 1);
 	stage.setTransition(statMark, 'opacity', 1, 0, 0.5, 1);
 	return stage;

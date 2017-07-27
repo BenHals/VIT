@@ -226,7 +226,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
             var distSectionBB = distSection.boundingBox;
             var arrowsHeight = distSection.bbHeight/3;
             var end = [distSectionBB[0] + distSection.bbWidth/2, distSectionBB[1],distSectionBB[0] + distSection.bbWidth/2, distSection[1] + arrowsHeight];
-            statMarker = new visElement('arrow', 'popStatArrow'+cat, ctx);
+            statMarker = new visElement('arrow', 'popStatArrowDist'+cat, ctx);
             section.addChild(statMarker);
             statMarker.setRelativeBoundingBox(vis.distScale(0) - section.boundingBox[0], vis.dynamicSections.s3.elements[1].bbHeight/2, vis.distScale(population.statistics.overall.AvgDeviation)- section.boundingBox[0], vis.dynamicSections.s3.elements[1].bbHeight/2, distSectionBB);
             statMarker.setCenter(end[0], statMarker.centerY);

@@ -102,11 +102,17 @@ class visualisation {
         
         this.drawPop();
     }
-    setupSample(sampleID){
+    setupSample(sampleID, lastSID){
         this.clearSample();
+        lastSID = lastSID ? lastSID : sampleID - 1;
+        if(lastSID > sampleID) {
+            lastSID = 0;
+            sampleID = 1;
+        }
         var sampleSectionDisplayArea = this.dynamicSections.s2.elements[1];
-        var distElement = this.dynamicElements.distribution.datapoints[sampleID];
-        this.dynamicElements.selectedDistElements = [distElement];
+        var distElement = this.dynamicElements.distribution.datapoints.slice(lastSID + 1, sampleID+1);
+        if(!distElement) distElement= this.dynamicElements.distribution.datapoints.slice(0, 2);
+        this.dynamicElements.selectedDistElements = distElement;
         var sampleSections = setupSection(state.sampleData.samples[sampleID], this.dynamicCtx, sampleSectionDisplayArea);
         this.dynamicElements.sample = {container: sampleSectionDisplayArea};
         if(state.sampleData.dimensions[0].type == 0){
@@ -123,7 +129,9 @@ class visualisation {
             this.dynamicElements.selectedDistStatMarker = statMarkers[1][0];
         }
 
-        distElement.show();
+        for(var e in distElement){
+            distElement[e].show();
+        }
 
         var testAnimElement = new visElement('rect', 'test', this.dynamicCtx);
             sampleSectionDisplayArea.addChild(testAnimElement);
@@ -296,14 +304,29 @@ class visualisation {
     }
     beginAnimationSequence(repititions, animationConstructor){
         var count = 0;
+        if(state.selectedSample >= 990 || repititions >= 99){
+            for(var d in this.dynamicElements.distribution.datapoints){
+                this.dynamicElements.distribution.datapoints[d].hide();
+            }
+            state.selectedSample = 0;
+            state.lastSelectedSample = 0;
+        }
         var endAnimRepeator = function(){
             count++;
             if(count > repititions) return;
             state.shouldDraw = false;
-            state.selectedSample++;
+            state.lastSelectedSample = state.selectedSample;
+            if(state.selectedSample >= 990){
+                for(var d in this.dynamicElements.distribution.datapoints){
+                    this.dynamicElements.distribution.datapoints[d].hide();
+                }
+                state.selectedSample = 0;
+                state.lastSelectedSample = 0;
+            }
+            state.selectedSample += repititions < 99 ? 1 : 10;
             state.selectedSample = ((state.selectedSample%state.numSamples)+state.numSamples)%state.numSamples;
             
-            this.setupSample(state.selectedSample);
+            this.setupSample(state.selectedSample, state.lastSelectedSample);
 
 
             //create animation;

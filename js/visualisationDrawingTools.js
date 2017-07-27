@@ -237,14 +237,20 @@ function drawDataPoint(){
         this.ctx.strokeRect(this.boundingBox[0], this.boundingBox[1], this.bbWidth, this.bbHeight);
     }
 }
-function drawProportionBar(color){
+function drawProportionBar(c){
+    c = d3.color(this.color ? this.color : c);
+    var color = d3.color(c);
+    color.opacity = this.opacity;
     this.ctx.save();
     this.ctx.fillStyle = color;
     this.ctx.fillRect(this.boundingBox[0], this.boundingBox[1], this.bbWidth, this.bbHeight);
     this.ctx.restore();
 }
 
-function drawText(color, baseline, align, text, bb){
+function drawText(c, baseline, align, text, bb){
+    c = d3.color(this.color ? this.color : c);
+    var color = d3.color(c);
+    color.opacity = this.opacity;
     if(!text) text = this.text;
     if(!bb) bb = this.boundingBox;
     this.ctx.save();

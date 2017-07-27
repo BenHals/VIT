@@ -282,8 +282,8 @@ function numericalStats(statisticObject, dataSet, dim){
 function categoricalStats(statisticObject, dataSet, dim, focus){
     // Find the number of elements where the first dimension category is the focus
     var focusTotal = dataSet.reduce(function(sum, value){return accessDimension(value,dim) == focus ? sum+1 : sum;}, 0);
-    statisticObject.focusProportion = focusTotal/dataSet.length;
-    statisticObject.Proportion = focusTotal/dataSet.length;
+    statisticObject.focusProportion = dataSet.length != 0 ? focusTotal/dataSet.length : 0;
+    statisticObject.Proportion = dataSet.length != 0 ? focusTotal/dataSet.length : 0;
 }
 function categoryDiffs(statisticObject, dataSet, dimensions, categories){
     // TODO: make this a setting. Change in drawing as well.
