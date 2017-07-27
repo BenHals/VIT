@@ -83,7 +83,7 @@ function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSec
             dataElement.setRelativeCenter(numericalScale(datapoint.dimensionValues[0]) - numericalScale(numericalScale.domain()[0]),sectionElement.bbHeight*(1/2), sectionElement.boundingBox);
             dataElement.drawSelf = drawDataPoint.bind(dataElement);
             dataElement.color = '#000000';
-            dataElement.fill = true;
+            dataElement.fill = false;
             datapoints.push(dataElement);
         }
         dynamicElements[s] = datapoints;
@@ -239,12 +239,17 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
     }
 }
 
-function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale){
+function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale, module){
     var dynamicElements = [];
+    var CIElements = [];
     var sectionElement = new visElement('rect', 'distribution', ctx);
+    var desiredStatistic = Math.abs(state.prunedData.statistics.overall[state.statistic ? state.statistic : getStatisticsOptions()[0]]);
+    var CI = module.name == "Sampling Variation" || module.name == "Bootstrapping";
     distSectionDisplayArea.addChild(sectionElement);
     sectionElement.setRelativeBoundingBox(0,0,distSectionDisplayArea.bbWidth, distSectionDisplayArea.bbHeight, distSectionDisplayArea.boundingBox);
     var datapoints = [];
+    var sortedDist = distribution.slice().sort(function(a,b){return parseFloat(a) - parseFloat(b);});
+    state.CIInterval = [parseFloat(d3.quantile(sortedDist, 0.025)), parseFloat(d3.quantile(sortedDist, 0.975))];
     for(var d in distribution){
         var datapoint = distribution[d];
         var dataElement = new visElement('rect', 'distElem' + d, ctx);
@@ -254,13 +259,81 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale)
         dataElement.drawSelf = drawDataPoint.bind(dataElement);
         dataElement.fill = false;
         dataElement.hide();
+        dataElement.distId = d;
+        dataElement.value = parseFloat(datapoint);
+        dataElement.inCI = false;
+        if(dataElement.value > state.CIInterval[0] && dataElement.value < state.CIInterval[1]){
+            dataElement.inCI = true;
+        }
+        var numAbovePop = 0;
+        if(parseFloat(datapoint) >= Math.abs(parseFloat(desiredStatistic))){
+            dataElement.abovePop = true;
+            numAbovePop++;
+        }
+        state.numAbovePop = numAbovePop;
+        dataElement.fill = false;
         datapoints.push(dataElement);
     }
+
     if(datapoints.length > 1) {
         numericalHeap(datapoints, sectionElement.boundingBox, true);
         dynamicElements = datapoints;
     }
-    return dynamicElements;
+    var ciElement = new visElement('rect', 'distribution', ctx);
+    distSectionDisplayArea.addChild(ciElement);
+    ciElement.setRelativeBoundingBox(0,0,distSectionDisplayArea.bbWidth, distSectionDisplayArea.bbHeight, distSectionDisplayArea.boundingBox);
+    if(CI){
+        var l1 = new visElement('arrow', 'CI1', ctx);
+        ciElement.addChild(l1);
+        l1.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[0])- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
+        l1.drawSelf = drawLine.bind(l1, "red");
+        l1.setAlternateBB();
+        l1.opacity = 0;
+        CIElements.push(l1);
+        var l2 = new visElement('arrow', 'CI2', ctx);
+        ciElement.addChild(l2);
+        l2.setRelativeBoundingBox(vis.distScale(state.CIInterval[1]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
+        l2.drawSelf = drawLine.bind(l2, "red");
+        l2.setAlternateBB();
+        l2.opacity = 0;
+        CIElements.push(l2);
+
+        var lDistAcross = new visElement('arrow', 'CIDistAcross', ctx);
+        ciElement.addChild(lDistAcross);
+        lDistAcross.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight/2, ciElement.boundingBox);
+        lDistAcross.drawSelf = drawLine.bind(lDistAcross, "red");
+        lDistAcross.setAlternateBB();
+        lDistAcross.opacity = 0;
+        CIElements.push(lDistAcross);
+
+        var lPopAcross = new visElement('arrow', 'CIDistAcross', ctx);
+        ciElement.addChild(lPopAcross);
+        lPopAcross.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight/2, ciElement.boundingBox);
+        lPopAcross.drawSelf = drawLine.bind(lPopAcross, "red");
+        lPopAcross.setAlternateBB();
+        lPopAcross.opacity = 0;
+        CIElements.push(lPopAcross);
+    }else{
+        
+        var ciArrow = new visElement('arrow', 'abovePopArrow', ctx);
+        ciElement.addChild(ciArrow);
+        ciArrow.setRelativeBoundingBox(vis.distScale(0) - sectionElement.boundingBox[0], sectionElement.bbHeight-10, vis.distScale(desiredStatistic)- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
+        ciArrow.drawSelf = drawArrow.bind(ciArrow, 'darkred', 5);
+        ciArrow.setAlternateBB();
+        ciArrow.opacity = 0;
+        CIElements.push(ciArrow);
+
+        var aboveLabel = new visElement('text', 'aboveLabelText', ctx);
+        var aboveLabelText = state.numAbovePop + "/" + state.sampleData.distribution.length;
+        aboveLabel.setText(aboveLabelText);
+        aboveLabel.setTextColor('darkred');
+        ciElement.addChild(aboveLabel);
+        aboveLabel.setRelativeBoundingBox(vis.distScale(desiredStatistic) - sectionElement.boundingBox[0] - 5, sectionElement.bbHeight-10, vis.distScale(desiredStatistic)- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
+        aboveLabel.drawSelf = drawText.bind(aboveLabel, 'darkred', 'alphabetic', 'end');
+        aboveLabel.opacity = 0;
+        CIElements.push(aboveLabel);
+    }
+    return [dynamicElements, CIElements];
 }
 function setupDistStatMarkers(d, ctx, distSectionDisplayArea, sampleSectionDisplayArea, sampleScale){
     var dynamicElements = [];

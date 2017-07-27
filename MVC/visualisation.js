@@ -96,8 +96,10 @@ class visualisation {
 
         var distSectionDisplayArea = this.dynamicSections.s3.elements[1];
         this.dynamicElements.distribution = {container:distSectionDisplayArea};
-        this.dynamicElements.distribution.datapoints = 
-            setupDistribution(state.sampleData.distribution, this.dynamicCtx, distSectionDisplayArea, this.distScale);
+        var distRet = setupDistribution(state.sampleData.distribution, this.dynamicCtx, distSectionDisplayArea, this.distScale, this.module);
+        this.dynamicElements.distribution.datapoints = distRet[0];
+        this.dynamicElements.distribution.CI = distRet[1];
+            
 
         
         this.drawPop();
@@ -311,8 +313,12 @@ class visualisation {
                 this.dynamicElements.distribution.datapoints[d].hide();
 
             }
+            for(var d in this.dynamicElements.distribution.CI){
+                this.dynamicElements.distribution.CI[d].hide();
+
+            }
             this.dynamicElements.distribution.statMarkers = [];
-            this.dynamicSections.s3.elements[1].elements = this.dynamicSections.s3.elements[1].elements.slice(0,1);
+            this.dynamicSections.s3.elements[1].elements = this.dynamicSections.s3.elements[1].elements.slice(0,2);
             state.selectedSample = 0;
             state.lastSelectedSample = 0;
             state.resetDist = false;

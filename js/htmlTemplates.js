@@ -171,6 +171,9 @@ function generatevisualisationViewHTML(){
         <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
           <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
         </button>
+        <button type="button" class="btn btn-default" aria-label="Back" onclick="showCI()">
+          <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+        </button>
       </div>
       <input id="visAnimProgress" type="range" min="0" list="stages">
       <datalist id="stages"></datalist>

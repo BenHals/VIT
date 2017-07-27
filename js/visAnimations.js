@@ -183,6 +183,54 @@ function getDistAnimation(module, dimensions, statisticsDimensions, speedMultipl
 	};
 }
 
+function getCIAnimation(module, dimensions, statisticsDimensions, speedMultiplier){
+
+	return function(d){
+		var CI = module.name == "Sampling Variation" || module.name == "Bootstrapping";
+		if(!speedMultiplier) speedMultiplier = 1;
+		var animation = new visAnim('animation');
+		var distributionElements = d.distribution.datapoints;
+		var CIElements = d.distribution.CI;
+		for(var dist in distributionElements){
+			var distElement = distributionElements[dist];
+			distElement.show();
+			distElement.opacity = 1;
+		}
+		for(var allCI in CIElements){
+			var ciEl = CIElements[allCI];
+			ciEl.show();
+			ciEl.opacity = 0;
+		}
+		var stage = new animStage(dist, 'animation', 1000 * speedMultiplier);
+		for(var allDist in distributionElements){
+			var allDistElement = distributionElements[allDist];
+			var fadeOutVarName =  !CI ? 'abovePop' : 'inCI';
+			if (allDistElement[fadeOutVarName] != true){
+				stage.setTransition(allDistElement, 'opacity', 1, 0.1, 0, 1);
+			}
+		}
+		animation.addStage(stage);
+		stage = new animStage("CILines", 'animation', 1000 * speedMultiplier);
+		for(var allCI in CIElements){
+			var ciEl = CIElements[allCI];
+			ciEl.show();
+			stage.setTransition(ciEl, 'opacity', 0, 1, 0, 1);
+		}
+		animation.addStage(stage);
+
+		if(CI){
+			var midPoint = (vis.dynamicSections.s1.elements[1].bbHeight/2) + vis.dynamicSections.s1.elements[1].boundingBox[1];
+			stage = new animStage("CILines", 'animation', 2000 * speedMultiplier);
+			var popLineAcross = CIElements[3];
+			popLineAcross.show();
+			stage.setTransition(popLineAcross, 'centerY', popLineAcross.alternateBB[0][1], midPoint, 0, 1);
+			animation.addStage(stage);
+		}
+		
+		return animation;
+	};
+}
+
 // ***********************Stage Constructors************************8
 function samplePointsFadeInStage(d, animation, speedMultiplier, name){
 	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);

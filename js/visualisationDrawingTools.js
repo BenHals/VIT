@@ -139,12 +139,15 @@ class visElement {
             }
         }
         this.setCenter(this.centerX, this.centerY);
+
     }
     draw(){
         for(var i =0; i < this.elements.length; i++){
             this.elements[i].draw();
         }
+        if(this.id == "abovePopArrow") console.log('ar');
         if(this.visible){
+            if(this.id == "abovePopArrow") console.log('ar');
             this.drawSelf();
         }
     }

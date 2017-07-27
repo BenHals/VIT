@@ -115,6 +115,14 @@ var vis = new visualisation();
 window.onload = function(){
 
     state.loadingFromURL = true;
+    state.urlModule = getURLParameter(window.location.href, 'module');
+    state.urlFile = getURLParameter(window.location.href, 'file');
+    state.urlD0 = getURLParameter(window.location.href, 'd0');
+    state.urlD1 = getURLParameter(window.location.href, 'd1');
+    state.urlFocus = getURLParameter(window.location.href, 'focus');
+    state.urlSampleSize = getURLParameter(window.location.href, 'ss');
+    state.urlStatistic = getURLParameter(window.location.href, 'statistic');
+    
     // Check for a selected module in the url.
     var urlModule = getURLParameter(window.location.href, 'module');
     urlModule = urlModule != null ? urlModule : "Home";
@@ -460,6 +468,11 @@ function distSequence(num, d, s){
         vis.beginAnimationSequence(num, getAnimation(state.selectedModule, state.prunedData.dimensions, state.sampleData.dimensions, num, dist, speed));
     }
 
+}
+function showCI(){
+    unpause();
+    vis.beginAnimationSequence(1, getCIAnimation(state.selectedModule, state.prunedData.dimensions, state.sampleData.dimensions, 1));
+    state.resetDist = true;
 }
 function startVisButtonClicked(){
     return;
