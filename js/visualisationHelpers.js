@@ -187,6 +187,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
         popSection.addChild(statMarker);
         statMarker.setRelativeBoundingBox(popScale(stats[0]) - popSection.boundingBox[0], popSection.bbHeight/2, popScale(stats[1])- popSection.boundingBox[0], popSection.bbHeight/2, popSection.boundingBox);
         statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
+        statMarker.setAlternateBB();
         sampleStatMarkers.push(statMarker);
         return [sampleStatMarkers, distStatMarkers];
     }else{
@@ -210,6 +211,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
             section.addChild(statMarker);
             statMarker.setRelativeBoundingBox(popScale(stat) - section.boundingBox[0], section.bbHeight*(3/4), popScale(overallStatistic)- section.boundingBox[0], section.bbHeight*(3/4), section.boundingBox);
             statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
+            statMarker.setAlternateBB();
             sampleStatMarkers.push(statMarker);
         }
         if(isPop){
@@ -219,6 +221,18 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
             popStatLine.drawSelf = drawLine.bind(popStatLine, 'black', true);
             sampleStatMarkers.push(statMarker);
             return [sampleStatMarkers, distStatMarkers];
+        }else{
+            var distSection = vis.dynamicSections.s3.elements[1];
+            var distSectionBB = distSection.boundingBox;
+            var arrowsHeight = distSection.bbHeight/3;
+            var end = [distSectionBB[0] + distSection.bbWidth/2, distSectionBB[1],distSectionBB[0] + distSection.bbWidth/2, distSection[1] + arrowsHeight];
+            statMarker = new visElement('arrow', 'popStatArrow'+cat, ctx);
+            section.addChild(statMarker);
+            statMarker.setRelativeBoundingBox(vis.distScale(0) - section.boundingBox[0], vis.dynamicSections.s3.elements[1].bbHeight/2, vis.distScale(population.statistics.overall.AvgDeviation)- section.boundingBox[0], vis.dynamicSections.s3.elements[1].bbHeight/2, distSectionBB);
+            statMarker.setCenter(end[0], statMarker.centerY);
+            statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
+            statMarker.setAlternateBB();
+            sampleStatMarkers.push(statMarker);
         }
         return [sampleStatMarkers, distStatMarkers];
     }

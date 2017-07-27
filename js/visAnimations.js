@@ -106,17 +106,26 @@ function getAnimation(module, dimensions, statisticsDimensions, repititions, inc
 		var animation = new visAnim('animation');
 		var inclueSelectedPoints = module.name == "Sampling Variation";
 		var inclueSelectedPoints = dimensions[0].type != 1;
-		var secondStageMultiSize = dimensions.length <= 1 ? 0 : dimensions[1].categories.length;
+		var secondStageMultiSize = dimensions.length > 1 ? 0 : dimensions[1].categories.length;
 		if(inclueSelectedPoints){
 			animation.addStage(samplePointsFadeInStage(d, animation, speedMultiplier, "fadeSelectedPoints"));
 			animation.addStage(samplePointsDropFromPop(d, animation, speedMultiplier, "pointsDrop", secondStageMultiSize == 0));
 		}
+		var hasExtraStatMark = dimensions.length >= 2 && dimensions[1].categories.length > 2;
 		if(secondStageMultiSize > 1){
 			animation.addStage(samplePointsSplitToGroups(d, animation, speedMultiplier, "samplePointsSplitToGroups"));
 		}
-		animation.addStage(statMarkersFadeInStage(d, animation, speedMultiplier, "statMarkersFade"));
+		animation.addStage(statMarkersFadeInStage(d, animation, speedMultiplier, "statMarkersFade", hasExtraStatMark));
 		if(includeDistribution){
-			animation.addStage(singleNumericalDistDrop(d, animation, speedMultiplier, "singleNumericalDistDrop"));
+			var distDropStage;
+			if(dimensions.length < 2 || dimensions[1].categories.length < 2){
+				distDropStage = singleNumericalDistDrop;
+			}else if(dimensions[1].categories.length == 2){
+				distDropStage = diffDistDrop;
+			}else{
+				distDropStage = multiDiffDistDrop;
+			}
+			animation.addStage(distDropStage(d, animation, speedMultiplier, "distDropStage"));
 			animation.addStage(distElementsFadeInStage(d, animation, speedMultiplier, "distElementsFade"));
 		}
 		return animation;
@@ -165,7 +174,7 @@ function samplePointsSplitToGroups(d, animation, speedMultiplier, name){
 	});
 	return stage;
 }
-function statMarkersFadeInStage(d, animation, speedMultiplier, name){
+function statMarkersFadeInStage(d, animation, speedMultiplier, name, except){
 	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
 	var count = 0;
 	var totalNumPoints = state.sampleSize;
@@ -175,6 +184,7 @@ function statMarkersFadeInStage(d, animation, speedMultiplier, name){
 		count++;
 	});
 	selectAllStatMarkers(d, function(element, index){
+		if(except && index == d.sample.statMarkers.length-1) return;
 		stage.setTransition(element, 'color', "#000000", "#000000", 0, 1);
 		stage.setTransition(element, 'opacity', 0, 1, 0, 1);
 
@@ -190,6 +200,48 @@ function singleNumericalDistDrop(d, animation, speedMultiplier, name){
 	var end = d.selectedDistElements[0];
 	stage.setTransition(statMark, 'boundingBox', start, [end.centerX, end.centerY, end.centerX, end.centerY], 0, 1);
 	stage.setTransition(statMark, 'opacity', 1, 0, 0.5, 1);
+	return stage;
+}
+function diffDistDrop(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
+	var statMark = d.sample.statMarkers[2];
+	stage.setTransition(statMark, 'color', "#000000", "#FF0000", 0, 0.1);
+	var start = statMark.alternateBB[0];
+	var end = d.selectedDistElements[0];
+	stage.setTransition(statMark, 'boundingBox', start, [vis.distScale(0), end.centerY, end.centerX, end.centerY], 0, 1);
+	return stage;
+}
+function multiDiffDistDrop(d, animation, speedMultiplier, name){
+	var stage = new animStage(name, animation.name, 4000 * speedMultiplier);
+	var statMarks = d.sample.statMarkers.filter(function(e){return e.type == "arrow"});
+	var count = 0;
+	var distSection = vis.dynamicSections.s3.elements[1];
+	var distSectionBB = distSection.boundingBox;
+	var arrowsHeight = distSection.bbHeight/3;
+	var end = [distSectionBB[0] + distSection.bbWidth/2, distSectionBB[1],distSectionBB[0] + distSection.bbWidth/2, distSection[1] + arrowsHeight];
+	var arrowHeightDiff = (arrowsHeight) / statMarks.length;
+	for(var s in statMarks.slice(0,statMarks.length-1)){
+		var statMark = statMarks[s];
+		stage.setTransition(statMark, 'color', "#000000", "#FF0000", 0, 0.1);
+		var start = statMark.alternateBB[0];
+
+		stage.setTransition(statMark, 'boundingBox', start, [end[0]-statMark.bbWidth/2, end[1]+arrowHeightDiff*count, end[2]+statMark.bbWidth/2, end[1]+arrowHeightDiff*count], 0, 0.3);
+		//stage.setTransition(statMark, 'opacity', 1, 0, 0.5, 1);
+		stage.setTransition(statMark, 'color', "#FF0000", "#000000", 0.5, 0.6);
+		count++;
+	}
+
+	var statMark = statMarks[count];
+	stage.setTransition(statMark, 'color', "#000000", "#FF0000", 0, 0.1);
+	stage.setTransition(statMark, 'opacity', 1, 0, 0, 0.1);
+	var start = statMark.alternateBB[0];
+	//stage.setTransition(statMark, 'boundingBox', start, [end[0]-statMark.bbWidth/2, end[1]+arrowHeightDiff*count, end[2]+statMark.bbWidth/2, end[1]+arrowHeightDiff*count], 0, 0.1);
+	//stage.setTransition(statMark, 'opacity', 1, 0, 0.5, 1);
+	stage.setTransition(statMark, 'color', "#000000", "#FF0000", 0.5, 0.6);
+	stage.setTransition(statMark, 'opacity', 0, 1, 0.5, 0.6);
+	var start = statMark.alternateBB[0];
+	var end = d.selectedDistElements[0];
+	stage.setTransition(statMark, 'boundingBox', start, [vis.distScale(0), end.centerY, end.centerX, end.centerY], 0.6, 1);
 	return stage;
 }
 function distElementsFadeInStage(d, animation, speedMultiplier, name){

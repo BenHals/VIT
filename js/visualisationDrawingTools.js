@@ -273,6 +273,7 @@ function drawLine(c, dash, bb){
 }
 
 function drawArrow(c, arrowHeadSize, bb){
+    c = d3.color(this.color ? this.color : c);
     var color = d3.color(c);
     color.opacity = this.opacity;
     if(!bb) bb = this.boundingBox;
