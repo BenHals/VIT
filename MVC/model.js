@@ -72,6 +72,7 @@ class modelClass {
             var row = state.parsedData[i];
             for(var v in columns){
                 var variable = columns[v];
+                if(!state.variableType) state.variableType = {};
                 if(!(variable in state.variableType)){
 
                     // Assume to be numerical at first
@@ -79,6 +80,7 @@ class modelClass {
                 }
                 if(isNaN(+row[variable]) && row[variable] != "" && row[variable] != "NA" && row[variable] != "N/A"){
                     state.variableType[variable] = 1;
+                    if(!state.categories) state.categories = {};
                     if(!(variable in state.categories)) state.categories[variable] = new Set();
                     state.categories[variable].add(row[variable]);
 
@@ -104,6 +106,7 @@ class modelClass {
 
     getCategories(name){
         var focus = state.focus;
+        if(!(name in state.categories)) return null;
         var categoriesArray = [...state.categories[name]];
         categoriesArray.sort(function(a,b){
             if(focus){

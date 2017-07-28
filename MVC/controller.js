@@ -113,7 +113,7 @@ var model = new modelClass();
 var vis = new visualisation();
 
 window.onload = function(){
-
+    window.state = {variables_selected: new Set(), dimensions: [], numSamples:1000, paused:false};
     state.loadingFromURL = true;
     state.urlModule = getURLParameter(window.location.href, 'module');
     state.urlFile = getURLParameter(window.location.href, 'file');
@@ -122,7 +122,7 @@ window.onload = function(){
     state.urlFocus = getURLParameter(window.location.href, 'focus');
     state.urlSampleSize = getURLParameter(window.location.href, 'ss');
     state.urlStatistic = getURLParameter(window.location.href, 'statistic');
-    
+
     // Check for a selected module in the url.
     var urlModule = getURLParameter(window.location.href, 'module');
     urlModule = urlModule != null ? urlModule : "Home";
@@ -237,7 +237,7 @@ function varSelected(e, fromButton){
 
 
     // Select inputs dont have ordering, so we must keep track ourselves
-    var selectedLabels = fromButton ? [...e.target.selectedOptions].map(function(option){return option.innerText}) : e;
+    var selectedLabels = fromButton ? [...Array.prototype.slice.call(e.target.selectedOptions)].map(function(option){return option.innerText}) : e;
     var selOptions = new Set(selectedLabels);
     for (var index = 0; index < selectedLabels.length; index++){
         state.variables_selected.add(selectedLabels[index])

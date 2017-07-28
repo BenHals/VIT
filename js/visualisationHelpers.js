@@ -285,14 +285,14 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
     if(CI){
         var l1 = new visElement('arrow', 'CI1', ctx);
         ciElement.addChild(l1);
-        l1.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[0])- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
+        l1.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[0])- sectionElement.boundingBox[0], sectionElement.bbHeight, ciElement.boundingBox);
         l1.drawSelf = drawLine.bind(l1, "red");
         l1.setAlternateBB();
         l1.opacity = 0;
         CIElements.push(l1);
         var l2 = new visElement('arrow', 'CI2', ctx);
         ciElement.addChild(l2);
-        l2.setRelativeBoundingBox(vis.distScale(state.CIInterval[1]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
+        l2.setRelativeBoundingBox(vis.distScale(state.CIInterval[1]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight, ciElement.boundingBox);
         l2.drawSelf = drawLine.bind(l2, "red");
         l2.setAlternateBB();
         l2.opacity = 0;

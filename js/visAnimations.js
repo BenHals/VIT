@@ -397,7 +397,7 @@ function selectAllSamplePoints(dynamicElements, func){
 }
 function selectAllStatMarkers(dynamicElements, func){
 	for(var sc in dynamicElements.sample.statMarkers){
-		func(dynamicElements.sample.statMarkers[sc], sc,);
+		func(dynamicElements.sample.statMarkers[sc], sc);
 	}
 }
 function fallDown(dynamicElements, speedMulti){
