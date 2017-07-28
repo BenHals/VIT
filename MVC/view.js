@@ -37,6 +37,7 @@ class viewClass {
     switchModule(moduleHTML){
         $('#moduleContent').html(moduleHTML);
         $('#sampleButton').hide();
+
     }
 
     selectedFileDone(fileName){
@@ -139,9 +140,11 @@ class viewClass {
         $('#visualisation').html(`<canvas id="popCanvas" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}></canvas>
             <canvas id="dynamicCanvas" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}></canvas>
             `);
-        this.toggleDataDisplay();
-        this.toggleDataDisplay();
 
+        this.toggleDataDisplay();
+        this.toggleDataDisplay();
+        var dispWidth = $('#dataDisplay').css("width");
+        $('#dynamicCanvas').css("left", parseInt(dispWidth.slice(0, dispWidth.length-2)) + 5);
         $('#sampleButton').show();
     }
 
@@ -171,7 +174,11 @@ class viewClass {
         }else{
             canvasRedraw(1);
         }
-
+        $('#dynamicCanvas').css("left", 1000);
+        var dispWidth = $('#dataDisplay').width();
+        $('#dynamicCanvas').css("left", dispWidth + 5);
+        var dispWidth = $('#dataDisplay').outerWidth();
+        $('#dynamicCanvas').css("left", dispWidth + 5);
         this.showingDataDisplay = !this.showingDataDisplay;
     }
 
@@ -277,6 +284,8 @@ class viewClass {
         });
         this.toggleDataDisplay();
         this.toggleDataDisplay();
+        var dispWidth = $('#dataDisplay').css("width");
+        $('#dynamicCanvas').css("left", parseInt(dispWidth.slice(0, dispWidth.length-2)) + 5);
     }
     toPause(){
         $('#pausePlay span').removeClass('glyphicon-play');

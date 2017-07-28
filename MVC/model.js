@@ -19,6 +19,13 @@ class modelClass {
 
     parseCSV(csv){
         state.parsedData = d3.csvParse(csv);
+        for(var r in state.parsedData){
+            var row = state.parsedData[r];
+            for(var c in row){
+                var el = row[c];
+                row[c.trim()] = el.trim();
+            }
+        }
         console.log(state.parsedData);
         parsedCSV();
     }
