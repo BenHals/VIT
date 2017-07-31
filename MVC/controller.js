@@ -137,11 +137,34 @@ window.onload = function(){
     var urlFileName = urlFile.split(':');
     if(urlFileName[0] == 'preset'){
         loadFromPreset(urlFileName[1]);
+    }else if(urlFileName[0] == 'url'){
+        var baseURL = "";
+        for(var i = 1; i < urlFileName.length; i++){
+            baseURL += urlFileName[i];
+            if(i < urlFileName.length - 1) baseURL+=":";
+        }
+        reconstructURL(baseURL);
     }
 
 
 };
 
+function reconstructURL(baseURL){
+    console.log(baseURL);
+    var parameters = getURLParameter(window.location.href, 'urlParams').split('-');
+    console.log(parameters);
+    var url = baseURL;
+    if(parameters.length > 1){
+        url += "?";
+        for(var p = 0; p < parameters.length - 1; p++){
+            var keyValue = parameters[p].split(':');
+            url += keyValue[0] + "=" + keyValue[1];
+            if( p != parameters.length-2) url += "&";
+        }
+    }
+    loadFromURL(url);
+
+}
 function loadModule(moduleName){
 
     // Set the current selected module.
@@ -210,6 +233,36 @@ function loadFromPreset(filename){
     state.filename = filename;
     // Set our url parameter to reload here.
     var newURL = updateURLParameter(window.location.href, 'file', "preset:"+filename);
+    window.history.pushState({path:newURL},'', newURL);
+    if(!state.loadingFromURL){
+        newURL = deleteURLParameter(window.location.href, ['d0','d1','focus']);
+        window.history.pushState({path:newURL},'', newURL)
+    }
+}
+
+function loadFromURL(u){
+    var url = u ? u : $("#urlInputField").val();
+    model.loadFromURL(url);
+    state.filename = url;
+    var parameters = {};
+    var parameterSplit = url.split("?");
+    parameterSplit = parameterSplit.length > 1 ? parameterSplit[1] : [];
+    if(parameterSplit.length > 0){
+        parameterSplit = parameterSplit.split('&');
+        for(var pIndex = 0; pIndex < parameterSplit.length; pIndex++){
+            var keyValue = parameterSplit[pIndex].split('=');
+            parameters[keyValue[0]] = keyValue[1];
+        }
+    }
+    console.log(parameters);
+    // Set our url parameter to reload here.
+    var paramString = "";
+    for(var param in parameters){
+        paramString += param+":"+parameters[param]+"-";
+    }
+    var newURL = updateURLParameter(window.location.href, 'file', "url:"+url);
+    window.history.pushState({path:newURL},'', newURL);
+    newURL = updateURLParameter(window.location.href, "urlParams", paramString);
     window.history.pushState({path:newURL},'', newURL);
     if(!state.loadingFromURL){
         newURL = deleteURLParameter(window.location.href, ['d0','d1','focus']);

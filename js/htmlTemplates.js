@@ -50,6 +50,14 @@ function generateFileOptionsHTML(module, exampleFiles){
                           </div>
                       </div>
                   </div>
+                  <div class="row">
+                    <div class="input-group">
+                      <input id="urlInputField" type="text" class="form-control" placeholder="From URL...">
+                      <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="button" onclick="loadFromURL()">Go!</button>
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <div class="modal-footer">
                   <p class="pull-left" id="selectedFile"></p>

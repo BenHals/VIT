@@ -18,6 +18,7 @@ class modelClass {
     }
 
     parseCSV(csv){
+        if(csv.slice(0, 20).indexOf("DOCTYPE") != -1) return;
         state.parsedData = d3.csvParse(csv);
         for(var r in state.parsedData){
             var row = state.parsedData[r];
@@ -69,7 +70,27 @@ class modelClass {
 
           xhr.send();
     }
+    loadFromURL(url){
+        var self = this;
+        url = encodeURIComponent(url);
+            //this.controller.setUpDataVeiw(this.storedData[filename]);
+        var xhr = createCORSRequest('GET', "https://www.stat.auckland.ac.nz/~wild/VITonline/getFileFromURL.php"+"?fn=" +url);
+        //var xhr = createCORSRequest('GET', "http://localhost:8080/getFileFromURL.php"+"?fn=" +filename);  
+        if (!xhr) {
+            throw new Error('CORS not supported');
+        }
+              // Response handlers.
+          xhr.onload = function() {
+            var text = xhr.responseText;
+            self.parseCSV(text);
+          };
 
+          xhr.onerror = function() {
+            alert('Woops, there was an error making the request.');
+          };
+
+          xhr.send();
+    }
     getVariables(){
         var columns = state.parsedData.columns;
 

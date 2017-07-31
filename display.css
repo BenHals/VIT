@@ -52,6 +52,9 @@
     cursor: inherit;
     display: block;
 }
+.modal-body div {
+  margin-top: 5px;
+}
 .exampleItems {
   cursor: pointer;
 }
