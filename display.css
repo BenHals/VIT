@@ -139,18 +139,29 @@
   text-align: center;
 }
 #visualisation {
-  display: block;
+  display: flex;
   flex: 1;
   background-color: white;
   padding-left:5px;
   padding-right:5px;
 }
 
-#dynamicCanvas {
+#canvasWrapper {
+  position: relative;
+  padding:0px;
+  margin:0px;
+}
+.mainCanvas {
+  margin: 0px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+/*#dynamicCanvas {
   position: absolute;
   top: 0;
   left: auto;
-}
+}*/
 
 
 

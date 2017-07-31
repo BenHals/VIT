@@ -134,23 +134,28 @@ class viewClass {
         // $('#popStats').width(width);
         // $('#dataDisplay button').width(width);
         this.toggleDataDisplay();
+         $('#visualisation').html(`<div id="canvasWrapper"></div>`);
         var visHeight = $('#visualisation' ).innerHeight();
         var visWidth = $('#visualisation' ).innerWidth();
 
-        $('#visualisation').html(`<canvas id="popCanvas" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}></canvas>
+        $('#visualisation').html(`<div id="canvasWrapper">
+            <canvas id="popCanvas" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}></canvas>
             <canvas id="dynamicCanvas" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}></canvas>
-            `);
+            </div>`);
 
         this.toggleDataDisplay();
         this.toggleDataDisplay();
         var dispWidth = $('#dataDisplay').css("width");
-        $('#dynamicCanvas').css("left", parseInt(dispWidth.slice(0, dispWidth.length-2)) + 5);
+        //$('#dynamicCanvas').css("left", parseInt(dispWidth.slice(0, dispWidth.length-2)) + 5);
         $('#sampleButton').show();
     }
 
     toggleDataDisplay(){
         $('.mainCanvas').attr('width', 0);
         $('.mainCanvas').attr('height', 0);
+        $('#canvasWrapper').css('width', 0);
+        // $('#visualisation').toggle();
+        $('#visualisation').css('width', 0);
         $('#popStats').toggle();
         $('#prunedTable').toggle();
         $('#showDD').toggle();
@@ -162,9 +167,13 @@ class viewClass {
             $('#dataDisplay').innerWidth('auto');
             $('#dataDisplay .table-responsive').innerWidth(Math.max(width, $('#popStats').width()));
         }
-
-        $('.mainCanvas').attr('width', $('#visualisation' ).innerWidth() - 2);
-        $('.mainCanvas').attr('height', $('#visualisation' ).innerHeight() - 2);
+        $('#canvasWrapper').css('width', 0);
+        //$('#visualisation').toggle();
+        $('#visualisation').css('width', 'auto');
+        var width =  $('#visualisation' ).width() - 2;
+        $('.mainCanvas').attr('width', width);
+        $('.mainCanvas').attr('height', $('#visualisation' ).height() - 2);
+        $('#canvasWrapper').width(width);
         var newWidth = $('.mainCanvas').attr('width');
         var normWidth = $('.mainCanvas').attr('data-normWidth');
         var scaleX = newWidth/normWidth;
@@ -174,11 +183,11 @@ class viewClass {
         }else{
             canvasRedraw(1);
         }
-        $('#dynamicCanvas').css("left", 1000);
-        var dispWidth = $('#dataDisplay').width();
-        $('#dynamicCanvas').css("left", dispWidth + 5);
-        var dispWidth = $('#dataDisplay').outerWidth();
-        $('#dynamicCanvas').css("left", dispWidth + 5);
+        // $('#dynamicCanvas').css("left", 1000);
+        // var dispWidth = $('#dataDisplay').width();
+        // $('#dynamicCanvas').css("left", dispWidth + 5);
+        // var dispWidth = $('#dataDisplay').outerWidth();
+        // $('#dynamicCanvas').css("left", dispWidth + 5);
         this.showingDataDisplay = !this.showingDataDisplay;
     }
 
@@ -285,7 +294,7 @@ class viewClass {
         this.toggleDataDisplay();
         this.toggleDataDisplay();
         var dispWidth = $('#dataDisplay').css("width");
-        $('#dynamicCanvas').css("left", parseInt(dispWidth.slice(0, dispWidth.length-2)) + 5);
+       // $('#dynamicCanvas').css("left", parseInt(dispWidth.slice(0, dispWidth.length-2)) + 5);
     }
     toPause(){
         $('#pausePlay span').removeClass('glyphicon-play');

@@ -135,16 +135,6 @@ class visualisation {
             distElement[e].show();
         }
 
-        var testAnimElement = new visElement('rect', 'test', this.dynamicCtx);
-            sampleSectionDisplayArea.addChild(testAnimElement);
-            testAnimElement.setBoundingBox(0,0,5,5);
-            testAnimElement.setRelativeCenter(0,0, sampleSectionDisplayArea.boundingBox);
-            testAnimElement.drawSelf = testAnimElement.renderBB;
-            this.dynamicElements.test = testAnimElement;
-
-        // this.animation = createSquareAnim(testAnimElement);
-        // this.animDone = false;
-        // //this.drawDynamic();
     }
     scale(x){
         if(this.ctx){
