@@ -246,7 +246,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
     var desiredStatistic = Math.abs(state.prunedData.statistics.overall[state.statistic ? state.statistic : getStatisticsOptions()[0]]);
     var CI = module.name == "Sampling Variation" || module.name == "Bootstrapping";
     distSectionDisplayArea.addChild(sectionElement);
-    sectionElement.setRelativeBoundingBox(0,0,distSectionDisplayArea.bbWidth, distSectionDisplayArea.bbHeight, distSectionDisplayArea.boundingBox);
+    sectionElement.setRelativeBoundingBox(0,0,distSectionDisplayArea.bbWidth, distSectionDisplayArea.bbHeight-5, distSectionDisplayArea.boundingBox);
     var datapoints = [];
     var sortedDist = distribution.slice().sort(function(a,b){return parseFloat(a) - parseFloat(b);});
     state.CIInterval = [parseFloat(d3.quantile(sortedDist, 0.025)), parseFloat(d3.quantile(sortedDist, 0.975))];

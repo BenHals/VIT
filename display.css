@@ -194,3 +194,9 @@ input[type="range"]::-webkit-slider-thumb {
   input[type="range"]::-webkit-slider-thumb:active {
     background-color: #0080a7;
   }
+  .playSection {
+    margin-top: 5px;
+  }
+  .playSection button{
+    margin:5px;
+  }

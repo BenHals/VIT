@@ -29,7 +29,8 @@ var modules = {
             sample = sample.slice(0, sampleSize);
             return sample;
         },
-        labels:["Population", "Sample", "Sample Distribution"]
+        labels:["Population", "Sample", "Sample Distribution"],
+        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
     },
     "Bootstrapping": {
         name: "Bootstrapping",
@@ -49,7 +50,8 @@ var modules = {
             }
             return sample;
         },
-        labels:['Data','Re-Sample','Bootstrap Distribution']
+        labels:['Data','Re-Sample','Bootstrap Distribution'],
+        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
     },
     "Randomisation Variation": {
         name: "Randomisation Variation",
@@ -71,7 +73,8 @@ var modules = {
             }
             return sample;
         },
-        labels:['Data','Random Variation','Randomisation Distribution']
+        labels:['Data','Random Variation','Randomisation Distribution'],
+        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
     },
     "Randomisation Test": {
         name: "Randomisation Test",
@@ -104,7 +107,8 @@ var modules = {
             }
             return sample;
         },
-        labels:['Data','Re-Randomised Data','Re-Randomisation Distribution']
+        labels:['Data','Re-Randomised Data','Re-Randomisation Distribution'],
+        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
     }
 };
 

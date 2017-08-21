@@ -250,7 +250,7 @@ class viewClass {
         $("#controls").addClass("col-sm-pull-9");
         $("#display").addClass("col-sm-push-3");
         if(!visualisationView.length){
-            var visualisationViewHTML = generatevisualisationViewHTML();
+            var visualisationViewHTML = generatevisualisationViewHTML(state.selectedModule);
             $('#controls').append(visualisationViewHTML);
         }else{
             $('#visualisationView').show();

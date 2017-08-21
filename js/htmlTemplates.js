@@ -148,44 +148,110 @@ function generateModuleHTML(module){
     return moduleHTML;
 }
 
-function generatevisualisationViewHTML(){
-  return `
-  <div id="visualisationView">
-    <div id="takeSamplesProgressContainer" class="progress">
-      <div id="takeSamplesProgress" class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
-        <span class="sr-only">0% Complete</span>
+function generatevisualisationViewHTML(module){
+  if ($(window).width() < 768) {
+    // do something for small screens
+    return `
+    <div id="visualisationView">
+      <div id="takeSamplesProgressContainer" class="progress">
+        <div id="takeSamplesProgress" class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+          <span class="sr-only">0% Complete</span>
+        </div>
+      </div>
+      <div id="visControls">
+        <div id="buttonBar">
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="sampleOptionsSwitch()">
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+          </button>
+          <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
+            <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, false)">
+            <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, false)">
+            <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, true)">
+            <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, true)">
+            <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
+            <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="showCI()">
+            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+          </button>
+        </div>
+        <input id="visAnimProgress" type="range" min="0" list="stages">
+        <datalist id="stages"></datalist>
       </div>
     </div>
-    <div id="visControls">
-      <div id="buttonBar">
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="sampleOptionsSwitch()">
-          <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-        </button>
-        <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
-          <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, false)">
-          <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, false)">
-          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, true)">
-          <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, true)">
-          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
-          <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
-        </button>
-        <button type="button" class="btn btn-default" aria-label="Back" onclick="showCI()">
-          <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
-        </button>
+    `;
+  }else{
+    return `
+    <div id="visualisationView">
+      <div id="takeSamplesProgressContainer" class="progress">
+        <div id="takeSamplesProgress" class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+          <span class="sr-only">0% Complete</span>
+        </div>
       </div>
-      <input id="visAnimProgress" type="range" min="0" list="stages">
-      <datalist id="stages"></datalist>
+      <div id="visControls">
+        <div id="buttonBar">
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="sampleOptionsSwitch()">
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+          </button>
+
+
+
+          <div id="samplePlayButtons" class="playSection panel panel-default">
+            <div class="panel-heading">${module.playSectionLabels[0]}</div>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, false)">
+              <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+              <span>1</span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, false)">
+              <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+              <span>5</span>
+            </button>
+          </div>
+
+          <div id="distPlayButtons" class="playSection panel panel-default">
+            <div class="panel-heading">${module.playSectionLabels[1]}</div>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, true)">
+              <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
+              <span>1</span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, true)">
+              <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+              <span>5</span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
+              <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
+              <span>1000</span>
+            </button>
+          </div>
+
+          <div id="statsPlayButtons" class="playSection panel panel-default">
+            <div class="panel-heading">${module.playSectionLabels[2]}</div>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="showCI()">
+              <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+
+        <div id="animationPlayback" class="playSection panel panel-default">
+          <div class="panel-heading">Playback Controls</div>
+          <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
+              <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+            </button>
+          <input id="visAnimProgress" type="range" min="0" list="stages">
+          <datalist id="stages"></datalist>
+        </div>
+      </div>
     </div>
-  </div>
-  `;
+    `;
+  }
 }
