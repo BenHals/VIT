@@ -141,6 +141,7 @@ class viewClass {
         $('#visualisation').html(`<div id="canvasWrapper">
             <canvas id="popCanvas" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}></canvas>
             <canvas id="dynamicCanvas" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}></canvas>
+            <svg id="dynamicSVG" class="mainCanvas" width=${visWidth} height=${visHeight} data-normWidth = ${visWidth} data-normHeight = ${visHeight}><g id="svgContainer"></g></svg>
             </div>`);
 
         this.toggleDataDisplay();

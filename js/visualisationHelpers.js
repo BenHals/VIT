@@ -60,7 +60,7 @@ function setupProportional(dataset, ctx, displayArea, proportionScale, populatio
         otherBar.addChild(otherBarLabel);
         otherBarLabel.setRelativeBoundingBox(focusBarWidth, sectionElement.bbHeight*(1/4) + sectionElement.bbHeight/8, focusBarWidth + 20 , sectionElement.bbHeight*(1/4), sectionElement.boundingBox);
     
-        labelSection(sectionElement, ctx, section.name, s);
+        labelSection(sectionElement, ctx, section.name, s, displayArea);
         dynamicElements[s].push(sectionElement);
     }
     return dynamicElements;
@@ -90,7 +90,7 @@ function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSec
         var boxHeight = sectionElement.boundingBox[3] - sectionElement.boundingBox[1];
         var heapBB = [sectionElement.boundingBox[0], sectionElement.boundingBox[1] + boxHeight/2, sectionElement.boundingBox[2], sectionElement.boundingBox[3]];
         if(datapoints.length > 1) numericalHeap(datapoints, heapBB, true);
-        labelSection(sectionElement, ctx, section.name, s);
+        labelSection(sectionElement, ctx, section.name, s, displayArea);
     }
     return dynamicElements;
 
@@ -120,8 +120,8 @@ function numericalHeap(datapoints, boundingBox, changeValue){
     }
 }
 
-function labelSection(section, ctx, name, index){
-    var sectionLabel = new visElement('text', 'populationSection' + name +'Label', ctx);
+function labelSection(section, ctx, name, index, da){
+    var sectionLabel = new visElement('text', 'populationSection'+ da.id + name +'Label', ctx);
     sectionLabel.setText(name);
     section.addChild(sectionLabel);
     sectionLabel.setRelativeBoundingBox(section.bbWidth, 0, section.bbWidth, 0, section.boundingBox);
@@ -137,7 +137,7 @@ function setupPopAxis(popSectionAxisArea, popScale, ctx){
 }
 
 function setupLabel(label, labelArea, ctx){
-    var sectionLabel = new visElement('text', "popLabel", ctx);
+    var sectionLabel = new visElement('text', "popLabel"+label, ctx);
     sectionLabel.setText(label);
     labelArea.addChild(sectionLabel);
     sectionLabel.setRelativeBoundingBox(0, 0, 10, 10, labelArea.boundingBox);

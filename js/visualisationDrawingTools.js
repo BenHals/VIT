@@ -33,6 +33,9 @@ class visElement {
         this.lastTransitionStage = null;
         this.stageDuration = null;
         this.opacity = 1;
+
+        this.svgInit = false;
+        this.svgElem = null;
     }
     resetStage(anim, stage, duration){
         this.transitions = [];
@@ -141,7 +144,19 @@ class visElement {
         this.setCenter(this.centerX, this.centerY);
 
     }
+    initializeSVG(){
+        if(this.type == 'text'){
+            var elem = d3.select("#"+this.id)["_groups"][0][0] ? d3.select("#"+this.id) : d3.select("#svgContainer").append("text");
+            this.svgElem = elem.attr("id",this.id).text(this.text);
+
+        }
+        if(this.type == "axis") {
+            return;
+        }
+        this.svgInit = true;
+    }
     draw(){
+        if(!this.svgInit) this.initializeSVG();
         for(var i =0; i < this.elements.length; i++){
             this.elements[i].draw();
         }
@@ -237,10 +252,17 @@ function drawDataPoint(){
     
     if(this.fill){
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(this.boundingBox[0], this.boundingBox[1], this.bbWidth, this.bbHeight); 
+        this.ctx.fillRect(parseInt(this.boundingBox[0]), this.boundingBox[1], this.bbWidth, this.bbHeight); 
     }else{
         this.ctx.strokeStyle = color;
-        this.ctx.strokeRect(this.boundingBox[0], this.boundingBox[1], this.bbWidth, this.bbHeight);
+        // this.ctx.strokeRect(parseInt(this.boundingBox[0])+0.50,
+        // parseInt(this.boundingBox[1])+0.50,
+        // parseInt(this.bbWidth),
+        // parseInt(this.bbHeight));
+        this.ctx.beginPath();
+        this.ctx.arc(parseInt(this.centerX),parseInt(this.centerY),parseInt(3),0,2*Math.PI);
+        this.ctx.stroke();
+
     }
 }
 function drawProportionBar(c){
@@ -254,18 +276,24 @@ function drawProportionBar(c){
 }
 
 function drawText(c, baseline, align, text, bb){
+
     c = d3.color(this.color ? this.color : c);
     var color = d3.color(c);
     color.opacity = this.opacity;
     if(!text) text = this.text;
     if(!bb) bb = this.boundingBox;
-    this.ctx.save();
-    this.ctx.font = '1em Helvetica';
-    this.ctx.textBaseline = baseline;
-    this.ctx.textAlign = align;
-    this.ctx.fillStyle = color;
-    this.ctx.fillText(text, bb[0], bb[3] - 2);
-    this.ctx.restore();
+    if(this.svgElem){
+        this.svgElem.attr("x", bb[0]).attr("y", bb[3]).attr("dominant-baseline", baseline).attr("text-anchor", align)
+            .style("fill", color).style("font-weight", 1);
+    }else{
+        this.ctx.save();
+        this.ctx.font = '1em Helvetica';
+        this.ctx.textBaseline = baseline;
+        this.ctx.textAlign = align;
+        this.ctx.fillStyle = color;
+        this.ctx.fillText(text, bb[0], bb[3] - 2);
+        this.ctx.restore();
+    }
 }
 
 function drawLine(c, dash, bb){
@@ -278,7 +306,7 @@ function drawLine(c, dash, bb){
     if(dash) this.ctx.setLineDash([5, 15]);
     this.ctx.beginPath();
     this.ctx.moveTo(bb[0], bb[1]);
-    this.ctx.lineTo(bb[2],bb[3]);
+    this.ctx.lineTo(Math.round(bb[2])+0.5,Math.round(bb[3])+0.5);
     this.ctx.closePath();
     this.ctx.stroke();
     this.ctx.restore();
@@ -320,12 +348,21 @@ function drawAxis(){
         this.ctx.moveTo(this.scale(value), this.boundingBox[1]);
         this.ctx.lineTo(this.scale(value), this.boundingBox[1] + 10);
         var lebelValue = Math.abs(parseFloat(value.toPrecision(12))) > 0.0001 ? parseFloat(value.toPrecision(12)) : 0;
-        drawText.bind(this, "black", 'hanging', 
+        if(!this.svgInit){
+            this.svgElem = d3.select("#svgContainer").append("text").attr("id",this.id).text(lebelValue.toString())
+                .attr("x", this.scale(value)).attr("y", this.boundingBox[1] + 15)
+                .attr("text-anchor", 0 ? 'start' : value+step > stop ? 'end' : 'middle').attr("dominant-baseline", "hanging")
+                .style("font-weight", 0);
+        }else{
+            drawText.bind(this, "black", 'hanging', 
             tick == 0 ? 'start' : value+step > stop ? 'end' : 'center',
             lebelValue.toString(), [this.scale(value), this.boundingBox[1] + 10, this.scale(value) + 5, this.boundingBox[1] + 15])();
+        
+        }
         value += step;
         tick++;
     }
+    this.svgInit = true;
     this.ctx.closePath();
     this.ctx.stroke();
 }

@@ -8,6 +8,14 @@ class visualisation {
         this.dynamicCanvas = document.getElementById('dynamicCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.dynamicCtx = this.dynamicCanvas.getContext('2d');
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.mozImageSmoothingEnabled = false;
+        this.ctx.oImageSmoothingEnabled = false;
+        this.ctx.webkitImageSmoothingEnabled = false;
+        this.dynamicCtx.imageSmoothingEnabled = false;
+        this.dynamicCtx.mozImageSmoothingEnabled = false;
+        this.dynamicCtx.oImageSmoothingEnabled = false;
+        this.dynamicCtx.webkitImageSmoothingEnabled = false;
         this.population = population;
         this.dimensions = population.dimensions;
         this.sections = createSections($('#popCanvas'), this.ctx, 5, 10);
@@ -140,6 +148,7 @@ class visualisation {
         if(this.ctx){
             this.ctx.scale(x, 1);
             this.dynamicCtx.scale(x, 1);
+            d3.select("#svgContainer").attr("transform","scale("+x+",1)");
         }
     }
 
