@@ -142,13 +142,30 @@ class visElement {
             }
         }
         this.setCenter(this.centerX, this.centerY);
+        if(this.type =="datapoint" && this.svgElem){
+            this.svgElem.attr("id",this.id).attr("cx", this.centerX).attr("cy", this.centerY).attr("r", 5)
+                .attr("opacity", this.opacity).attr("visibility", this.visible?"visible":"hidden")
+                .style("fill", this.color).style("stroke", this.color).style("fill-opacity", this.fill ? 1:0);
+            // if(this.visible){
+            //     this.svgElem.attr("visibility", "visible");
+            // }else{
+            //     this.svgElem.attr("visibility", "hidden");
+            // }
+        }
 
     }
     initializeSVG(){
+        var elem;
+        this.color = d3.color(this.color ? this.color : '#000000');
         if(this.type == 'text'){
-            var elem = d3.select("#"+this.id)["_groups"][0][0] ? d3.select("#"+this.id) : d3.select("#svgContainer").append("text");
+            elem = d3.select("#"+this.id)["_groups"][0][0] ? d3.select("#"+this.id) : d3.select("#svgContainer").append("text");
             this.svgElem = elem.attr("id",this.id).text(this.text);
 
+        }else if(this.type == "datapoint"){
+            var dpClass = this.displayArea == "ss1Display" ? "popDP" : this.displayArea == "ss2Display" ? "sampleDP" : "distDP";
+            elem = d3.select("#"+this.id)["_groups"][0][0] ? d3.select("#"+this.id) : d3.select("#svgContainer").append("circle");
+            this.svgElem = elem.attr("id",this.id).attr("class", dpClass).attr("cx", this.centerX).attr("cy", this.centerY).attr("r", 5).attr("visibility", this.visible?"visible":"hidden")
+                .style("fill", this.color).style("stroke", this.color).style("fill-opacity", this.fill ? 1:0);
         }
         if(this.type == "axis") {
             return;
@@ -247,9 +264,13 @@ function clearScreen(ctx){
     }
 }
 function drawDataPoint(){
+    if(this.svgElem) {
+        this.svgElem.attr("visibility", this.visible?"visible":"hidden");
+        return;
+    }
     var color = d3.color(this.color ? this.color : '#000000');
     color.opacity = this.opacity;
-    
+
     if(this.fill){
         this.ctx.fillStyle = color;
         this.ctx.fillRect(parseInt(this.boundingBox[0]), this.boundingBox[1], this.bbWidth, this.bbHeight); 

@@ -40,10 +40,12 @@ function setupProportional(dataset, ctx, displayArea, proportionScale, populatio
         var focusBar = new visElement('rect', 'populationSection' + s +'focus', ctx);
         sectionElement.addChild(focusBar);
         focusBar.setRelativeBoundingBox(0, sectionElement.bbHeight*(1/4),focusBarWidth,sectionElement.bbHeight*(3/4), sectionElement.boundingBox);
+        focusBar.color = proportionColorsList[0];
         focusBar.drawSelf = drawProportionBar.bind(focusBar, proportionColorsList[0]);
         var focusBarLabel = new visElement('text', 'populationSection' + s +'focusLabel', ctx);
         focusBarLabel.setText(focusProportion > 0.001 ? dataset.dimensions[0].categories[0] : "");
         focusBarLabel.setTextColor(proportionColorsList[0]);
+        focusBarLabel.color = proportionColorsList[0];
         focusBar.addChild(focusBarLabel);
         focusBarLabel.setRelativeBoundingBox(0, sectionElement.bbHeight*(1/4) + sectionElement.bbHeight/8, 20 ,sectionElement.bbHeight*(1/4), sectionElement.boundingBox);
 
@@ -52,11 +54,13 @@ function setupProportional(dataset, ctx, displayArea, proportionScale, populatio
         var otherBar = new visElement('rect', 'populationSection' + s +'other', ctx);
         sectionElement.addChild(otherBar);
         otherBar.setRelativeBoundingBox(focusBarWidth, sectionElement.bbHeight*(1/4),otherBarWidth + focusBarWidth,sectionElement.bbHeight*(3/4), sectionElement.boundingBox);
+        otherBar.color = proportionColorsList[1];
         otherBar.drawSelf = drawProportionBar.bind(otherBar, proportionColorsList[1]);
         var otherBarLabel = new visElement('text', 'populationSection' + s +'otherLabel', ctx);
         var otherBarText = dataset.dimensions[0].categories.length == 2 ? dataset.dimensions[0].categories[1] : 'Other';
         otherBarLabel.setText(otherProportion > 0.001 ? otherBarText : "");
         otherBarLabel.setTextColor(proportionColorsList[1]);
+        otherBarLabel.color = proportionColorsList[1];
         otherBar.addChild(otherBarLabel);
         otherBarLabel.setRelativeBoundingBox(focusBarWidth, sectionElement.bbHeight*(1/4) + sectionElement.bbHeight/8, focusBarWidth + 20 , sectionElement.bbHeight*(1/4), sectionElement.boundingBox);
     
@@ -77,13 +81,14 @@ function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSec
         var datapoints = [];
         for(var d in section.data){
             var datapoint = section.data[d];
-            var dataElement = new visElement('rect', 'populationDP' + s, ctx, datapoint.id);
+            var dataElement = new visElement('datapoint', 'populationDP' + displayArea.id+ s + datapoint.id, ctx, datapoint.id);
             sectionElement.addChild(dataElement);
             dataElement.setBoundingBox(0,0,5,5);
             dataElement.setRelativeCenter(numericalScale(datapoint.dimensionValues[0]) - numericalScale(numericalScale.domain()[0]),sectionElement.bbHeight*(1/2), sectionElement.boundingBox);
             dataElement.drawSelf = drawDataPoint.bind(dataElement);
             dataElement.color = '#000000';
             dataElement.fill = false;
+            dataElement.displayArea = displayArea.id;
             datapoints.push(dataElement);
         }
         dynamicElements[s] = datapoints;
@@ -110,7 +115,7 @@ function numericalHeap(datapoints, boundingBox, changeValue){
         if(buckets[bucket].length > tallestBucketHeight) tallestBucketHeight = buckets[bucket].length;
     }
     var spaceAvaliable = boundingBox[3] - boundingBox[1];
-    var spacePerElement = Math.min(spaceAvaliable/tallestBucketHeight, datapoints[0].bbHeight);
+    var spacePerElement = Math.min(spaceAvaliable/tallestBucketHeight, datapoints[0].bbHeight*2);
     for(var b in buckets){
         for(var e in buckets[b]){
             buckets[b][e].setAlternativeCenter([buckets[b][e].centerX, buckets[b][e].centerY]);
@@ -125,6 +130,7 @@ function labelSection(section, ctx, name, index, da){
     sectionLabel.setText(name);
     section.addChild(sectionLabel);
     sectionLabel.setRelativeBoundingBox(section.bbWidth, 0, section.bbWidth, 0, section.boundingBox);
+    sectionLabel.color = groupColorsList[index];
     sectionLabel.drawSelf = drawText.bind(sectionLabel, groupColorsList[index], 'hanging', 'end');
 }
 
@@ -164,6 +170,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
         distSection.addChild(statMarker);
         statMarker.setRelativeBoundingBox(popScale(desiredStatistic) - popSection.boundingBox[0], popSection.bbHeight*(3/4), popScale(desiredStatistic)- popSection.boundingBox[0], popSection.bbHeight, popSection.boundingBox);
         statMarker.drawSelf = drawLine.bind(statMarker, 'steelblue', false);
+        statMarker.color = 'steelblue';
         statMarker.setAlternateBB();
         statMarker.opacity = 0.25;
         distStatMarkers.push(statMarker);
@@ -252,7 +259,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
     state.CIInterval = [parseFloat(d3.quantile(sortedDist, 0.025)), parseFloat(d3.quantile(sortedDist, 0.975))];
     for(var d in distribution){
         var datapoint = distribution[d];
-        var dataElement = new visElement('rect', 'distElem' + d, ctx);
+        var dataElement = new visElement('datapoint', 'distElem' + d, ctx);
         sectionElement.addChild(dataElement);
         dataElement.setBoundingBox(0,0,5,5);
         dataElement.setRelativeCenter(distScale(datapoint) - distScale(distScale.domain()[0]),sectionElement.bbHeight, sectionElement.boundingBox);
@@ -262,6 +269,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         dataElement.distId = d;
         dataElement.value = parseFloat(datapoint);
         dataElement.inCI = false;
+        dataElement.displayArea = distSectionDisplayArea.id;
         if(dataElement.value > state.CIInterval[0] && dataElement.value < state.CIInterval[1]){
             dataElement.inCI = true;
         }
@@ -287,6 +295,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         ciElement.addChild(l1);
         l1.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[0])- sectionElement.boundingBox[0], sectionElement.bbHeight, ciElement.boundingBox);
         l1.drawSelf = drawLine.bind(l1, "red");
+        l1.color = "red";
         l1.setAlternateBB();
         l1.opacity = 0;
         CIElements.push(l1);
@@ -294,6 +303,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         ciElement.addChild(l2);
         l2.setRelativeBoundingBox(vis.distScale(state.CIInterval[1]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight, ciElement.boundingBox);
         l2.drawSelf = drawLine.bind(l2, "red");
+        l2.color = "red";
         l2.setAlternateBB();
         l2.opacity = 0;
         CIElements.push(l2);
@@ -302,6 +312,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         ciElement.addChild(lDistAcross);
         lDistAcross.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight/2, ciElement.boundingBox);
         lDistAcross.drawSelf = drawLine.bind(lDistAcross, "red");
+        lDistAcross.color = "red";
         lDistAcross.setAlternateBB();
         lDistAcross.opacity = 0;
         CIElements.push(lDistAcross);
@@ -310,6 +321,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         ciElement.addChild(lPopAcross);
         lPopAcross.setRelativeBoundingBox(vis.distScale(state.CIInterval[0]) - sectionElement.boundingBox[0], sectionElement.bbHeight/2, vis.distScale(state.CIInterval[1])- sectionElement.boundingBox[0], sectionElement.bbHeight/2, ciElement.boundingBox);
         lPopAcross.drawSelf = drawLine.bind(lPopAcross, "red");
+        lPopAcross.color = "red";
         lPopAcross.setAlternateBB();
         lPopAcross.opacity = 0;
         CIElements.push(lPopAcross);
@@ -319,6 +331,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         ciElement.addChild(ciArrow);
         ciArrow.setRelativeBoundingBox(vis.distScale(0) - sectionElement.boundingBox[0], sectionElement.bbHeight-10, vis.distScale(desiredStatistic)- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
         ciArrow.drawSelf = drawArrow.bind(ciArrow, 'darkred', 5);
+        ciArrow.color = "darkred";
         ciArrow.setAlternateBB();
         ciArrow.opacity = 0;
         CIElements.push(ciArrow);
@@ -330,6 +343,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         ciElement.addChild(aboveLabel);
         aboveLabel.setRelativeBoundingBox(vis.distScale(desiredStatistic) - sectionElement.boundingBox[0] - 5, sectionElement.bbHeight-10, vis.distScale(desiredStatistic)- sectionElement.boundingBox[0], sectionElement.bbHeight-10, ciElement.boundingBox);
         aboveLabel.drawSelf = drawText.bind(aboveLabel, 'darkred', 'alphabetic', 'end');
+        aboveLabel.color = "darkred";
         aboveLabel.opacity = 0;
         CIElements.push(aboveLabel);
     }

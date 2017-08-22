@@ -291,6 +291,7 @@ class visualisation {
         // Clear sample section elements
         if(this.dynamicSections){
             this.dynamicSections.s2.elements[1].elements = [];
+            d3.selectAll(".sampleDP").remove();
         }
     }
     pause(){
@@ -312,6 +313,7 @@ class visualisation {
                 this.dynamicElements.distribution.datapoints[d].hide();
 
             }
+            d3.selectAll(".distDP").attr("visibility", "hidden");
             for(var d in this.dynamicElements.distribution.CI){
                 this.dynamicElements.distribution.CI[d].hide();
 
