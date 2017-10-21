@@ -206,7 +206,7 @@ class viewClass {
         $("#display").removeClass("col-sm-push-3");
         var sampleOptions = $('#sampleOptions');
         if(!sampleOptions.length){
-            var sampleOptionsHTML = generateSampleOptionsHTML(state.selectedModule.name, 0, false);
+            var sampleOptionsHTML = state.design.genSampleOptions(state.selectedModule.name, 0, false);
             $('#controls').append(sampleOptionsHTML);
             $('#sampleSizeInput').val(getSampleSizeDefault()).change();
         }else{
@@ -250,7 +250,7 @@ class viewClass {
         $("#controls").addClass("col-sm-pull-9");
         $("#display").addClass("col-sm-push-3");
         if(!visualisationView.length){
-            var visualisationViewHTML = generatevisualisationViewHTML(state.selectedModule);
+            var visualisationViewHTML = state.design.genVisualisationView(state.selectedModule);
             $('#controls').append(visualisationViewHTML);
         }else{
             $('#visualisationView').show();

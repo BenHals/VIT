@@ -16,7 +16,20 @@
     height: auto;
   }
 }
-
+.bluebutton{
+  margin-top:1px;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  width:100%;
+  height:5%;
+  font-size: 2vh;
+  font-weight: 700;
+    /*#18afe3*/
+  color: white;
+  background-color: #094b85;
+  cursor: pointer;
+}
 #moduleName {
   font-family: "PT Sans Caption", sans-serif;
   font-weight: 700;

@@ -170,6 +170,11 @@ class modelClass {
                 var dimensionValue;
                 if(dimension.type == 0){
                     dimensionValue = +row[dimension.name];
+                    if(isNaN(dimensionValue)){
+                        console.log(row);
+                        categoryOk = false;
+                        rejected++;
+                    }
                 }else{
                     dimensionValue = row[dimension.name];
 
@@ -178,6 +183,7 @@ class modelClass {
                         rejected++;
                     }
                 }
+
                 prunedDimensionValues.push(dimensionValue);
             }
             if(categoryOk) allDataPoints.push({id:i-rejected, dimensionValues:prunedDimensionValues});

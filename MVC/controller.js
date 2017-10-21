@@ -126,7 +126,8 @@ window.onload = function(){
     state.urlFocus = getURLParameter(window.location.href, 'focus');
     state.urlSampleSize = getURLParameter(window.location.href, 'ss');
     state.urlStatistic = getURLParameter(window.location.href, 'statistic');
-
+    state.menuDesign = getURLParameter(window.location.href, 'design');
+    state.design = state.menuDesign == "new" ? new_design : old_design;
     // Check for a selected module in the url.
     var urlModule = getURLParameter(window.location.href, 'module');
     urlModule = urlModule != null ? urlModule : "Home";
@@ -194,19 +195,15 @@ function newFileReset(){
     state.statistic = null;
 }
 
-function localFile(){
-    var file = $('#localFile')[0].files[0];
-    if(file){
-        var newURL = deleteURLParameter(window.location.href, ['file','d0','d1','focus', 'statistic', 'ss']);
-        window.history.pushState({path:newURL},'', newURL)
-        state.filename = file.name;
-        model.getLocalFile(file);
-    }
-}
+
 
 function parsedCSV(){
     $('#selectedFile').text(state.filename);
     $('#fileSelectDone').removeAttr('disabled');
+    // The new design has a modal with a done button, otherwise confirm immediatly.
+    if(state.menuDesign != "new"){
+        selectedFileClicked();
+    }
     if(state.loadingFromURL){
 
         // Check for variables in URL
@@ -232,9 +229,20 @@ function getPresets(callback){
     model.getPresets(callback);
 }
 
+function localFile(){
+    var file = $('#localFile')[0].files[0];
+    if(file){
+        var newURL = deleteURLParameter(window.location.href, ['file','d0','d1','focus', 'statistic', 'ss']);
+        window.history.pushState({path:newURL},'', newURL)
+        state.filename = file.name;
+        model.getLocalFile(file);
+    }
+}
+
 function loadFromPreset(filename){
     model.loadFromPreset(filename);
     state.filename = filename;
+
     // Set our url parameter to reload here.
     var newURL = updateURLParameter(window.location.href, 'file', "preset:"+filename);
     window.history.pushState({path:newURL},'', newURL);
@@ -259,6 +267,7 @@ function loadFromURL(u){
         }
     }
     console.log(parameters);
+
     // Set our url parameter to reload here.
     var paramString = "";
     for(var param in parameters){

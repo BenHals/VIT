@@ -84,7 +84,7 @@ function setupNumerical(dataset, ctx, displayArea, numericalScale, populationSec
             var dataElement = new visElement('datapoint', 'populationDP' + displayArea.id+ s + datapoint.id, ctx, datapoint.id);
             sectionElement.addChild(dataElement);
             dataElement.setBoundingBox(0,0,5,5);
-            dataElement.setRelativeCenter(numericalScale(datapoint.dimensionValues[0]) - numericalScale(numericalScale.domain()[0]),sectionElement.bbHeight*(1/2), sectionElement.boundingBox);
+            dataElement.setRelativeCenter(numericalScale(datapoint.dimensionValues[0]) - section.boundingBox[0],sectionElement.bbHeight*(1/2), sectionElement.boundingBox);
             dataElement.drawSelf = drawDataPoint.bind(dataElement);
             dataElement.color = '#000000';
             dataElement.fill = false;
