@@ -394,63 +394,68 @@ function generateFileOptionsHTML_old(module, exampleFiles){
 
 
           <div id="samplePlayButtons" class="playSection panel panel-default">
-            <div class="panel-heading">${module.playSectionLabels[0]}</div>
+            <div class="panel-heading text-center">${module.playSectionLabels[0]}</div>
             <div class = "row">
-              <div class="col-md-8">
-                <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, false)">
-                  <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
-                  <span>1</span>
-                </button>
+              <div class="col-md-8 radioOption">
+                <input id="sampleOptions" type="radio" name="sampleOptions" value="1" checked>
+                <label>1</label>
               </div>
             </div>
             <div class = "row">
-              <div class="col-md-8">
-                <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, false)">
-                  <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
-                  <span>5</span>
-                </button>
+              <div class="col-md-8 radioOption">
+                <input id="sampleOptions" type="radio" name="sampleOptions" value="5">
+                <label>5</label>
               </div>
             </div>
+            <div class = "row">
+              <div class="panelButton col-md-11 ">
+                <button type="button" class="btn btn-primary btn-block" aria-label="Back" onclick="readDistSequence('sampleOptions')">
+                    Go
+                </button> 
+              </div>
+            </div>  
           </div>
 
           <div id="distPlayButtons" class="playSection panel panel-default">
-            <div class="panel-heading">${module.playSectionLabels[1]}</div>
+            <div class="panel-heading text-center">${module.playSectionLabels[1]}</div>
             <div class = "row">
-              <div class="col-md-8">
-                <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, true)">
-                  <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
-                  <span>1</span>
-                </button>
+              <div class="col-md-8 radioOption">
+                <input id="distOptions" type="radio" name="distOptions" value="1" checked>
+                <label>1</label>
               </div>
             </div>
             <div class = "row">
-              <div class="col-md-8">
-                <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, true)">
-                  <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
-                  <span>5</span>
-                </button>
+              <div class="col-md-8 radioOption">
+                <input id="distOptions" type="radio" name="distOptions" value="5">
+                <label>5</label>
               </div>
             </div>
             <div class = "row">
-              <div class="col-md-8">
-                <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
-                  <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
-                  <span>1000</span>
-                </button>
+              <div class="col-md-8 radioOption">
+                <input id="distOptions" type="radio" name="distOptions" value="900">
+                <label>1000</label>
               </div>
             </div>
+            <div class = "row">
+              <div class="panelButton col-md-11 ">
+                <button type="button" class="btn btn-primary btn-block" aria-label="Back" onclick="readDistSequence('distOptions')">
+                    Go
+                </button> 
+              </div>
+            </div> 
           </div>
 
           <div id="statsPlayButtons" class="playSection panel panel-default">
-            <div class="panel-heading">${module.playSectionLabels[2]}</div>
+            <div class="panel-heading text-center">${module.playSectionLabels[2]}</div>
             <button type="button" class="btn btn-default" aria-label="Back" onclick="showCI()">
               <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+              Show CI
             </button>
           </div>
         </div>
 
         <div id="animationPlayback" class="playSection panel panel-default">
-          <div class="panel-heading">Playback Controls</div>
+          <div class="panel-heading text-center">Playback Controls</div>
           <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
               <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
             </button>

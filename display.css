@@ -213,3 +213,11 @@ input[type="range"]::-webkit-slider-thumb {
   .playSection button{
     margin:5px;
   }
+
+  .panelButton {
+    padding-right: 0px !important;
+  }
+
+  .radioOption {
+      margin: 5px;
+  }

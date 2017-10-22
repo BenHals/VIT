@@ -523,6 +523,15 @@ function visSampleChange(change){
 
     }
 }
+
+function readDistSequence(radioName){
+    var radioGroup = $("input:radio[name='"+radioName+"']:checked");
+    var num = radioGroup.val();
+
+    // Second parameter should be true if the distribution animation is playing.
+    distSequence(num, radioName=="distOptions");
+}
+
 function distSequence(num, d, s){
     unpause();
     var speed = s ? s : 1/num;
