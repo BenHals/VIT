@@ -221,3 +221,16 @@ input[type="range"]::-webkit-slider-thumb {
   .radioOption {
       margin: 5px;
   }
+
+  #visualisationView {
+    display: block;
+    height: 100%;
+  }
+  #visControls {
+    display: block;
+    height: 100%;
+  }
+  .control-section {
+    display: block;
+    height: 33%;
+  }

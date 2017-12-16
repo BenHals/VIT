@@ -299,6 +299,12 @@ function generateFileOptionsHTML_old(module, exampleFiles){
           <label class = "btn btn-primary btn-block local-file-button"> Choose a local file...
               <input id = "localFile" type = "file" value = "Pick a local file" onchange = "localFile()">
           </label>
+          <div class="input-group btn-block">
+            <input id="urlInputField" type="text" class="form-control" placeholder="From URL...">
+            <span class="input-group-btn">
+              <button class="btn btn-secondary" type="button" onclick="loadFromURL()">Go!</button>
+            </span>
+          </div>
           <div class="btn-group btn-block">
               <button type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   Use an Example file... <span class="caret"></span>
@@ -307,12 +313,7 @@ function generateFileOptionsHTML_old(module, exampleFiles){
                   ${exampleFiles}
                 </ul>
           </div>
-          <div class="input-group btn-block">
-            <input id="urlInputField" type="text" class="form-control" placeholder="From URL...">
-            <span class="input-group-btn">
-              <button class="btn btn-secondary" type="button" onclick="loadFromURL()">Go!</button>
-            </span>
-          </div>
+
 
           <div id = "selectedFileLabel" class = "well invisible"></div>
           <div id="variablePanel" class="panel panel-default invisible">
@@ -385,14 +386,23 @@ function generateFileOptionsHTML_old(module, exampleFiles){
         </div>
       </div>
       <div id="visControls">
-        <div id="buttonBar">
-          <button type="button" class="bluebutton btn btn-default" aria-label="Back" onclick="sampleOptionsSwitch()">
+        <div id="control-section-1" class ="control-section">
+          <button type="button" class="btn btn-primary btn-block" aria-label="Back" onclick="sampleOptionsSwitch()">
             <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
-            Back to Data Input
-          </button>
+            Back to options
+        </button>
 
+        <div id="animationPlayback" class="playSection panel panel-default">
+          <div class="panel-heading text-center">Playback Controls</div>
+            <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
+                <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+              </button>
+            <input id="visAnimProgress" type="range" min="0" list="stages">
+            <datalist id="stages"></datalist>
+          </div>
+        </div>
 
-
+        <div id="control-section-2" class ="control-section">
           <div id="samplePlayButtons" class="playSection panel panel-default">
             <div class="panel-heading text-center">${module.playSectionLabels[0]}</div>
             <div class = "row">
@@ -415,52 +425,47 @@ function generateFileOptionsHTML_old(module, exampleFiles){
               </div>
             </div>  
           </div>
-
-          <div id="distPlayButtons" class="playSection panel panel-default">
-            <div class="panel-heading text-center">${module.playSectionLabels[1]}</div>
-            <div class = "row">
-              <div class="col-md-8 radioOption">
-                <input id="distOptions" type="radio" name="distOptions" value="1" checked>
-                <label>1</label>
-              </div>
-            </div>
-            <div class = "row">
-              <div class="col-md-8 radioOption">
-                <input id="distOptions" type="radio" name="distOptions" value="5">
-                <label>5</label>
-              </div>
-            </div>
-            <div class = "row">
-              <div class="col-md-8 radioOption">
-                <input id="distOptions" type="radio" name="distOptions" value="900">
-                <label>1000</label>
-              </div>
-            </div>
-            <div class = "row">
-              <div class="panelButton col-md-11 ">
-                <button type="button" class="btn btn-primary btn-block" aria-label="Back" onclick="readDistSequence('distOptions')">
-                    Go
-                </button> 
-              </div>
-            </div> 
-          </div>
-
-          <div id="statsPlayButtons" class="playSection panel panel-default">
-            <div class="panel-heading text-center">${module.playSectionLabels[2]}</div>
-            <button type="button" class="btn btn-default" aria-label="Back" onclick="showCI()">
-              <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
-              Show CI
-            </button>
-          </div>
         </div>
 
-        <div id="animationPlayback" class="playSection panel panel-default">
-          <div class="panel-heading text-center">Playback Controls</div>
-          <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="pauseToggle()">
-              <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
-            </button>
-          <input id="visAnimProgress" type="range" min="0" list="stages">
-          <datalist id="stages"></datalist>
+        <div id="control-section-3" class ="control-section">
+          <div id="buttonBar">
+            <div id="distPlayButtons" class="playSection panel panel-default">
+              <div class="panel-heading text-center">${module.playSectionLabels[1]}</div>
+              <div class = "row">
+                <div class="col-md-8 radioOption">
+                  <input id="distOptions" type="radio" name="distOptions" value="1" checked>
+                  <label>1</label>
+                </div>
+              </div>
+              <div class = "row">
+                <div class="col-md-8 radioOption">
+                  <input id="distOptions" type="radio" name="distOptions" value="5">
+                  <label>5</label>
+                </div>
+              </div>
+              <div class = "row">
+                <div class="col-md-8 radioOption">
+                  <input id="distOptions" type="radio" name="distOptions" value="900">
+                  <label>1000</label>
+                </div>
+              </div>
+              <div class = "row">
+                <div class="panelButton col-md-11 ">
+                  <button type="button" class="btn btn-primary btn-block" aria-label="Back" onclick="readDistSequence('distOptions')">
+                      Go
+                  </button> 
+                </div>
+              </div>
+              <div class = "row">
+                <div class="panelButton col-md-11 ">
+                  <button type="button" class="btn btn-default btn-block" aria-label="Back" onclick="showCI()">
+                  <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                  Show CI
+                  </button> 
+                </div>
+              </div> 
+            </div>
+          </div>
         </div>
       </div>
     </div>
