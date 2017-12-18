@@ -163,7 +163,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
         // For 1 dimensional data just draw a marker at desired statistic
         statMarker = new visElement('line', name + 'StatMarker', ctx);
         popSection.addChild(statMarker);
-        var desiredStatistic = population.statistics.overall[state.statistic ? state.statistic : getStatisticsOptions()[0]];
+        var desiredStatistic = population.statistics.overall[state.selectedModule.name == "Randomisation Variation" ? "Mean" : state.statistic ? state.statistic : getStatisticsOptions()[0]];
         statMarker.setRelativeBoundingBox(popScale(desiredStatistic) - popSection.boundingBox[0], 0, popScale(desiredStatistic)- popSection.boundingBox[0], popSection.bbHeight, popSection.boundingBox);
         statMarker.drawSelf = drawLine.bind(statMarker, 'black', false);
         statMarker.setAlternateBB();
