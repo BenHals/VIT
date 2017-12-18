@@ -50,7 +50,7 @@ class visualisation {
         if(this.dimensions.length == 1 && this.module.name != "Randomisation Variation"){
             type = this.dimensions[0].type;
             return type == 0 ? this.singleNumericalStatistics : this.singleCategoricalStatistics;
-        }else if(this.dimensions.length == 2 && this.dimensions[1].categories.length == 2 || this.module.name == "Randomisation Variation"){
+        }else if(this.dimensions.length == 2 && this.dimensions[1].categories.length == 2 || (this.module.name == "Randomisation Variation" && this.module.sampleGroups.length <= 2)){
             type = this.dimensions[0].type;
             return type == 0 ? this.dualNumericalStatistics : this.dualCategoricalStatistics;
         }else{
@@ -59,6 +59,7 @@ class visualisation {
         }
     }
     setupPopulationElements(){
+        d3.select("#svgContainer").selectAll("*").remove();
         // We want heaped points for numerical values (type = 0)
         // and proportion bars for categorical values (type = 1)
         var popSectionDisplayArea = this.sections.s1.elements[1];
@@ -91,18 +92,26 @@ class visualisation {
     }
     setupSampleElements(){
         this.clearAll();
+        d3.selectAll("#sampSectionAxis").remove();
+        d3.selectAll("#sampLabel").remove();
+        
         var sampleSectionAxisArea = this.sections.s2.elements[2];
-        setupPopAxis(sampleSectionAxisArea, this.popScale, this.ctx);
+        sampleSectionAxisArea.elements = [];
+        setupPopAxis(sampleSectionAxisArea, this.popScale, this.ctx, 'samp');
         var sampleLabelArea = this.sections.s2.elements[0];
-        setupLabel(this.module.labels[1], sampleLabelArea, this.ctx);
+        sampleLabelArea.elements = [];
+        setupLabel(this.module.labels[1], sampleLabelArea, this.ctx, 'samp');
 
         this.distScale = getDistributionScale();
         var distSectionAxisArea = this.sections.s3.elements[2];
-        setupPopAxis(distSectionAxisArea, this.distScale, this.ctx);
+        distSectionAxisArea.elements = [];
+        setupPopAxis(distSectionAxisArea, this.distScale, this.ctx, 'samp');
         var distLabelArea = this.sections.s3.elements[0];
-        setupLabel(this.module.labels[2], distLabelArea, this.ctx);
+        distLabelArea.elements = [];
+        setupLabel(this.module.labels[2], distLabelArea, this.ctx, 'samp');
 
         var distSectionDisplayArea = this.dynamicSections.s3.elements[1];
+        distSectionDisplayArea.elements = [];
         this.dynamicElements.distribution = {container:distSectionDisplayArea};
         var distRet = setupDistribution(state.sampleData.distribution, this.dynamicCtx, distSectionDisplayArea, this.distScale, this.module);
         this.dynamicElements.distribution.datapoints = distRet[0];
@@ -286,6 +295,9 @@ class visualisation {
             this.dynamicSections.s2.elements[1].elements = [];
             this.dynamicSections.s3.elements[1].elements = [];
         }
+    }
+    clearStatic(){
+
     }
     clearSample(){
         // Clear sample section elements

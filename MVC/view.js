@@ -232,7 +232,23 @@ class viewClass {
         $('#takeSamplesButton').show();
         
     }
+    groupNumAlert(text){
+        $('#groupNumPanel').append(`<div id="groupNumAlert" class="alert alert-danger pull-right varAlert">${text}</div>`);
+        $('#groupNumPanel').removeClass('has-success');
+        $('#groupNumPanel .glyphicon').removeClass('glyphicon-ok');
+        $('#groupNumPanel').addClass('has-error');
+        $('#groupNumPanel .glyphicon').addClass('glyphicon-warning-sign');
+        $('#takeSamplesButton').hide();
+    }
 
+    groupNumValid(){
+        $('#groupNumPanel').removeClass('has-error');
+        $('#groupNumPanel .glyphicon').removeClass('glyphicon-warning-sign');
+        $('#groupNumPanel').addClass('has-success');
+        $('#groupNumPanel .glyphicon').addClass('glyphicon-ok');
+        $('#takeSamplesButton').show();
+        
+    }
     setupStatistic(){
         var avaliableStatistics = getStatisticsOptions();
         var selectedStat = state.statistic ? state.statistic : "";

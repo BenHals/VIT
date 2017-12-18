@@ -116,7 +116,7 @@ function getAnimation(module, dimensions, statisticsDimensions, repititions, inc
 		var animation = new visAnim('animation');
 		var inclueSelectedPoints = module.name == "Sampling Variation";
 		inclueSelectedPoints = dimensions[0].type != 1;
-		var secondStageMultiSize = dimensions.length <= 1 ? 0 : dimensions[1].categories.length;
+		var secondStageMultiSize = statisticsDimensions.length <= 1 ? 0 : statisticsDimensions[1].categories.length;
 		var firstDimType = dimensions[0].type;
 		if(inclueSelectedPoints && firstDimType == 0){
 			animation.addStage(samplePointsFadeInStage(d, animation, speedMultiplier, "fadeSelectedPoints"));
@@ -124,16 +124,16 @@ function getAnimation(module, dimensions, statisticsDimensions, repititions, inc
 		}else{
 			animation.addStage(samplePropBarsFadeInStage(d, animation, speedMultiplier, "fadeSelectedPoints"));
 		}
-		var hasExtraStatMark = dimensions.length >= 2 && dimensions[1].categories.length > 2;
+		var hasExtraStatMark = statisticsDimensions.length >= 2 && statisticsDimensions[1].categories.length > 2;
 		if(secondStageMultiSize > 1 && firstDimType == 0){
 			animation.addStage(samplePointsSplitToGroups(d, animation, speedMultiplier, "samplePointsSplitToGroups"));
 		}
 		animation.addStage(statMarkersFadeInStage(d, animation, speedMultiplier, "statMarkersFade", hasExtraStatMark, firstDimType));
 		if(includeDistribution){
 			var distDropStage;
-			if(dimensions.length < 2 || dimensions[1].categories.length < 2){
+			if(statisticsDimensions.length < 2 || statisticsDimensions[1].categories.length < 2){
 				distDropStage = singleNumericalDistDrop;
-			}else if(dimensions[1].categories.length == 2){
+			}else if(statisticsDimensions[1].categories.length == 2){
 				distDropStage = diffDistDrop;
 			}else{
 				distDropStage = multiDiffDistDrop;

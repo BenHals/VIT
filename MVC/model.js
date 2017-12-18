@@ -221,7 +221,7 @@ class modelClass {
         // If we are in the randomisation variation module, samples actually have 
         // an extra dimension, as they are grouped as either A or B.
         if(state.selectedModule.name == "Randomisation Variation"){
-            state.sampleData.dimensions.push({name:"RandVariation", type:1, categories:["A", "B"]});
+            state.sampleData.dimensions.push({name:"RandVariation", type:1, categories:state.selectedModule.sampleGroups});
         }
 
         var samples = [];

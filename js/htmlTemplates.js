@@ -475,7 +475,7 @@ function generateFileOptionsHTML_old(module, exampleFiles){
 
 function generateSampleOptionsHTML_old(module, type, sampleSizeFixed){
   var sampleSizeRange = [1, getSampleSizeMax()];
-  return `
+  var ret_val =  `
   <div id="sampleOptions">
     <button type="button" class="bluebutton btn btn-default" aria-label="Back" onclick="fileOptionsSwitch()">
         <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
@@ -489,9 +489,20 @@ function generateSampleOptionsHTML_old(module, type, sampleSizeFixed){
       </div>
       <input id="sampleSizeInput" type="number" class="form-control" min=${sampleSizeRange[0]} max=${sampleSizeRange[1]} onchange="validateSampleSize()">
       <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+    </div>`
+  if(module == "Randomisation Variation"){
+    ret_val += 
+    `
+    <div id="groupNumPanel" class="panel panel-default has-feedback">
+      <div id="groupNumHeader" class="panel-heading">
+        <label class="control-label panel-title" for="groupNumInput">groupNum</label>
+      </div>
+      <input id="groupNumInput" type="number" class="form-control" min=2 max=5 onchange="validateGroupNum()" value = 2>
+      <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
     </div>
-
-    <div id="statisticPanel" class="panel panel-default">
+    `
+  }
+  ret_val += `<div id="statisticPanel" class="panel panel-default">
       <div id="statisticSelectHeader" class="panel-heading">
         <h3 class="panel-title">Statistic</h3>
       </div>
@@ -502,4 +513,6 @@ function generateSampleOptionsHTML_old(module, type, sampleSizeFixed){
     <button id = "takeSamplesButton" class = "btn btn-primary btn-block" onclick="takeSamplesButtonClicked()">Take Samples</button>
   </div>
   `;
+
+  return ret_val;
 }

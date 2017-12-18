@@ -134,23 +134,26 @@ function labelSection(section, ctx, name, index, da){
     sectionLabel.drawSelf = drawText.bind(sectionLabel, groupColorsList[index], 'hanging', 'end');
 }
 
-function setupPopAxis(popSectionAxisArea, popScale, ctx){
-    var popAxis = new visElement('axis', 'populationSectionAxis', ctx);
+function setupPopAxis(popSectionAxisArea, popScale, ctx, n){
+    var name = n ? n : 'pop';
+    var popAxis = new visElement('axis', name + 'SectionAxis', ctx);
     popAxis.setScale(popScale);
     popSectionAxisArea.addChild(popAxis);
     popAxis.setRelativeBoundingBox(0, 0, popSectionAxisArea.bbWidth, popSectionAxisArea.bbHeight, popSectionAxisArea.boundingBox);
     popAxis.drawSelf = drawAxis.bind(popAxis);
 }
 
-function setupLabel(label, labelArea, ctx){
-    var sectionLabel = new visElement('text', "popLabel"+label, ctx);
+function setupLabel(label, labelArea, ctx, n){
+    var name = n ? n : 'pop';
+    var sectionLabel = new visElement('text', name + "Label");
     sectionLabel.setText(label);
     labelArea.addChild(sectionLabel);
     sectionLabel.setRelativeBoundingBox(0, 0, 10, 10, labelArea.boundingBox);
     sectionLabel.drawSelf = drawText.bind(sectionLabel, 'black', 'hanging', 'start');
 }
 
-function setupPopStatistic(population, popSection, distSection, popScale, isPop, ctx){
+function setupPopStatistic(population, popSection, distSection, popScale, isPop, ctx, n){
+    var name = n ? n : "pop";
     var statMarker;
     var statisticOfInterest;
     var stats, category, stat, section;
@@ -158,7 +161,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
     var distStatMarkers = [];
     if(population.dimensions.length == 1){
         // For 1 dimensional data just draw a marker at desired statistic
-        statMarker = new visElement('line', 'popStatMarker', ctx);
+        statMarker = new visElement('line', name + 'StatMarker', ctx);
         popSection.addChild(statMarker);
         var desiredStatistic = population.statistics.overall[state.statistic ? state.statistic : getStatisticsOptions()[0]];
         statMarker.setRelativeBoundingBox(popScale(desiredStatistic) - popSection.boundingBox[0], 0, popScale(desiredStatistic)- popSection.boundingBox[0], popSection.bbHeight, popSection.boundingBox);
@@ -166,7 +169,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
         statMarker.setAlternateBB();
         sampleStatMarkers.push(statMarker);
 
-        statMarker = new visElement('line', 'popStatMarker', ctx);
+        statMarker = new visElement('line', name + 'StatMarker', ctx);
         distSection.addChild(statMarker);
         statMarker.setRelativeBoundingBox(popScale(desiredStatistic) - popSection.boundingBox[0], popSection.bbHeight*(3/4), popScale(desiredStatistic)- popSection.boundingBox[0], popSection.bbHeight, popSection.boundingBox);
         statMarker.drawSelf = drawLine.bind(statMarker, 'steelblue', false);
@@ -184,13 +187,13 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
             stat = population.statistics.grouped[category][statisticOfInterest];
             stats.push(stat);
             section = popSection.elements[c];
-            statMarker = new visElement('line', 'popStatMarker'+c, ctx);
+            statMarker = new visElement('line', name + 'StatMarker'+c, ctx);
             section.addChild(statMarker);
             statMarker.setRelativeBoundingBox(popScale(stat) - section.boundingBox[0], 0, popScale(stat)- section.boundingBox[0], section.bbHeight, section.boundingBox);
             statMarker.drawSelf = drawLine.bind(statMarker, 'black', false);
             sampleStatMarkers.push(statMarker);
         }
-        statMarker = new visElement('arrow', 'popStatMarker', ctx);
+        statMarker = new visElement('arrow', name + 'StatMarker', ctx);
         popSection.addChild(statMarker);
         statMarker.setRelativeBoundingBox(popScale(stats[0]) - popSection.boundingBox[0], popSection.bbHeight/2, popScale(stats[1])- popSection.boundingBox[0], popSection.bbHeight/2, popSection.boundingBox);
         statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
@@ -200,21 +203,21 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
     }else{
         // for 2 dimensional data with multiple groups, we want the
         // total variation from the mean.
-        statisticOfInterest = state.prunedData.dimensions[0].type == 0 ? "Mean" : "Proportion";
+        statisticOfInterest = state.dimensions[0].type == 0 ? "Mean" : "Proportion";
         var overallStatistic = state.prunedData.statistics.overall[statisticOfInterest];
         stats = [];
-        for(var cat in state.prunedData.dimensions[1].categories){
-            category = state.prunedData.dimensions[1].categories[cat];
+        for(var cat in state.dimensions[1].categories){
+            category = state.dimensions[1].categories[cat];
             stat = population.statistics.grouped[category][statisticOfInterest];
             stats.push(stat);
             section = popSection.elements[cat];
-            statMarker = new visElement('line', 'popStatMarker'+cat, ctx);
+            statMarker = new visElement('line', name + 'StatMarker'+cat, ctx);
             section.addChild(statMarker);
             statMarker.setRelativeBoundingBox(popScale(stat) - section.boundingBox[0], 0, popScale(stat)- section.boundingBox[0], section.bbHeight, section.boundingBox);
             statMarker.drawSelf = drawLine.bind(statMarker, 'black', false);
             sampleStatMarkers.push(statMarker);
             
-            statMarker = new visElement('arrow', 'popStatArrow'+cat, ctx);
+            statMarker = new visElement('arrow', name + 'StatArrow'+cat, ctx);
             section.addChild(statMarker);
             statMarker.setRelativeBoundingBox(popScale(stat) - section.boundingBox[0], section.bbHeight*(3/4), popScale(overallStatistic)- section.boundingBox[0], section.bbHeight*(3/4), section.boundingBox);
             statMarker.drawSelf = drawArrow.bind(statMarker, 'black', 5);
@@ -222,7 +225,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
             sampleStatMarkers.push(statMarker);
         }
         if(isPop){
-            var popStatLine = new visElement('line', 'popStatMarker', ctx);
+            var popStatLine = new visElement('line', name + 'StatMarker', ctx);
             popSection.addChild(popStatLine);
             popStatLine.setRelativeBoundingBox(popScale(overallStatistic) - popSection.boundingBox[0], 0, popScale(overallStatistic)- popSection.boundingBox[0], popSection.bbHeight*2 + popSection.parent.elements[0].bbHeight + popSection.parent.elements[2].bbHeight, popSection.boundingBox);
             popStatLine.drawSelf = drawLine.bind(popStatLine, 'black', true);
@@ -233,7 +236,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
             var distSectionBB = distSection.boundingBox;
             var arrowsHeight = distSection.bbHeight/3;
             var end = [distSectionBB[0] + distSection.bbWidth/2, distSectionBB[1],distSectionBB[0] + distSection.bbWidth/2, distSection[1] + arrowsHeight];
-            statMarker = new visElement('arrow', 'popStatArrowDist'+cat, ctx);
+            statMarker = new visElement('arrow', name + 'StatArrowDist'+cat, ctx);
             section.addChild(statMarker);
             statMarker.setRelativeBoundingBox(vis.distScale(0) - section.boundingBox[0], vis.dynamicSections.s3.elements[1].bbHeight/2, vis.distScale(population.statistics.overall.AvgDeviation)- section.boundingBox[0], vis.dynamicSections.s3.elements[1].bbHeight/2, distSectionBB);
             statMarker.setCenter(end[0], statMarker.centerY);
@@ -325,7 +328,7 @@ function setupDistribution(distribution, ctx, distSectionDisplayArea, distScale,
         lPopAcross.setAlternateBB();
         lPopAcross.opacity = 0;
         CIElements.push(lPopAcross);
-    }else{
+    }else if(module.name != "Randomisation Variation"){
         
         var ciArrow = new visElement('arrow', 'abovePopArrow', ctx);
         ciElement.addChild(ciArrow);

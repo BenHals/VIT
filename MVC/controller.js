@@ -3,6 +3,7 @@ var state = {variables_selected: new Set(), dimensions: [], numSamples:1000, pau
 var numericalStatistics = ['Mean', 'Median'];
 var categoricalStatistics = ['Proportion'];
 var sampleSizeOptions = {"fullRange":0, "popSize":1};
+var randVarGroups = ["A", "B", "C", "D", "E"];
 // Options for modules.
 // allowed variables should be a list of variable types acceptable, [0, 1] means
 // dimension 1 is numeretical and dimension 2 is categorical.
@@ -58,6 +59,7 @@ var modules = {
         baseHTML: generateModuleHTML,
         allowedVariables:[[0, null]],
         sampleSize:sampleSizeOptions['popSize'],
+        sampleGroups:randVarGroups.slice(0, 2),
         generateSample:function(data, sampleSize, pop){
             // Sample Elements are the same as the population elements,
             // but with either A or B set as the group.
@@ -67,7 +69,8 @@ var modules = {
                 // Pick a random element and copy it.
                 var popItem = $.extend(true, {}, population.slice(i,i+1)[0]);
                 var group = Math.random();
-                popItem.dimensionValues.push(group < 0.5 ? "A" : "B");
+                var group_index = Math.floor(group/(1/this.sampleGroups.length));
+                popItem.dimensionValues.push(this.sampleGroups[group_index]);
                 sample.push(popItem);
 
             }
@@ -455,6 +458,45 @@ function validateSampleSize(){
     window.history.pushState({path:newURL},'', newURL);
     
 }
+
+function validateGroupNum(){
+        // Remove old alerts
+        $('#groupNumAlert').remove();
+    
+        var groupNumValue = $('#groupNumInput').val();
+        var gnInt = parseInt(groupNumValue);
+        if(isNaN(gnInt)){
+            view.groupNumAlert("Number of groups must be an integer value");
+            state.groupNum = null;
+            return;
+        }
+    
+        var gnMax = 5;
+        var gnMin = 2;
+        if(gnInt < gnMin || gnInt > gnMax){
+            var alertText = gnMax != gnMin ? "Number of groups must be between "+gnMin+" and " + gnMax +"" :
+                                            "This module only allows the sample size to be the same as the population (" + gnMax +")";
+            view.groupNumAlert(alertText);
+            state.groupNum = null;
+            return;
+        }
+        state.groupNum = gnInt;
+        state.selectedModule.sampleGroups = randVarGroups.slice(0, state.groupNum);
+        console.log(modules.sampleGroups);
+
+        // Reset dimensions
+        state.dimensions = [state.dimensions[0]];
+        state.dimensions.push({name:"RandVariation", type:1, categories:state.selectedModule.sampleGroups});
+        vis.dimensions = state.dimensions;
+
+        view.groupNumValid();
+    
+        // Set our url parameter to reload here.
+        var newURL = updateURLParameter(window.location.href, 'gn', state.groupNum);
+        window.history.pushState({path:newURL},'', newURL);
+        view.setupStatistic()
+        
+    }
 
 function getStatisticsOptions(){
     var statisticsOptions = vis.getStatisticsOptions();

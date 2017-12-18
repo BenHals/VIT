@@ -303,6 +303,9 @@ function drawText(c, baseline, align, text, bb){
     color.opacity = this.opacity;
     if(!text) text = this.text;
     if(!bb) bb = this.boundingBox;
+    if(isNaN(bb[0])){
+        console.log(bb);
+    }
     if(this.svgElem){
         this.svgElem.attr("x", bb[0]).attr("y", bb[3]).attr("dominant-baseline", baseline).attr("text-anchor", align)
             .style("fill", color).style("font-weight", 1);
