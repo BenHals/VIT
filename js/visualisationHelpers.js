@@ -169,6 +169,7 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
         statMarker.setAlternateBB();
         sampleStatMarkers.push(statMarker);
 
+        // A shorter, steel blue line at the statistic
         statMarker = new visElement('line', name + 'StatMarker', ctx);
         distSection.addChild(statMarker);
         statMarker.setRelativeBoundingBox(popScale(desiredStatistic) - popSection.boundingBox[0], popSection.bbHeight*(3/4), popScale(desiredStatistic)- popSection.boundingBox[0], popSection.bbHeight, popSection.boundingBox);
@@ -177,6 +178,14 @@ function setupPopStatistic(population, popSection, distSection, popScale, isPop,
         statMarker.setAlternateBB();
         statMarker.opacity = 0.25;
         distStatMarkers.push(statMarker);
+
+        //For 1 dimentional data we want to drop a dotted line down for the population mean.
+        if(isPop){
+            var popStatLine = new visElement('line', name + 'StatMarker', ctx);
+            popSection.addChild(popStatLine);
+            popStatLine.setRelativeBoundingBox(popScale(desiredStatistic) - popSection.boundingBox[0], 0, popScale(desiredStatistic)- popSection.boundingBox[0], (popSection.bbHeight + popSection.parent.elements[0].bbHeight + popSection.parent.elements[2].bbHeight)*3, popSection.boundingBox);
+            popStatLine.drawSelf = drawLine.bind(popStatLine, 'black', true);
+        }
         return [sampleStatMarkers, distStatMarkers];
     }else if(population.dimensions[1].categories.length == 2){
         // For 2 diminsional data with 2 groups, show the difference

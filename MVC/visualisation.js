@@ -337,8 +337,14 @@ class visualisation {
             state.resetDist = false;
         }
         var endAnimRepeator = function(){
+
+
             count++;
             if(count > repititions) return;
+            for(var d in this.allPopElements){
+                this.allPopElements[d].fillOpacity = 0;
+                this.allPopElements[d].updateSelf(0);
+            }
             state.shouldDraw = false;
             state.lastSelectedSample = state.selectedSample;
             if(state.selectedSample >= 990){

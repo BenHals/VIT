@@ -242,6 +242,8 @@ function samplePointsFadeInStage(d, animation, speedMultiplier, name){
 		var startPos = vis.allPopElements[element.popId].centerY;
 		stage.setTransition(element, 'centerY', startPos, startPos, 0, 1);
 		stage.setTransition(element, 'color', "#000000", "#FF0000", fadeTimeEachPoint * count, fadeTimeEachPoint * (count+1));
+		stage.setTransition(element, 'fillOpacity', 0, 1, fadeTimeEachPoint * count, fadeTimeEachPoint * (count+1));
+		stage.setTransition(vis.allPopElements[element.popId], 'fillOpacity', 0, 1, fadeTimeEachPoint * count, fadeTimeEachPoint * (count+1));
 		count++;
 	});
 	selectAllStatMarkers(d, function(element, index){
@@ -252,6 +254,7 @@ function samplePointsFadeInStage(d, animation, speedMultiplier, name){
 	if(d.selectedDistStatMarker) stage.setTransition(d.selectedDistStatMarker, 'opacity', 0, 0, 0, 1);
 	return stage;
 }
+
 function samplePropBarsFadeInStage(d, animation, speedMultiplier, name){
 	var stage = new animStage(name, animation.name, 2000 * speedMultiplier);
 	var fade = speedMultiplier < 0.05 ? 1 : 0;

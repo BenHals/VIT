@@ -33,6 +33,7 @@ class visElement {
         this.lastTransitionStage = null;
         this.stageDuration = null;
         this.opacity = 1;
+        this.fillOpacity = 0;
 
         this.svgInit = false;
         this.svgElem = null;
@@ -145,7 +146,7 @@ class visElement {
         if(this.type =="datapoint" && this.svgElem){
             this.svgElem.attr("id",this.id).attr("cx", this.centerX).attr("cy", this.centerY).attr("r", 5)
                 .attr("opacity", this.opacity).attr("visibility", this.visible?"visible":"hidden")
-                .style("fill", this.color).style("stroke", this.color).style("fill-opacity", this.fill ? 1:0);
+                .style("fill", this.color).style("stroke", this.color).style("fill-opacity", this.fillOpacity);
             // if(this.visible){
             //     this.svgElem.attr("visibility", "visible");
             // }else{
@@ -165,7 +166,7 @@ class visElement {
             var dpClass = this.displayArea == "ss1Display" ? "popDP" : this.displayArea == "ss2Display" ? "sampleDP" : "distDP";
             elem = d3.select("#"+this.id)["_groups"][0][0] ? d3.select("#"+this.id) : d3.select("#svgContainer").append("circle");
             this.svgElem = elem.attr("id",this.id).attr("class", dpClass).attr("cx", this.centerX).attr("cy", this.centerY).attr("r", 5).attr("visibility", this.visible?"visible":"hidden")
-                .style("fill", this.color).style("stroke", this.color).style("fill-opacity", this.fill ? 1:0);
+                .style("fill", this.color).style("stroke", this.color).style("fill-opacity", this.fillOpacity);
         }
         if(this.type == "axis") {
             return;
