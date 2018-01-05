@@ -37,7 +37,6 @@ class viewClass {
     switchModule(moduleHTML){
         $('#moduleContent').html(moduleHTML);
         $('#sampleButton').hide();
-
     }
 
     selectedFileDone(fileName){
