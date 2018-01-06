@@ -24,7 +24,7 @@ config.modules =  {
         baseHTML: generateModuleHTML,
         baseControls: generateFileControls,
         allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c']],
-        sampleSize:config.sampleSizeOptions['fullRange'],
+        options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: 0}, {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10}],
         generateSample:function(data, sampleSize, pop){
             // Each sample should be sampleSize elements taken from the pop
             // without replacement (can't take the same element twice).

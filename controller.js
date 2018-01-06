@@ -13,7 +13,7 @@ const controller = {
         // New file, so want to clean up url.
         deleteFromUrl(['file','d0','d1','focus', 'statistic', 'ss']);
         model.getLocalFile(file);
-        self.fileParsed();
+        this.fileParsed();
     },
 
     urlFileSelected: async function(url){
@@ -121,7 +121,7 @@ const controller = {
         }
 
         fc_showContinue();
-        this.showPreview();
+        this.doneSetup();
     },
 
     focusSelected: function(e){
@@ -129,7 +129,7 @@ const controller = {
         updateUrl('focus', focus);
         model.setDimensionFocus(focus, 0);
 
-        this.showPreview();
+        this.doneSetup();
     },
     ddResized: function(dd_width){
         let total_space = $("#display").innerWidth();
@@ -137,11 +137,15 @@ const controller = {
         this.resizeVis(vis_space, $("#display").innerHeight());
     },
     resizeVis: function(width, height){
-
+        view.resizeCanvas();
     },
-    showPreview: function(){
+    doneSetup: function(){
         let ds = model.populationDataset();
         view.loadDataDisplay(ds);
-
+        view.loadCanvas();
+        vis.init();
+        vis.initModule(model.selected_module, model.getOptions());
+        vis.initDimensions(model.dimensions);
+        vis.initPopulation(ds);
     },
 }

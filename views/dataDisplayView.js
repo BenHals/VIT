@@ -39,6 +39,7 @@ function dd_populateInit(dataset, dimensions){
     dd_populateRows(dataset, dimensions);
     dd_updateDatapoints(dataset, dimensions, true);
     dd_updateDatapoints(dataset, dimensions, false);
+    dd_toggle();
 }
 
 function dd_populateRows(dataset, dimensions){

@@ -5,10 +5,22 @@ const model = {
     parsedData: undefined,
     selected_columns: new Set(),
     dimensions: [],
+    module_options: {},
 
 
     setSelectedModule: function(module){
         this.selected_module = module;
+        this.getDefaultOptions();
+    },
+    getDefaultOptions: function(){
+        let options = this.selected_module.options;
+        for(let i in options){
+            let option = options[i];
+            this.module_options[option.name] = option.default;
+        }
+    },
+    getOptions: function(){
+        return this.module_options;
     },
     getModuleName: function(){
         return this.selected_module.name;
@@ -50,7 +62,7 @@ const model = {
             for(var c in row){
                 var el = row[c];
                 delete row[c];
-                row[c.trim()] = config.NA.some((e)=>e==el) ? null : el.trim();
+                row[c.trim()] = config.NA.some((e)=>e==el) ? 0 : el.trim();
             }
         }
         console.log(this.parsedData);
@@ -65,7 +77,7 @@ const model = {
         // column_values = {col1: [val, val, ...], col2: [val, val, ...], ...}
         data.columns.forEach((column_name) => {
             columns[column_name] = {name: column_name};
-            let value_array = data.map((row) => isNaN(parseFloat(row[column_name])) ? row[column_name] : parseFloat(row[column_name]));
+            let value_array = data.map((row) => isNaN((row[column_name])) ? row[column_name] : parseFloat(row[column_name]));
             column_values[column_name] = value_array;
             columns[column_name].type = !value_array.some(isNaN) ? 'numeric' : 'categoric';
             if(columns[column_name].type == 'numeric'){
@@ -231,11 +243,11 @@ const model = {
 
     populationDataset: function(){
         this.cleanData();
-        this.populationDS = createDataset(this.cleanedData, this.dimensions, this.genStatistics());
+        this.populationDS = createDataset(this.cleanedData, this.dimensions, this.genStatistics(this.cleanedData));
         return this.populationDS;
     },
 
-    genStatistics: function(){
+    genStatistics: function(cleanedData){
         let generator = {overall: [], // Statistics across all datapoints, I.E mean of everything
             fac1: [], // Statistics for each category of factor 1
             fac2: [], // Statistics for each category of factor 2
@@ -244,6 +256,11 @@ const model = {
             generator.overall.push(meanGen('meanX', this.dimensions[0].name));
             generator.fac2.push(meanGen('meanX', this.dimensions[0].name));
             generator.both.push(meanGen('meanX', this.dimensions[0].name));
+        }else{
+            generator.fac1.push(propGen('propX', this.dimensions[0].name, cleanedData.length));
+            if(this.dimensions.length > 1) generator.fac2.push(propGen('propY', this.dimensions[1].name, cleanedData.length));
+            generator.both.push(propGen('propX', this.dimensions[0].name, cleanedData.length));
+            if(this.dimensions.length > 1) generator.both.push(propGen('propY', this.dimensions[1].name, cleanedData.length));
         }
         return generator;
     }

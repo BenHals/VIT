@@ -27,5 +27,30 @@ const view = {
 
         // Populate dynamic fields.
         populators.forEach((genItems)=>{genItems()});
+    },
+
+    loadCanvas: function(){
+        $('#visualisation').html(`<div id="canvasWrapper">
+            <canvas id="popCanvas" class="mainCanvas"></canvas>
+            <canvas id="dynamicCanvas" class="mainCanvas"></canvas>
+            <svg id="dynamicSVG" class="mainCanvas"><g id="svgContainer"></g></svg>
+            </div>`);
+        this.resizeCanvas();
+    },
+    resizeCanvas: function(){
+        vis_width = $('#canvasWrapper').innerWidth();
+        vis_height = $('#canvasWrapper').innerHeight();
+        $('#popCanvas').attr('width', vis_width);
+        $('#popCanvas').attr('height', vis_height);
+        $('#popCanvas').attr('data-normWidth', vis_width);
+        $('#popCanvas').attr('data-normHeight', vis_height);
+        $('#dynamicCanvas').attr('width', vis_width);
+        $('#dynamicCanvas').attr('height', vis_height);
+        $('#dynamicCanvas').attr('data-normWidth', vis_width);
+        $('#dynamicCanvas').attr('data-normHeight', vis_height);
+        $('#dynamicSVG').attr('width', vis_width);
+        $('#dynamicSVG').attr('height', vis_height);
+        $('#dynamicSVG').attr('data-normWidth', vis_width);
+        $('#dynamicSVG').attr('data-normHeight', vis_height);
     }
 }

@@ -100,3 +100,6 @@ function runStatGens(datapoints, functions){
 function meanGen(stat_name, dim_name){
     return [stat_name, function(dp){return dp.reduce((a, c)=>{return a+c[dim_name]}, 0) / dp.length}];
 }
+function propGen(stat_name, dim_name, total){
+    return [stat_name, function(dp){return dp.length / total}];
+}
