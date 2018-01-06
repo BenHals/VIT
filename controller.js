@@ -131,8 +131,17 @@ const controller = {
 
         this.showPreview();
     },
+    ddResized: function(dd_width){
+        let total_space = $("#display").innerWidth();
+        let vis_space = total_space - dd_width;
+        this.resizeVis(vis_space, $("#display").innerHeight());
+    },
+    resizeVis: function(width, height){
 
+    },
     showPreview: function(){
-        model.popDataset();
-    }
+        let ds = model.populationDataset();
+        view.loadDataDisplay(ds);
+
+    },
 }

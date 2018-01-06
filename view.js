@@ -18,4 +18,14 @@ const view = {
         // Populate dynamic fields.
         populators.forEach((genItems)=>{genItems()});
     },
+
+    loadDataDisplay: function(dataset){
+        let [html, populators] = generateDataDisplay(dataset);
+        
+        // Set the html.
+        $('#dataDisplay').html(html);
+
+        // Populate dynamic fields.
+        populators.forEach((genItems)=>{genItems()});
+    }
 }

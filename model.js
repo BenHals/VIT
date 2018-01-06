@@ -229,9 +229,10 @@ const model = {
         }
     },
 
-    popDataset: function(){
+    populationDataset: function(){
         this.cleanData();
-        createDataset(this.cleanedData, this.dimensions, this.genStatistics());
+        this.populationDS = createDataset(this.cleanedData, this.dimensions, this.genStatistics());
+        return this.populationDS;
     },
 
     genStatistics: function(){
