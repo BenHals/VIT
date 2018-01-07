@@ -18,7 +18,6 @@ const vis = {
         this.interpolators = [];
         let canvas_bounds = this.canvas.getBoundingClientRect();
         this.areas = sectionAreas({top: 0, left: 0, right: canvas_bounds.width, bottom: canvas_bounds.height, width: canvas_bounds.width, height: canvas_bounds.height});
-        //this.drawStatic();
     },
     initModule: function(module, options){
         this.module = module;
@@ -41,11 +40,23 @@ const vis = {
                 this.ctx.fillStyle = "rgba("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+", 0.4)";
                 let offset = this.dimensions[0].type=='numeric' ? 5 : 0;
                 this.ctx.fillRect(e.attrs.x - offset, e.attrs.y - offset, e.attrs.width || offset*2, e.attrs.height || offset * 2); 
-            }
-            
+            }   
         }
- 
+    },
+    initPreview: function(dataset){
+        let datapoints = elementsFromDataset(dataset, this.dimensions, this.areas["sec0display"], this.options);
+        placeElements(datapoints, this.dimensions, this.areas["sec0display"], this.options);
+        this.staticElements.datapoints = datapoints;
+        this.staticElements.all = [].concat(datapoints.all);
 
+        let factor_labels = labelsFromDimensions(this.dimensions, this.areas["sec0display"], this.options);
+        this.staticElements.factor_labels = factor_labels;
+        this.staticElements.all = this.staticElements.all.concat(factor_labels);
+
+        let section_labels = labelsFromModule(this.module.labels, this.areas, this.options);
+        this.staticElements.section_labels = section_labels;
+        this.staticElements.all = this.staticElements.all.concat(section_labels);
+        this.drawStatic();
     },
     initInterpolators: function(interpolators){
         this.interpolators = interpolators;
@@ -57,7 +68,10 @@ const vis = {
 
     },
     drawStatic: function(){
-        this.testSections();
+        for(let i = 0; i < this.staticElements.all.length; i++){
+            let element = this.staticElements.all[i];
+            element.draw(this.ctx);
+        }
     },
     testSections: function(){
         for(let i in this.areas){

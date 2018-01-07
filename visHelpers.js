@@ -56,13 +56,60 @@ function elementsFromDataset(dataset, dimensions, bounds, options){
 
 }
 
+function labelsFromDimensions(dimensions, bounds, options){
+    let factor_labels = dimensions.length > 1 ? dimensions[1].factors : [""];
+    let num_factors = factor_labels.length;
+    
+    let label_elements = factor_labels.map((label, i)=>{
+        let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, i)[1], bottom: bounds.split(num_factors, i+1)[1]};
+        let el = new visElement(`factor${i}Label`, 'text');
+        el.setAttr('text', label);
+        el.setAttr('x', factor_bounds.right);
+        el.setAttr('y', factor_bounds.top);
+        el.setAttr('baseline', 'hanging');
+        el.setAttr('align', 'end');
+        return el;
+    });
+    return label_elements
+}
+
+function labelsFromModule(labels, areas, options){
+    
+    let label_elements = labels.map((label, i)=>{
+        let factor_bounds = areas[`sec${i}title`];
+        let el = new visElement(`section${i}Label`, 'text');
+        el.setAttr('text', label);
+        el.setAttr('x', factor_bounds.left);
+        el.setAttr('y', factor_bounds.top);
+        el.setAttr('baseline', 'hanging');
+        el.setAttr('align', 'start');
+        return el;
+    });
+    return label_elements
+}
+
 function placeElements(elements, dimensions, bounds, options){
     let num_factors = elements.factors.length;
     for(let f = 0; f < num_factors; f++){
         let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
         if(dimensions[0].type == 'numeric'){
-            heap(elements.factors[f], factor_bounds);
-            console.log(elements);
+            if(dimensions.length < 2 || dimensions[1].type == 'categoric'){
+                heap(elements.factors[f], factor_bounds);
+                console.log(elements);
+            }else if(dimensions[1].type == 'numeric'){
+                let max_x = elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000);
+                let min_x = elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 1000000);
+                let max_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] > a ? c.attrs[dimensions[1].name] : a, -100000);
+                let min_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] < a ? c.attrs[dimensions[1].name] : a, 1000000);
+                for(let i = 0; i < elements.all.length; i++){
+                    let element = elements.all[i];
+                    let screen_x = linearScale(element.attrs[dimensions[0].name], [min_x, max_x], [bounds.left, bounds.right] );
+                    let screen_y = linearScale(element.attrs[dimensions[1].name], [min_y, max_y], [bounds.top, bounds.bottom] );
+                    element.setAttr('x', screen_x);
+                    element.setAttr('y', screen_y);
+                }
+            }
+
 
         }else{
             let sum = 0;

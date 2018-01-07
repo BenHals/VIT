@@ -23,7 +23,7 @@ config.modules =  {
         name: "Sampling Variation",
         baseHTML: generateModuleHTML,
         baseControls: generateFileControls,
-        allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c']],
+        allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c'], ['n', 'n']],
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: 0}, {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10}],
         generateSample:function(data, sampleSize, pop){
             // Each sample should be sampleSize elements taken from the pop

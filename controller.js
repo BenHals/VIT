@@ -146,6 +146,6 @@ const controller = {
         vis.init();
         vis.initModule(model.selected_module, model.getOptions());
         vis.initDimensions(model.dimensions);
-        vis.initPopulation(ds);
+        vis.initPreview(ds);
     },
 }
