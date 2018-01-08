@@ -24,7 +24,12 @@ let defaultDrawFuncs = {
         ctx.closePath();
         ctx.stroke();
         ctx.restore();
-    }
+    },
+    "distribution": function(e, ctx){
+        ctx.fillStyle = "rgba("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+", 0.4)";
+        let offset = 5;
+        ctx.fillRect(e.attrs.x - offset, e.attrs.y - offset, offset*2, offset * 2); 
+    },
 }
 
 function clearCtx(ctx){

@@ -173,20 +173,38 @@ const controller = {
     setOption: function(o, new_val){
         model.setOption(o.name, new_val);
     },
-    takeSamples: function() {
+    takeSamples: async function() {
         let required_options = model.selected_module.options;
         let is_valid = true;
         for(let o in required_options){
             is_valid = is_valid && required_options[o].is_valid;
         }
         if(!is_valid) return false;
-        let ds = model.populationDataset();
-        vis.initOptions(model.getOptions());
-        vis.initPopulation(ds);
         this.gotoAni();
+        let [samples, distribution] = [null, null];
+        model.takeSamples();
+        // let p = await model.takeSamples().then((data) => {
+        //     [samples, distribution] = data;
+        // });
+        
+        // let ds = model.populationDataset();
+        // vis.initOptions(model.getOptions());
+        // vis.initPopulation(ds);
+        // vis.initSamples(samples, distribution);
+        
     },
     gotoAni: function(){
         view.loadControls(generateAniControls);
+    },
+    updateSampleProgress: function(p){
+        ac_updateProgress(p);
+        if(model.samples.length == 1000){
+            ac_loadingDone();
+            let ds = model.populationDataset();
+            vis.initOptions(model.getOptions());
+            vis.initPopulation(ds);
+            vis.initSamples(model.samples, model.distribution);
+        }
     },
     aniBack: function(){
         this.gotoOption();

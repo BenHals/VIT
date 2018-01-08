@@ -44,11 +44,10 @@ config.modules =  {
         allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c'], ['n', 'n']],
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
                 {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
-        generateSample:function(data, sampleSize, pop){
+        generateSample:function(population_rows, sampleSize,){
             // Each sample should be sampleSize elements taken from the pop
             // without replacement (can't take the same element twice).
-            var population = pop ? pop : data.allDataPoints;
-            var sample = population.slice();
+            var sample = population_rows.slice(0, population_rows.length);
             d3.shuffle(sample);
             sample = sample.slice(0, sampleSize);
             return sample;

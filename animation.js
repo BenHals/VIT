@@ -44,6 +44,16 @@ class Animation {
 		if(stageIndex >= this.stages.length) {
 			return false;
 		}
+		for(let s = 0; s < stageIndex; s++){
+			let pre_stage = this.stages[s];
+			let endings = pre_stage.getEndings();
+			vis.initStageInitials(endings);
+		}
+		for(let e = this.stages.length - 1; e > stageIndex; e--){
+			let post_stage = this.stages[e];
+			let startings = post_stage.getStartings();
+			vis.initStageInitials(startings);
+		}
 		this.currentStage = stageIndex;
         let [elements, interpolators] = this.stages[stageIndex].loadStage();
         vis.initInterpolators(interpolators);
@@ -132,6 +142,24 @@ class animStage {
 			this.functions[f]();
         }
         return [this.elements, interpolators];
+	}
+	getEndings(){
+		let endings = [];
+		for(var t in this.transitions){
+            let transition = this.transitions[t];
+            let partial_interpolator = d3.interpolate(transition.attrFrom, transition.changeTo);
+			endings.push({el: transition.element, attr: transition.attr, value: partial_interpolator(1)});
+		}
+		return endings;
+	}
+	getStartings(){
+		let startings = [];
+		for(var t in this.transitions){
+            let transition = this.transitions[t];
+            let partial_interpolator = d3.interpolate(transition.attrFrom, transition.changeTo);
+			startings.push({el: transition.element, attr: transition.attr, value: partial_interpolator(0)});
+		}
+		return startings;
 	}
 	setFunc(f){
 		this.functions.push(f);

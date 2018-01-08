@@ -247,23 +247,23 @@ const model = {
     },
 
     cleanData: function(){
-        this.cleanedData = [];
+        this.cleaned_data = [];
         for(var r in this.parsedData){
             if(r == 'columns') break;
             var row = this.parsedData[r];
-            this.cleanedData.push({id: r});
+            this.cleaned_data.push({id: r});
             for(var d in this.dimensions){
                 let dim = this.dimensions[d];
                 var el = row[dim.name];
                 if(dim.type == 'numeric') el = parseFloat(el);
-                this.cleanedData[r][dim.name] = el;
+                this.cleaned_data[r][dim.name] = el;
             }
         }
     },
 
     populationDataset: function(){
         this.cleanData();
-        this.populationDS = createDataset(this.cleanedData, this.dimensions, this.genStatistics(this.cleanedData));
+        this.populationDS = createDataset(this.cleaned_data, this.dimensions, this.genStatistics(this.cleaned_data));
         return this.populationDS;
     },
 
@@ -271,7 +271,7 @@ const model = {
         return this.populationDS.all.length;
     },
 
-    genStatistics: function(cleanedData){
+    genStatistics: function(cleaned_data){
         let generator = {overall: [], // Statistics across all datapoints, I.E mean of everything
             fac1: [], // Statistics for each category of factor 1
             fac2: [], // Statistics for each category of factor 2
@@ -291,15 +291,50 @@ const model = {
             }
 
         }else{
-            if(this.dimensions.length > 1) generator.fac2.push(propGen('proportion', this.dimensions[0].name, this.dimensions[0].focus, cleanedData.length));
-            generator.overall.push(propGen('proportion', this.dimensions[0].name, this.dimensions[0].focus, cleanedData.length));
+            if(this.dimensions.length > 1) generator.fac2.push(propGen('proportion', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length));
+            generator.overall.push(propGen('proportion', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length));
             if(this.dimensions.length > 1){
-                generator.overall.push(avDev('Average Deviation', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, propGen('', this.dimensions[0].name, this.dimensions[0].focus, cleanedData.length)[1] ));
-                generator.overall.push(fStat('F Stat', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, propGen('', this.dimensions[0].name, this.dimensions[0].focus, cleanedData.length)[1]));
+                generator.overall.push(avDev('Average Deviation', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, propGen('', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length)[1] ));
+                generator.overall.push(fStat('F Stat', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, propGen('', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length)[1]));
             }
 
         }
         return generator;
+    },
+    
+    takeSamples: async function(){
+        let population_data = this.cleaned_data;
+        let sample_size = this.getOptions()["Sample Size"];
+        let sample_generator = this.selected_module.generateSample;
+        this.samples = [];
+        this.distribution = [];
+        let stat = model.getOptions()["Statistic"];
+        for(let i = 1; i <= 1000; i++){
+            let sample_dataset = null;
+            setTimeout(()=> {this.genSample(population_data, sample_size, sample_generator, stat, i)}, 0);
+        }
+    },
+    genSample: async function(population_data, sample_size, sample_generator, stat, i){
+        // if(window.Worker){
+        //     let data = null;
+        //     let p = new Promise((resolve, reject)=>{
+        //         let worker = new Worker('./sampleWorker.js');
+        //         worker.postMessage([population_data, sample_size, sample_generator]);
+        //         worker.onmessage((e)=> resolve(e.data[0]));
+        //     }).then((ds)=>{
+        //         this.distribution.push(ds.statistics[stat]);
+        //         this.samples.push(ds);
+        //         controller.updateSampleProgress(i/1000);
+        //     });
+
+
+        // }else{
+            let sample = sample_generator(population_data, sample_size);
+            let ds = createDataset(sample, this.dimensions, this.genStatistics(sample));
+            this.distribution.push(ds.statistics[stat]);
+            this.samples.push(ds);
+            controller.updateSampleProgress(i/1000);
+        //}
     }
 
 }

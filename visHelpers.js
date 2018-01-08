@@ -197,6 +197,16 @@ function statisticsFromElements(elements, dimensions, bounds, options){
 
     return new_elements;
 }
+function elementsFromDistribution(dataset, options){
+    let distribution_elements = [];
+    for(let i = 0; i < dataset.length; i++){
+        let el = new visElement(i, 'distribution');
+        el.setAttr('stat', options.Statistic);
+        el.value = dataset[i];
+        distribution_elements.push(el);
+    }
+    return distribution_elements;
+}
 
 function placeElements(elements, dimensions, bounds, options){
     let num_factors = elements.factors.length;
@@ -256,21 +266,31 @@ function placeElements(elements, dimensions, bounds, options){
     }
 }
 
+function placeDistribution(datapoints, area, vertical){
+    if(! vertical){
+        heap(datapoints, area);
+    }else{
+        heap(datapoints, area, true);
+    }
+    
+}
+
 function linearScale(value, domain, range){
     let proportion = (value - domain[0]) / (domain[1] - domain[0]);
     return proportion * (range[1] - range[0]) + range[0];
 }
 
-function heap(elements, bounds){
+function heap(elements, bounds, vertical){
     let numBuckets = 300;
     let buckets = {};
     let tallestBucketHeight = 0;
     let max = elements.reduce((a, c)=> c.value > a ? c.value : a, -100000);
     let min = elements.reduce((a, c)=> c.value < a ? c.value : a, 1000000);
+    let screen_range = !vertical ? [bounds.left, bounds.right] : [bounds.top, bounds.bottom]
     for(let d = 0; d < elements.length; d++){
         let datapoint = elements[d];
-        let screen_x = linearScale(datapoint.value, [min, max], [bounds.left, bounds.right]);
-        let bucket = Math.floor(linearScale(screen_x, [bounds.left, bounds.right], [0, numBuckets] ));
+        let screen_x = linearScale(datapoint.value, [min, max], screen_range);
+        let bucket = Math.floor(linearScale(screen_x, screen_range, [0, numBuckets] ));
         if(!(bucket in buckets)) buckets[bucket] = [];
         buckets[bucket].push(datapoint);
         if(buckets[bucket].length > tallestBucketHeight) tallestBucketHeight = buckets[bucket].length;
@@ -279,10 +299,18 @@ function heap(elements, bounds){
     var spacePerElement = Math.min(spaceAvaliable/tallestBucketHeight, 5);
     for(var b in buckets){
         for(var e in buckets[b]){
-            buckets[b][e].setAttr('x', linearScale(buckets[b][e].value, [min, max], [bounds.left, bounds.right]))
-            buckets[b][e].setAttr('y', bounds.bottom - spacePerElement * e)
-            buckets[b][e].setAttr('init_x', linearScale(buckets[b][e].value, [min, max], [bounds.left, bounds.right]))
-            buckets[b][e].setAttr('init_y', bounds.bottom - spacePerElement * e)
+            if(!vertical){
+                buckets[b][e].setAttr('x', linearScale(buckets[b][e].value, [min, max], screen_range))
+                buckets[b][e].setAttr('y', bounds.bottom - spacePerElement * e)
+                buckets[b][e].setAttr('init_x', linearScale(buckets[b][e].value, [min, max], screen_range))
+                buckets[b][e].setAttr('init_y', bounds.bottom - spacePerElement * e)
+            }else{
+                buckets[b][e].setAttr('y', linearScale(buckets[b][e].value, [min, max], screen_range))
+                buckets[b][e].setAttr('x', bounds.left + spacePerElement * e)
+                buckets[b][e].setAttr('init_y', linearScale(buckets[b][e].value, [min, max], screen_range))
+                buckets[b][e].setAttr('init_x', bounds.left + spacePerElement * e)
+            }
+
         }
     }
 }

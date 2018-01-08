@@ -56,7 +56,7 @@ function generatevisualisationViewHTML(module){
             Back to Data Input
           </button>
 
-
+          <div id = "moduleName" class = "text-center h1">${module}</div>
 
           <div id="samplePlayButtons" class="playSection panel panel-default">
             <div class="panel-heading">${module.playSectionLabels[0]}</div>
@@ -164,7 +164,7 @@ function generateAniControlsHTML_old(module_name, labels){
             <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
             Back to options
         </button>
-
+        <div id = "moduleName" class = "text-center h1">${module_name}</div>
         <div id="animationPlayback" class="playSection panel panel-default">
           <div class="panel-heading text-center">Playback Controls</div>
             <button id="pausePlay" type="button" class="btn btn-default" aria-label="Back" onclick="ac_pauseToggle()">
@@ -251,7 +251,7 @@ function generateAniControls(old, module_name){
 
     // Returns the html for the controls, and functions to populate fields.
     let generator = old ? generateAniControlsHTML_old : generateAniControlsHTML;
-    return [generator(module_name, labels), []];
+    return [generator(module_name, labels), [ac_initHide]];
 }
 
 // ********** Ani Control Events **********
@@ -290,6 +290,9 @@ $(document).on('change', '#visAnimProgress', function(e){
     //visAnimUserRelease(e);
 });
 // ********** Ani Control Updates **********
+function ac_initHide(){
+  $('#visControls').hide();
+}
 function ac_unpause(){
   $('#pausePlay span').removeClass('glyphicon-play');
   $('#pausePlay span').addClass('glyphicon-pause');
@@ -302,4 +305,15 @@ function ac_pause(){
 
 function ac_setPlaybackProgress(p){
   $('#visAnimProgress').val(p);
+}
+
+function ac_updateProgress(p){
+  $('#takeSamplesProgress').show();
+  $('#takeSamplesProgress').css('width', `${p*1000}%`);
+  $('#visControls').hide();
+}
+
+function ac_loadingDone(){
+  $('#visControls').show();
+  $('#takeSamplesProgressContainer').hide();
 }
