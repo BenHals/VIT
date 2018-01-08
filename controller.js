@@ -1,4 +1,5 @@
 const controller = {
+    paused: false,
     loadModule: function(module_name){ 
         let selected_module = config.modules[module_name];
         // Set the current selected module.
@@ -120,12 +121,12 @@ const controller = {
             model.setDimensionFocus(focus, 0);
         }
 
-        fc_showContinue();
+        
         this.doneSetup();
     },
 
     focusSelected: function(e){
-        var focus = [...e.target.selectedOptions].map(function(option){return option.innerText});
+        var focus = [...e.target.selectedOptions].map(function(option){return option.innerText})[0];
         updateUrl('focus', focus);
         model.setDimensionFocus(focus, 0);
 
@@ -143,9 +144,75 @@ const controller = {
         let ds = model.populationDataset();
         view.loadDataDisplay(ds);
         view.loadCanvas();
+        fc_showContinue();
         vis.init();
         vis.initModule(model.selected_module, model.getOptions());
         vis.initDimensions(model.dimensions);
+        vis.initOptions(model.getOptions());
         vis.initPreview(ds);
     },
+    gotoOption: function(){
+        view.loadControls(generateOptionControls);
+        let required_options = model.selected_module.options;
+        oc_populateOptions(required_options);
+    },
+    optionBack: function(){
+        view.loadControls(generateFileControls);
+        let columns = model.getColumnNamesTypes();
+        let selected_columns = model.getSelectedColumns();
+        fc_populateColumnSelect(columns, selected_columns.map((col)=> col.name));
+
+        if(model.dimensions[0].type == 'categoric'){
+            let factors = model.getDimensionFactors()[0];
+            let focus = model.getDimensionFocus()[0];
+            fc_populateFocus(factors, focus);
+        }
+        
+    },
+
+    setOption: function(o, new_val){
+        model.setOption(o.name, new_val);
+    },
+    takeSamples: function() {
+        let required_options = model.selected_module.options;
+        let is_valid = true;
+        for(let o in required_options){
+            is_valid = is_valid && required_options[o].is_valid;
+        }
+        if(!is_valid) return false;
+        let ds = model.populationDataset();
+        vis.initOptions(model.getOptions());
+        vis.initPopulation(ds);
+        this.gotoAni();
+    },
+    gotoAni: function(){
+        view.loadControls(generateAniControls);
+    },
+    aniBack: function(){
+        this.gotoOption();
+    },
+    visAnimUserInput: function(new_progress){
+        console.log(new_progress);
+        if(vis.animation){
+            console.log(vis.animation.progress_percent(new_progress));
+            vis.setProgress(new_progress);
+        } 
+    },
+    initAnimation: function(num_samples, include_distribution){
+        console.log(num_samples +":"+include_distribution);
+        vis.initAnimation(num_samples, include_distribution);
+    }, 
+    pause: function(){
+        this.paused = true;
+        vis.pause();
+        ac_pause();
+    },
+    unpause: function(){
+        this.paused = false;
+        vis.unpause();
+        ac_unpause();
+    },
+    setPlaybackProgress: function(p){
+        ac_setPlaybackProgress(p);
+    }
 }

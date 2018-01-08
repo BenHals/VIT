@@ -7,6 +7,24 @@ const config = {
     NA: ["NA", "na", "N/A", "n/a", ""],
     groupColorsList: [ "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"],
     proportionColorsList: ["#3366cc", "#dc3912",'#1b9e77','#d95f02','#7570b3'],
+    initStatistics: function(dimensions){
+        if(dimensions[0].type == 'numeric'){
+            if(dimensions.length < 2 || (dimensions[1].type == 'categoric' && dimensions[1].factors.length < 3)){
+                return ["Mean", "Median"];
+            }else if(dimensions[1].type == 'numeric'){
+                return ["Slope"];
+            }else{
+                return ["Average Deviation", "F Stat"];
+            }
+        }else{
+            if(dimensions.length < 2 || dimensions[1].factors.length < 3){
+                return ["proportion"];
+            }else{
+                return ["Average Deviation", "F Stat"];
+            }
+            
+        }
+    },
 
 }
 
@@ -24,7 +42,8 @@ config.modules =  {
         baseHTML: generateModuleHTML,
         baseControls: generateFileControls,
         allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c'], ['n', 'n']],
-        options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: 0}, {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10}],
+        options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
+                {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
         generateSample:function(data, sampleSize, pop){
             // Each sample should be sampleSize elements taken from the pop
             // without replacement (can't take the same element twice).
@@ -118,6 +137,7 @@ config.modules =  {
             return sample;
         },
         labels:['Data','Re-Randomised Data','Re-Randomisation Distribution'],
-        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
+        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"],
+
     }
 }

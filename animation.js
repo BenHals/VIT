@@ -16,19 +16,29 @@ class Animation {
         this.playing = true;
         this.startStage(0);
     }
-    progress(ts){
+    progress_time(ts){
         let time_delta = ts - this.start_time;
-        let prog_percent = time_delta / total_duration;
-        let stage = 0;
+        let prog_percent = time_delta / this.total_duration;
+		let stage = 0;
+		let stage_percentage = 0;
         for(let i = 0; i < this.stages.length; i ++){
             time_delta -= this.stages[i].duration;
-            if(time_delta < 0) break;
+            if(time_delta < 0){
+				stage = i;
+				stage_percentage = 1 - ((time_delta*-1) / this.stages[i].duration);
+				break;
+			} 
         }
-        return [stage, prog_percent, ts - this.start_time];
-    }
+        return [stage, prog_percent, stage_percentage, ts - this.start_time];
+	}
+	progress_percent(p){
+		let prog_percent = p;
+		let ts = prog_percent * this.total_duration + this.start_time;
+		return this.progress_time(ts);
+	}
 	addStage(stage){
         this.stages.push(stage);
-        this.total_duration = 0;
+        this.total_duration += stage.duration;
 	}
 	startStage(stageIndex){
 		if(stageIndex >= this.stages.length) {
@@ -73,6 +83,14 @@ class Animation {
 		this.currentStageProgress = 0;
 		this.done = true;
 	}
+	percentUpdate(p){
+		let [current_stage, anim_percentage, stage_percentage, time_from_start] = this.progress_percent(p);
+		if(anim_percentage >= 1){
+			controller.pause();
+			return [this.stages.length - 1, 1];
+		}
+		return [current_stage, stage_percentage];
+	}
 
 }
 
@@ -102,7 +120,7 @@ class animStage {
         let interpolators = [];
 		for(var t in this.transitions){
             let transition = this.transitions[t];
-            let partial_interpolator = d3.interpolate(transition.attrFrom, changeTo);
+            let partial_interpolator = d3.interpolate(transition.attrFrom, transition.changeTo);
             let interpolator = function(percentage){
                 if(percentage <= transition.start) return partial_interpolator(0);
                 if(percentage >= transition.end) return partial_interpolator(1);

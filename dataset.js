@@ -100,6 +100,55 @@ function runStatGens(datapoints, functions){
 function meanGen(stat_name, dim_name){
     return [stat_name, function(dp){return dp.reduce((a, c)=>{return a+c[dim_name]}, 0) / dp.length}];
 }
-function propGen(stat_name, dim_name, total){
-    return [stat_name, function(dp){return dp.length / total}];
+function medianGen(stat_name, dim_name){
+    return [stat_name, function(dp){
+        let sorted = dp.sort((a, b)=> a[dim_name] - b[dim_name]);
+        let mid_ceil = sorted[Math.ceil(dp.length / 2)];
+        let mid_floor = sorted[Math.floor(dp.length / 2)];
+        return (mid_ceil[dim_name] + mid_floor[dim_name])/2;
+    }];
+}
+function propGen(stat_name, dim_name, focus, total){
+    return [stat_name, function(dp){return dp.reduce((a, c) => c[dim_name] == focus ? a + 1 : a, 0) / dp.length}];
+}
+
+function avDev(stat_name, dim_name, dim_name2, factors, mid_stat){
+    return [stat_name, function(dp){
+        let mean = mid_stat(dp);
+        let avg = 0;
+        for(let f = 0; f < factors.length; f++){
+            let factor_mean = mid_stat(dp.filter((e)=>e[dim_name2] == factors[f]));
+            avg += Math.abs(factor_mean);
+        }
+        return avg / factors.length;
+    }];
+}
+
+function fStat(stat_name, dim_name, dim_name2, factors, mid_stat){
+    return avDev(stat_name, dim_name, dim_name2, factors, mid_stat);
+}
+
+function slopeGen(stat_name, dim_name, dim_name2){
+    return [stat_name, function(dp){
+        let mean_x = meanGen('', dim_name)[1](dp);
+        let mean_y = meanGen('', dim_name2)[1](dp);
+        let covar = dp.reduce((a, c)=> {
+            let x = (c[dim_name] - mean_x);
+            let y = (c[dim_name2] - mean_y);
+            console.log(x*y);
+            return a + (x*y)}, 0);
+        let x_var = dp.reduce((a, c)=> a + ((c[dim_name] - mean_x)*(c[dim_name] - mean_x)), 0);
+        let slope = covar / x_var;
+        return slope;
+    }];
+}
+
+function interceptGen(stat_name, dim_name, dim_name2){
+    return [stat_name, function(dp){
+        let mean_x = meanGen('', dim_name)[1](dp);
+        let mean_y = meanGen('', dim_name2)[1](dp);
+        let slope = slopeGen(stat_name, dim_name, dim_name2)[1](dp);
+        let intercept = mean_y - slope*mean_x;
+        return intercept;
+    }];
 }

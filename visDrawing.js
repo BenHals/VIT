@@ -14,5 +14,23 @@ let defaultDrawFuncs = {
         ctx.textAlign = e.attrs['align'];
         ctx.textBaseline = e.attrs['baseline'];
         ctx.fillText(e.attrs.text, e.attrs.x, e.attrs.y);
+    },
+    "line": function(e, ctx){
+        ctx.save();
+        ctx.strokeStyle = "#000000";
+        ctx.beginPath();
+        ctx.moveTo(e.getAttr('x1'), e.getAttr('y1'));
+        ctx.lineTo(e.getAttr('x2'), e.getAttr('y2'));
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+    }
+}
+
+function clearCtx(ctx){
+    if(ctx){
+        var canvas = $('#popCanvas');
+        if(!ctx) return;
+        ctx.clearRect(0,0, canvas.attr("width"), canvas.attr("height"));
     }
 }

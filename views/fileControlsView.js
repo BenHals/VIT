@@ -204,7 +204,7 @@ function fc_selectedFileClicked(){
 }
 
 function fc_sampleButtonClicked(){
-    return ;
+    controller.gotoOption();
 }
 
 // ********** File Control Updates **********
@@ -251,4 +251,8 @@ function fc_tooManyVariables(err){
 
 function fc_wrongModule(err){
     alert("Wrong column types for module");
+}
+
+function fc_showContinue(){
+    $('#sampleButton').show();
 }
