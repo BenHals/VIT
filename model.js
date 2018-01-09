@@ -221,7 +221,17 @@ const model = {
         this.dimensions = [...this.selected_columns];
         let options = this.selected_module.options;
         this.setStatisticsValues();
+    },
 
+    getSampleDimensions: function(){
+        if(this.selected_module.name != "Randomisation Variation"){
+            return this.dimensions;
+        }else{
+            let num_groups = this.getOptions()['Groups'];
+            let group_names = ["A", "B", "C", "D", "E"];
+            let new_dimension = {name: "synthetic", type: "categoric", factors: grop_names.slice(0, num_groups)};
+            return this.dimensions.concat([new_dimension]);
+        }
     },
 
     getDimensionFactors: function(){

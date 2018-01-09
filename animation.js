@@ -88,15 +88,13 @@ class Animation {
 		return this.stages[this.currentStage];
 	}
 	finish(){
-		//this.currentStage = null;
-		this.playing = false;
-		this.currentStageProgress = 0;
-		this.done = true;
+		controller.pause();
+		vis.animationDone();
 	}
 	percentUpdate(p){
 		let [current_stage, anim_percentage, stage_percentage, time_from_start] = this.progress_percent(p);
 		if(anim_percentage >= 1){
-			controller.pause();
+			this.finish();
 			return [this.stages.length - 1, 1];
 		}
 		return [current_stage, stage_percentage];

@@ -1,8 +1,12 @@
 let defaultDrawFuncs = {
     "datapoint": function(e, ctx){
-        ctx.fillStyle = "rgba("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+", 0.4)";
+        let stroke_opacity = e.getAttr('stroke-opacity') || 1;
+        let fill_opacity = e.getAttr('fill-opacity') || 0;
+        ctx.fillStyle = `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)}, ${fill_opacity})`;
+        ctx.strokeStyle = `rgba(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)}, ${stroke_opacity})`;
         let offset = 5;
         ctx.fillRect(e.attrs.x - offset, e.attrs.y - offset, offset*2, offset * 2); 
+        ctx.strokeRect(e.attrs.x - offset, e.attrs.y - offset, offset*2, offset * 2);
     },
     "prop": function(e, ctx){
         ctx.fillStyle = "rgba("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+", 0.4)";

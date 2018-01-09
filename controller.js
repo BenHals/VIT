@@ -147,7 +147,7 @@ const controller = {
         fc_showContinue();
         vis.init();
         vis.initModule(model.selected_module, model.getOptions());
-        vis.initDimensions(model.dimensions);
+        vis.initDimensions(model.dimensions, model.getSampleDimensions());
         vis.initOptions(model.getOptions());
         vis.initPreview(ds);
     },

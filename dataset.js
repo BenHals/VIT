@@ -85,7 +85,6 @@ function createDataset(data, dimensions, statistics_generator){
             });
         });
     });
-    console.log(dataset);
     return dataset;
 }
 
@@ -98,13 +97,19 @@ function runStatGens(datapoints, functions){
 }
 
 function meanGen(stat_name, dim_name){
-    return [stat_name, function(dp){return dp.reduce((a, c)=>{return a+c[dim_name]}, 0) / dp.length}];
+    return [stat_name, function(dp){return dp.length > 0 ? dp.reduce((a, c)=>{return a+c[dim_name]}, 0) / dp.length : 0}];
 }
 function medianGen(stat_name, dim_name){
     return [stat_name, function(dp){
+        if (dp.length < 1) return 0;
         let sorted = dp.sort((a, b)=> a[dim_name] - b[dim_name]);
-        let mid_ceil = sorted[Math.ceil(dp.length / 2)];
-        let mid_floor = sorted[Math.floor(dp.length / 2)];
+        let mid_ceil = sorted[Math.floor(dp.length / 2)];
+        let mid_floor = sorted[Math.floor((dp.length-1) / 2)];
+        if(mid_ceil == undefined || mid_floor == undefined){
+            console.log(dp);
+            return 0;
+        }
+            
         return (mid_ceil[dim_name] + mid_floor[dim_name])/2;
     }];
 }
@@ -135,7 +140,6 @@ function slopeGen(stat_name, dim_name, dim_name2){
         let covar = dp.reduce((a, c)=> {
             let x = (c[dim_name] - mean_x);
             let y = (c[dim_name2] - mean_y);
-            console.log(x*y);
             return a + (x*y)}, 0);
         let x_var = dp.reduce((a, c)=> a + ((c[dim_name] - mean_x)*(c[dim_name] - mean_x)), 0);
         let slope = covar / x_var;

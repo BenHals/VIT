@@ -31,17 +31,27 @@ const vis = {
         this.module = module;
         this.options = options;
     },
-    initDimensions: function(dimensions){
-        this.dimensions = dimensions;
+    initDimensions: function(population_dimensions, sample_dimensions){
+        this.dimensions = population_dimensions;
+        this.population_dimensions = population_dimensions;
+        this.sample_dimensions = sample_dimensions;
     },
     initOptions: function(options){
         this.options = options;
     },
     initPopulation: function(dataset){
         this.initPreview(dataset);
-        let stat_markers = statisticsFromElements(this.staticElements.datapoints, this.dimensions, this.areas["sec0display"], this.options);
+        let stat_markers = statisticsFromElements(this.staticElements.datapoints, this.population_dimensions, this.areas["sec0display"], this.options);
         this.staticElements.stat_markers = stat_markers;
         this.staticElements.all = this.staticElements.all.concat(stat_markers);
+        if(this.population_dimensions[0].type == 'numeric'){
+            this.popMax = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] > a ? c.attrs[this.population_dimensions[0].name] : a, -100000);
+            this.popMin = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] < a ? c.attrs[this.population_dimensions[0].name] : a, 100000);
+        }else{
+            this.popMax = 0;
+            this.popMin = 1;
+        }
+
 
         this.drawStatic();
         
@@ -50,18 +60,18 @@ const vis = {
         this.samples = samples;
         this.distribution = distribution;
         this.initDistribution(this.distribution);
-        this.initSample(this.samples[this.current_sample]);
+        this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample]);
         
         this.drawDynamic();
     },
     initPreview: function(dataset){
         let statistic = this.options.Statistic;
-        let datapoints = elementsFromDataset(dataset, this.dimensions, this.areas["sec0display"], this.options, statistic);
-        placeElements(datapoints, this.dimensions, this.areas["sec0display"], this.options);
+        let datapoints = elementsFromDataset(dataset, this.population_dimensions, this.areas["sec0display"], this.options, statistic);
+        placeElements(datapoints, this.population_dimensions, this.areas["sec0display"], this.options);
         this.staticElements.datapoints = datapoints;
         this.staticElements.all = [].concat(datapoints.all);
 
-        let factor_labels = labelsFromDimensions(this.dimensions, this.areas["sec0display"], this.options);
+        let factor_labels = labelsFromDimensions(this.population_dimensions, this.areas["sec0display"], this.options);
         this.staticElements.factor_labels = factor_labels;
         this.staticElements.all = this.staticElements.all.concat(factor_labels);
 
@@ -72,27 +82,47 @@ const vis = {
     },
     initDistribution: function(distribution){
         let statistic = this.options.Statistic;
-        let datapoints = elementsFromDistribution(distribution, this.options);
-        let area = this.areas["sec2display"];
+        let min = 0;
+        let max = 1;
+        if(this.sample_dimensions[0].type == 'numeric'){
+            if(this.sample_dimensions.length < 2 || this.sample_dimensions[1].type == 'catetoric'){
+                max = this.popMax;
+                min = this.popMin;
+            }else{
+                max = distribution.reduce((a, c)=> c > a ? c : a, -100000);
+                min = distribution.reduce((a, c)=> c < a ? c : a, 100000);
+            }
+        }else{
+            max = this.popMax;
+            min = this.popMin; 
+        }
+        
+        let area_heap = this.areas["sec2display"];
+        let area_stat = this.areas["sec1display"];
         let vertical = false;
-        if(this.dimensions.length == 2 && this.dimensions[0].type == 'numeric' && this.dimensions[1].type == 'numeric'){
-            area = this.areas["sec2regRdisplay"];
+        if(this.sample_dimensions.length == 2 && this.sample_dimensions[0].type == 'numeric' && this.sample_dimensions[1].type == 'numeric'){
+            area_heap = this.areas["sec2regRdisplay"];
+            area_stat = this.areas["sec2regLdisplay"];
             vertical = true;
         }
-        placeDistribution(datapoints, area, vertical);
-        this.dynamicElements.distribution = datapoints;
+        let [datapoints, stats] = elementsFromDistribution(distribution, this.sample_dimensions, area_stat, this.options, min, max);
+        placeDistribution(datapoints, area_heap, vertical, min, max);
+        this.dynamicElements.distribution = {};
+        this.dynamicElements.distribution.datapoints = datapoints;
         let prev_all = this.dynamicElements.all || [];
         this.dynamicElements.all = prev_all.concat(datapoints);
+        this.dynamicElements.distribution.stats = stats;
         this.drawDynamic();
     },
-    initSample: function(dataset){
+    initSample: function(dataset, stats){
         let statistic = this.options.Statistic;
-        let datapoints = elementsFromDataset(dataset, this.dimensions, this.areas["sec1display"], this.options, statistic);
-        placeElements(datapoints, this.dimensions, this.areas["sec1display"], this.options);
+        let datapoints = elementsFromDataset(dataset, this.sample_dimensions, this.areas["sec1display"], this.options, statistic);
+        placeElements(datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.popMin, this.popMax);
         this.dynamicElements.datapoints = datapoints;
-        this.dynamicElements.all = this.dynamicElements.distribution.concat(datapoints.all);
+        this.dynamicElements.all = this.dynamicElements.distribution.datapoints.concat(datapoints.all);
+        this.dynamicElements.all = this.dynamicElements.all.concat(stats);
 
-        let factor_labels = labelsFromDimensions(this.dimensions, this.areas["sec1display"], this.options);
+        let factor_labels = labelsFromDimensions(this.sample_dimensions, this.areas["sec1display"], this.options);
         this.dynamicElements.factor_labels = factor_labels;
         this.dynamicElements.all = this.dynamicElements.all.concat(factor_labels);
 
@@ -100,16 +130,19 @@ const vis = {
         this.dynamicElements.section_labels = section_labels;
         this.dynamicElements.all = this.dynamicElements.all.concat(section_labels);
 
-        let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.dimensions, this.areas["sec1display"], this.options);
+        let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.popMin, this.popMax);
         this.dynamicElements.stat_markers = sample_stat_markers;
         this.dynamicElements.all = this.dynamicElements.all.concat(sample_stat_markers);
         this.drawDynamic();
     },
     initAnimation: function(reps, include_distribution){
+        this.reps_left = reps - 1;
+        this.include_distribution = include_distribution;
         let animation = new Animation(`${reps}:${include_distribution}`);
-        this.initSample(this.samples[this.current_sample]);
+        this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample]);
         this.current_sample = (this.current_sample + 1)%(this.samples.length);
-        ma_createAnimation(animation, this.staticElements, this.dynamicElements, this.module);
+        let speed = 1 + 0.5*reps;
+        ma_createAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed);
         this.animation = animation;
         this.animation.start();
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
@@ -174,7 +207,7 @@ const vis = {
         }
     },
     loop: function(ts){
-        let start_t = window.performance.now();
+        //let start_t = window.performance.now();
         this.last_frame = this.last_frame || ts;
         if(!this.paused){
             this.current_animation_percent += (ts-this.last_frame) / this.animation.total_duration;
@@ -184,9 +217,17 @@ const vis = {
         //this.drawStatic();
         
         this.drawDynamic();
+        this.drawStatic();
         this.last_frame = ts;
-        console.log(window.performance.now() - start_t);
+        //console.log(window.performance.now() - start_t);
         requestAnimationFrame(this.loop.bind(this));
+    },
+    animationDone: function(){
+        if(this.reps_left > 0) {
+            controller.unpause();
+            this.initAnimation(this.reps_left, this.include_distribution);
+        }
+        
     },
 
     setProgress: function(p){
