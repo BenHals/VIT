@@ -13,12 +13,13 @@ const model = {
         this.getDefaultOptions();
     },
     getDefaultOptions: function(){
+        this.selected_module.generateOptions(this.dimensions);
         let options = this.selected_module.options;
         for(let i in options){
             let option = options[i];
             this.module_options[option.name] = option.default;
         }
-        this.setStatisticsValues();
+        //this.setStatisticsValues();
     },
     setStatisticsValues: function(){
         let options = this.selected_module.options;
@@ -220,7 +221,8 @@ const model = {
     setDimensions: function(){
         this.dimensions = [...this.selected_columns];
         let options = this.selected_module.options;
-        this.setStatisticsValues();
+        //this.setStatisticsValues();
+        this.getDefaultOptions();
     },
 
     getSampleDimensions: function(){

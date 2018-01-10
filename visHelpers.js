@@ -122,7 +122,7 @@ function labelsFromModule(labels, areas, options){
     return label_elements
 }
 
-function statisticsFromElements(elements, dimensions, bounds, options, min, max){
+function statisticsFromElements(elements, dimensions, bounds, options, dataset, min, max){
     let new_elements = [];
     let statistic = options.Statistic;
     let num_factors = elements.factors.length;
@@ -141,6 +141,21 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
             el.setAttrInit('x2', screen_stat);
             el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             el.setAttrInit('stat', stat);
+            new_elements.push(el);
+        }
+        if(num_factors == 2){
+            let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, 0)[1], bottom: bounds.split(num_factors, 1)[1]};
+            let factor_1 = elements.factors[0];
+            let factor_stat_1 = factor_1.statistics[statistic];
+            let factor_2 = elements.factors[1];
+            let factor_stat_2 = factor_2.statistics[statistic];
+            let screen_factor_stat_1 = linearScale(factor_stat_1, [min, max], [factor_bounds.left, factor_bounds.right]);
+            let screen_factor_stat_2 = linearScale(factor_stat_2, [min, max], [factor_bounds.left, factor_bounds.right]);
+            let el = new visElement('dist_stat_arrow_diff', 'arrow');
+            el.setAttrInit('x1', screen_factor_stat_1);
+            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('x2', screen_factor_stat_2);
+            el.setAttrInit('y2', factor_bounds.bottom);
             new_elements.push(el);
         }
     }
@@ -164,8 +179,9 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
         let pop_stat = elements.all.statistics["Mean"] ? "Mean" : "proportion";
         console.log("Mean" + elements.all.statistics[pop_stat]);
         
-        let max_x = elements.all.statistics["Mean"] ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : 1;
-        let min_x = elements.all.statistics["Mean"] ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 1000000) : 0;
+        let max_x = max == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : max;
+        let min_x = min == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 1000000) : min;
+        let overall_stat = dataset.statistics[pop_stat];
         for(let f = 0; f < num_factors; f++){
             let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
             let factor = elements.factors[f];
@@ -178,10 +194,19 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
             el.setAttrInit('x2', screen_stat);
             el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             new_elements.push(el);
+
+            
+            let screen_overall_stat = linearScale(overall_stat, [min_x, max_x], [factor_bounds.left, factor_bounds.right]);
+            let el_diff = new visElement('dist_stat_arrow' + f, 'arrow');
+            el_diff.setAttrInit('x1', screen_stat);
+            el_diff.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            el_diff.setAttrInit('x2', screen_overall_stat);
+            el_diff.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            new_elements.push(el_diff);
+
         }
-        let stat = elements.all.statistics[statistic];
-        console.log(stat);
-        let screen_stat = linearScale(stat, [min_x, max_x], [bounds.innerLeft, bounds.innerRight]);
+        console.log(overall_stat);
+        let screen_stat = linearScale(overall_stat, [min_x, max_x], [bounds.innerLeft, bounds.innerRight]);
         let el = new visElement('overall'+statistic, 'line');
         el.setAttrInit('x1', screen_stat);
         el.setAttrInit('y1', bounds.top);
@@ -212,23 +237,65 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
     return new_elements;
 }
 
-function statisticsFromDistribution(distribution_stat, dimensions, bounds, options, min, max, s_i){
+function statisticsFromDistribution(distribution_stat, dataset, dimensions, bounds, options, min, max, s_i){
     let new_elements = [];
     let statistic = options.Statistic;
     let num_factors = dimensions.length > 1 ? dimensions[1].factors.length : 1;
     if(statistic == 'Mean' || statistic == 'Median'){
-        for(let f = 0; f < num_factors; f++){
-            let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
-            let stat = distribution_stat;
-            let screen_stat = linearScale(stat, [min, max], [factor_bounds.left, factor_bounds.right]);
-            let el = new visElement('dist_stat_line' + f, 'line');
-            el.setAttrInit('x1', screen_stat);
-            el.setAttrInit('y1', factor_bounds.bottom);
-            el.setAttrInit('x2', screen_stat);
+        if(num_factors > 0){
+            for(let f = 0; f < num_factors; f++){
+                let stats = dimensions.length < 2 || dimensions[1].type == 'numeric' ? dataset.statistics : dataset[dimensions[0].name][dimensions[1].name][dimensions[1].factors[f]].statistics;
+                let overall_stats = dataset.statistics;
+                let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
+                let stat = distribution_stat;
+                let factor_stat = stats[statistic];
+                let overall_stat = overall_stats[statistic]
+                let screen_factor_stat = linearScale(factor_stat, [min, max], [factor_bounds.left, factor_bounds.right]);
+                let screen_overall_stat = linearScale(overall_stat, [min, max], [factor_bounds.left, factor_bounds.right]);
+                let screen_stat = linearScale(stat, [min, max], [factor_bounds.left, factor_bounds.right]);
+                let el = new visElement('dist_stat_arrow' + f, 'line');
+                el.setAttrInit('x1', screen_stat);
+                el.setAttrInit('y1', factor_bounds.bottom);
+                el.setAttrInit('x2', screen_stat);
+                el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+                el.setAttrInit('stat', distribution_stat);
+                new_elements.push(el);
+            }    
+        }else if(num_factors == 2){
+            let stats_1 = dataset[dimensions[0].name][dimensions[1].name][dimensions[1].factors[0]].statistics;
+            let stats_2 = dataset[dimensions[0].name][dimensions[1].name][dimensions[1].factors[1]].statistics;
+            let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, 0)[1], bottom: bounds.split(num_factors, 1)[1]};
+            let factor_stat_1 = stats_1[statistic];
+            let factor_stat_2 = stats_2[statistic];
+            let screen_factor_stat_1 = linearScale(factor_stat_1, [min, max], [factor_bounds.left, factor_bounds.right]);
+            let screen_factor_stat_2 = linearScale(factor_stat_2, [min, max], [factor_bounds.left, factor_bounds.right]);
+            let el = new visElement('dist_stat_arrow_diff', 'arrow');
+            el.setAttrInit('x1', screen_factor_stat_1);
+            el.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            el.setAttrInit('x2', screen_factor_stat_2);
             el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             el.setAttrInit('stat', distribution_stat);
             new_elements.push(el);
+        }else{
+            for(let f = 0; f < num_factors; f++){
+                let stats = dimensions.length < 2 || dimensions[1].type == 'numeric' ? dataset.statistics : dataset[dimensions[0].name][dimensions[1].name][dimensions[1].factors[f]].statistics;
+                let overall_stats = dataset.statistics;
+                let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
+                let stat = distribution_stat;
+                let factor_stat = stats[statistic];
+                let overall_stat = overall_stats[statistic]
+                let screen_factor_stat = linearScale(factor_stat, [min, max], [factor_bounds.left, factor_bounds.right]);
+                let screen_overall_stat = linearScale(overall_stat, [min, max], [factor_bounds.left, factor_bounds.right]);
+                let el = new visElement('dist_stat_arrow' + f, 'arrow');
+                el.setAttrInit('x1', screen_factor_stat);
+                el.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+                el.setAttrInit('x2', screen_overall_stat);
+                el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+                el.setAttrInit('stat', distribution_stat);
+                new_elements.push(el);
+            }
         }
+
     }
     if(statistic == 'proportion'){
         for(let f = 0; f < num_factors; f++){
@@ -276,15 +343,15 @@ function statisticsFromDistribution(distribution_stat, dimensions, bounds, optio
 
     return new_elements;
 }
-function elementsFromDistribution(dataset, dimensions, bounds, options, min, max){
+function elementsFromDistribution(distribution, datasets, dimensions, bounds, options, min, max){
     let distribution_elements = [];
     let distribution_stat_elements = [];
-    for(let i = 0; i < dataset.length; i++){
+    for(let i = 0; i < distribution.length; i++){
         let el = new visElement(i, 'distribution');
         el.setAttr('stat', options.Statistic);
-        el.value = dataset[i];
+        el.value = distribution[i];
         distribution_elements.push(el);
-        let dist_stat_els = statisticsFromDistribution(dataset[i], dimensions, bounds, options, min, max, i);
+        let dist_stat_els = statisticsFromDistribution(distribution[i], datasets[i], dimensions, bounds, options, min, max, i);
         distribution_stat_elements.push(dist_stat_els);
     }
     return [distribution_elements, distribution_stat_elements];
@@ -292,15 +359,16 @@ function elementsFromDistribution(dataset, dimensions, bounds, options, min, max
 
 function placeElements(elements, dimensions, bounds, options, min, max){
     let num_factors = elements.factors.length;
+    let max_x = max == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : max;
+    let min_x = min == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 100000) : min;
     for(let f = 0; f < num_factors; f++){
         let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
         if(dimensions[0].type == 'numeric'){
             if(dimensions.length < 2 || dimensions[1].type == 'categoric'){
-                heap(elements.factors[f], factor_bounds, min, max);
+                heap(elements.factors[f], factor_bounds, min_x, max_x);
                 console.log(elements);
             }else if(dimensions[1].type == 'numeric'){
-                let max_x = max == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : max;
-                let min_x = min == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 100000) : min;
+
                 let max_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] > a ? c.attrs[dimensions[1].name] : a, -100000);
                 let min_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] < a ? c.attrs[dimensions[1].name] : a, 1000000);
                 for(let i = 0; i < elements.all.length; i++){

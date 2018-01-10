@@ -38,6 +38,19 @@ let defaultDrawFuncs = {
         ctx.stroke();
         ctx.restore();
     },
+    "arrow": function(e, ctx){
+        ctx.save();
+        let stroke_opacity = e.getAttr('stroke-opacity') == undefined ? 1 : e.getAttr('stroke-opacity');
+        let fill_opacity = e.getAttr('fill-opacity') == undefined ? 1 : e.getAttr('fill-opacity');
+        ctx.fillStyle = `rgba(0,0,255 , ${fill_opacity})`;
+        ctx.strokeStyle = `rgba(0,0,255 , ${stroke_opacity})`;
+        ctx.beginPath();
+        ctx.moveTo(e.getAttr('x1'), e.getAttr('y1'));
+        ctx.lineTo(e.getAttr('x2'), e.getAttr('y2'));
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+    },
     "distribution": function(e, ctx){
         let stroke_opacity = e.getAttr('stroke-opacity') == undefined ? 1 : e.getAttr('stroke-opacity');
         let fill_opacity = e.getAttr('fill-opacity') == undefined ? 1 : e.getAttr('fill-opacity');

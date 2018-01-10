@@ -35,13 +35,24 @@ config.modules =  {
         baseControls: null,
         generateSample:function(population, sampleSize){
             return null;
-        }
+        },
+        generateOptions: function(){return},
     },
     "Sampling Variation": {
         name: "Sampling Variation",
         baseHTML: generateModuleHTML,
         baseControls: generateFileControls,
         allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c'], ['n', 'n']],
+        generateOptions: function(dimensions){
+            if(dimensions.length < 1) return;
+            this.options = [];
+            let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(dimensions), default: config.initStatistics(dimensions)[0], validate: (v, o)=> o.values.includes(v)};
+            this.options.push(statistics);
+            if(dimensions[0].type == 'numeric'){
+                let sample_size = {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])};
+                this.options.push(sample_size);
+            }
+        },
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
                 {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
         generateSample:function(population_rows, sampleSize,){

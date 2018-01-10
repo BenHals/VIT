@@ -41,9 +41,7 @@ const vis = {
     },
     initPopulation: function(dataset){
         this.initPreview(dataset);
-        let stat_markers = statisticsFromElements(this.staticElements.datapoints, this.population_dimensions, this.areas["sec0display"], this.options);
-        this.staticElements.stat_markers = stat_markers;
-        this.staticElements.all = this.staticElements.all.concat(stat_markers);
+
         if(this.population_dimensions[0].type == 'numeric'){
             this.popMax = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] > a ? c.attrs[this.population_dimensions[0].name] : a, -100000);
             this.popMin = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] < a ? c.attrs[this.population_dimensions[0].name] : a, 100000);
@@ -53,10 +51,12 @@ const vis = {
             this.popMin = extent[0];
 
         }else{
-            this.popMax = 0;
-            this.popMin = 1;
+            this.popMax = 1;
+            this.popMin = 0;
         }
-
+        let stat_markers = statisticsFromElements(this.staticElements.datapoints, this.population_dimensions, this.areas["sec0display"], this.options, dataset, this.popMin, this.popMax);
+        this.staticElements.stat_markers = stat_markers;
+        this.staticElements.all = this.staticElements.all.concat(stat_markers);
         let axis = axisFromDataset(this.areas["sec0axis"], this.popMin, this.popMax);
         this.staticElements.pop_axis = axis;
         this.staticElements.all = this.staticElements.all.concat(axis);
@@ -74,6 +74,7 @@ const vis = {
         this.drawDynamic();
     },
     initPreview: function(dataset){
+        this.dataset = dataset;
         let statistic = this.options.Statistic;
         let datapoints = elementsFromDataset(dataset, this.population_dimensions, this.areas["sec0display"], this.options, statistic);
         placeElements(datapoints, this.population_dimensions, this.areas["sec0display"], this.options);
@@ -124,7 +125,7 @@ const vis = {
             area_axis = this.areas["sec2regRaxis"];
             vertical = true;
         }
-        let [datapoints, stats] = elementsFromDistribution(distribution, this.sample_dimensions, area_stat, this.options, min, max);
+        let [datapoints, stats] = elementsFromDistribution(distribution, this.samples, this.sample_dimensions, area_stat, this.options, min, max);
         placeDistribution(datapoints, area_heap, vertical, min, max);
         this.dynamicElements.distribution = {};
         this.dynamicElements.distribution.datapoints = datapoints;
@@ -157,7 +158,7 @@ const vis = {
         this.dynamicElements.section_labels = section_labels;
         this.dynamicElements.all = this.dynamicElements.all.concat(section_labels);
 
-        let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.popMin, this.popMax);
+        let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.dataset, this.popMin, this.popMax);
         this.dynamicElements.stat_markers = sample_stat_markers;
         this.dynamicElements.all = this.dynamicElements.all.concat(sample_stat_markers);
 
