@@ -47,20 +47,29 @@ const vis = {
         if(this.population_dimensions[0].type == 'numeric'){
             this.popMax = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] > a ? c.attrs[this.population_dimensions[0].name] : a, -100000);
             this.popMin = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] < a ? c.attrs[this.population_dimensions[0].name] : a, 100000);
+            let scale = d3.scaleLinear().domain([this.popMin, this.popMax]).nice();
+            let extent = scale.domain();
+            this.popMax = extent[1];
+            this.popMin = extent[0];
+
         }else{
             this.popMax = 0;
             this.popMin = 1;
         }
 
-
+        let axis = axisFromDataset(this.areas["sec0axis"], this.popMin, this.popMax);
+        this.staticElements.pop_axis = axis;
+        this.staticElements.all = this.staticElements.all.concat(axis);
         this.drawStatic();
         
     },
     initSamples: function(samples, distribution){
+        this.current_sample - 0;
         this.samples = samples;
         this.distribution = distribution;
+        this.dynamicElements.all = [];
         this.initDistribution(this.distribution);
-        this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample]);
+        this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample], true);
         
         this.drawDynamic();
     },
@@ -78,31 +87,41 @@ const vis = {
         let section_labels = labelsFromModule(this.module.labels, this.areas, this.options);
         this.staticElements.section_labels = section_labels;
         this.staticElements.all = this.staticElements.all.concat(section_labels);
+
+
         this.drawStatic();
     },
     initDistribution: function(distribution){
         let statistic = this.options.Statistic;
         let min = 0;
         let max = 1;
-        if(this.sample_dimensions[0].type == 'numeric'){
-            if(this.sample_dimensions.length < 2 || this.sample_dimensions[1].type == 'catetoric'){
-                max = this.popMax;
-                min = this.popMin;
-            }else{
-                max = distribution.reduce((a, c)=> c > a ? c : a, -100000);
-                min = distribution.reduce((a, c)=> c < a ? c : a, 100000);
-            }
-        }else{
+        if(statistic == "Slope"){
+            max = distribution.reduce((a, c)=> c > a ? c : a, -100000);
+            min = distribution.reduce((a, c)=> c < a ? c : a, 100000);
+            min =Math.min(min, 0);
+            max = Math.max(0, max);
+        }else if(statistic == 'proportion'){
+            max = 1;
+            min = 0; 
+        }else if(this.dimensions.length > 1 && this.dimensions[1].factors.length == 2){
+            max = 0 + (this.popMax - this.popMin)/2;
+            min = 0 - (this.popMax - this.popMin)/2; 
+        }else if(this.dimensions.length > 1 && this.dimensions[1].factors.length > 2){
+            max = 0 + (this.popMax - this.popMin);
+            min = 0; 
+        }else {
             max = this.popMax;
             min = this.popMin; 
         }
         
         let area_heap = this.areas["sec2display"];
         let area_stat = this.areas["sec1display"];
+        let area_axis = this.areas["sec2axis"];
         let vertical = false;
         if(this.sample_dimensions.length == 2 && this.sample_dimensions[0].type == 'numeric' && this.sample_dimensions[1].type == 'numeric'){
             area_heap = this.areas["sec2regRdisplay"];
             area_stat = this.areas["sec2regLdisplay"];
+            area_axis = this.areas["sec2regRaxis"];
             vertical = true;
         }
         let [datapoints, stats] = elementsFromDistribution(distribution, this.sample_dimensions, area_stat, this.options, min, max);
@@ -110,17 +129,25 @@ const vis = {
         this.dynamicElements.distribution = {};
         this.dynamicElements.distribution.datapoints = datapoints;
         let prev_all = this.dynamicElements.all || [];
-        this.dynamicElements.all = prev_all.concat(datapoints);
+        //this.dynamicElements.all = prev_all.concat(datapoints);
         this.dynamicElements.distribution.stats = stats;
+
+        let axis = axisFromDataset(area_axis, min, max, vertical);
+        this.staticElements.dist_axis = axis;
+        this.staticElements.all = this.staticElements.all.concat(axis);
+
         this.drawDynamic();
     },
-    initSample: function(dataset, stats){
+    initSample: function(dataset, stats, dist){
         let statistic = this.options.Statistic;
         let datapoints = elementsFromDataset(dataset, this.sample_dimensions, this.areas["sec1display"], this.options, statistic);
         placeElements(datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.popMin, this.popMax);
         this.dynamicElements.datapoints = datapoints;
-        this.dynamicElements.all = this.dynamicElements.distribution.datapoints.concat(datapoints.all);
-        this.dynamicElements.all = this.dynamicElements.all.concat(stats);
+        if(dist) {
+            this.initSampleDistElements(datapoints);
+        }else{
+            this.dynamicElements.all = this.dynamicElements.all.concat(datapoints.all);
+        }
 
         let factor_labels = labelsFromDimensions(this.sample_dimensions, this.areas["sec1display"], this.options);
         this.dynamicElements.factor_labels = factor_labels;
@@ -133,19 +160,50 @@ const vis = {
         let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.popMin, this.popMax);
         this.dynamicElements.stat_markers = sample_stat_markers;
         this.dynamicElements.all = this.dynamicElements.all.concat(sample_stat_markers);
+
+        let axis = axisFromDataset(this.areas["sec1axis"], this.popMin, this.popMax, false, 'sample_axis');
+        this.staticElements.sample_axis = axis;
+        this.staticElements.all = this.staticElements.all.filter((e)=>e.id != 'sample_axis').concat(this.staticElements.sample_axis);
+
         this.drawDynamic();
+    },
+    initSampleDistElements(datapoints){
+        this.dynamicElements.all = [].concat(datapoints.all);
+        for(let i = 0; i < this.dynamicElements.distribution.stats.length && i <= this.current_sample; i++){
+            this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.distribution.stats[i]);
+            this.dynamicElements.all = this.dynamicElements.all.concat([this.dynamicElements.distribution.datapoints[i]]);
+        }
     },
     initAnimation: function(reps, include_distribution){
         this.reps_left = reps - 1;
+        let speed = 1 + 0.75*reps;
         this.include_distribution = include_distribution;
         let animation = new Animation(`${reps}:${include_distribution}`);
-        this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample]);
-        this.current_sample = (this.current_sample + 1)%(this.samples.length);
-        let speed = 1 + 0.5*reps;
-        ma_createAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed);
-        this.animation = animation;
-        this.animation.start();
+        if(reps < 900){
+            if(this.current_sample >= 1000){
+                this.current_sample = 0;
+                this.dynamicElements.all = [];
+            }
+            this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample], true);
+            
+            ma_createAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample);
+            this.animation = animation;
+            this.animation.start();
+            this.current_sample = (this.current_sample + 1)%(this.samples.length);
+        }else{
+            this.dynamicElements.all = [];
+            for(let i = 0; i < this.dynamicElements.distribution.stats.length; i++){
+                this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.distribution.stats[i]);
+                this.dynamicElements.all = this.dynamicElements.all.concat([this.dynamicElements.distribution.datapoints[i]]);
+            }
+            ma_createDistributionAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, 1, this.current_sample);
+            this.animation = animation;
+            this.animation.start();
+            this.current_sample = 1000;
+            this.reps_left = 0;
+        }
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
+
         if(!this.loop_started) {
             this.loop(window.performance.now());
             this.loop_started = true;
@@ -169,6 +227,7 @@ const vis = {
         for(let i = 0; i < this.interpolators.length; i++){
             let interpolator = this.interpolators[i];
             let element = interpolator.el;
+
             let attr = interpolator.attr;
             let value = interpolator.value(stage_percentage);
             element.setAttr(attr, value);
@@ -179,6 +238,10 @@ const vis = {
         for(let i = 0; i < this.interpolators.length; i++){
             let interpolator = this.interpolators[i];
             let element = interpolator.el;
+            if(element.id == "dist_stat_lineline"){
+                console.log('test');
+            }
+            
             let attr = interpolator.attr;
             let value = interpolator.value(stage_percentage);
             element.setAttr(attr, value);
@@ -203,6 +266,9 @@ const vis = {
         clearCtx(ctx);
         for(let i = 0; i < this.dynamicElements.all.length; i++){
             let element = this.dynamicElements.all[i];
+            if(element.id == "factor0Mean"){
+                console.log('test');
+            }
             element.draw(ctx);
         }
     },
@@ -266,6 +332,11 @@ class visElement{
     }
     setAttr(attr, val){
         this.attrs[attr] = val;
+        
+    }
+    setAttrInit(attr, val){
+        this.attrs[attr] = val;
+        this.attrs['init_'+attr] = val;
     }
     draw(ctx){
         if(this.drawFunc){

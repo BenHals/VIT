@@ -67,14 +67,27 @@ function createPropBar(id, prop, y, x, all_list, factor_list, focus){
     }
     el = new visElement(id+'text', 'text');
     el.setAttr('text', x);
-    el.setAttr('y', y);
-    el.setAttr('x', x);
+    el.setAttrInit('y', y);
+    el.setAttrInit('x', x);
     all_list.push(el);
     if(x == focus){
         factor_list.unshift(el);
     }else{
         factor_list.push(el);
     }
+}
+
+function axisFromDataset(bounds, min, max, vertical, id){
+    let el = new visElement(id || 'axis', 'axis');
+    el.setAttrInit('x1', bounds.innerLeft);
+    el.setAttrInit('x2', bounds.innerRight);
+    el.setAttrInit('y1', bounds.innerTop);
+    el.setAttrInit('y2', bounds.innerBottom);
+    el.setAttrInit('min', min);
+    el.setAttrInit('max', max);
+    el.setAttr('vertical', vertical || false);
+    el.setAttrInit('step', tickStep(min, max, 10));
+    return el;
 }
 
 function labelsFromDimensions(dimensions, bounds, options){
@@ -85,8 +98,8 @@ function labelsFromDimensions(dimensions, bounds, options){
         let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, i)[1], bottom: bounds.split(num_factors, i+1)[1]};
         let el = new visElement(`factor${i}Label`, 'text');
         el.setAttr('text', label);
-        el.setAttr('x', factor_bounds.right);
-        el.setAttr('y', factor_bounds.top);
+        el.setAttrInit('x', factor_bounds.right);
+        el.setAttrInit('y', factor_bounds.top);
         el.setAttr('baseline', 'hanging');
         el.setAttr('align', 'end');
         return el;
@@ -100,8 +113,8 @@ function labelsFromModule(labels, areas, options){
         let factor_bounds = areas[`sec${i}title`];
         let el = new visElement(`section${i}Label`, 'text');
         el.setAttr('text', label);
-        el.setAttr('x', factor_bounds.left);
-        el.setAttr('y', factor_bounds.top);
+        el.setAttrInit('x', factor_bounds.left);
+        el.setAttrInit('y', factor_bounds.top);
         el.setAttr('baseline', 'hanging');
         el.setAttr('align', 'start');
         return el;
@@ -123,11 +136,11 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
             console.log(stat);
             let screen_stat = linearScale(stat, [min_x, max_x], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('factor'+f+statistic, 'line');
-            el.setAttr('x1', screen_stat);
-            el.setAttr('y1', factor_bounds.bottom);
-            el.setAttr('x2', screen_stat);
-            el.setAttr('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
-            el.setAttr('stat', stat);
+            el.setAttrInit('x1', screen_stat);
+            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('x2', screen_stat);
+            el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            el.setAttrInit('stat', stat);
             new_elements.push(el);
         }
     }
@@ -139,10 +152,10 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
             console.log(stat);
             let screen_stat = linearScale(stat, [0, 1], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('factor'+f+statistic, 'line');
-            el.setAttr('x1', screen_stat);
-            el.setAttr('y1', factor_bounds.bottom);
-            el.setAttr('x2', screen_stat);
-            el.setAttr('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            el.setAttrInit('x1', screen_stat);
+            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('x2', screen_stat);
+            el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             new_elements.push(el);
         }
     }
@@ -160,20 +173,20 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
             console.log(stat);
             let screen_stat = linearScale(stat, [min_x, max_x], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('factor'+f+statistic, 'line');
-            el.setAttr('x1', screen_stat);
-            el.setAttr('y1', factor_bounds.bottom);
-            el.setAttr('x2', screen_stat);
-            el.setAttr('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            el.setAttrInit('x1', screen_stat);
+            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('x2', screen_stat);
+            el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             new_elements.push(el);
         }
         let stat = elements.all.statistics[statistic];
         console.log(stat);
         let screen_stat = linearScale(stat, [min_x, max_x], [bounds.innerLeft, bounds.innerRight]);
         let el = new visElement('overall'+statistic, 'line');
-        el.setAttr('x1', screen_stat);
-        el.setAttr('y1', bounds.top);
-        el.setAttr('x2', screen_stat);
-        el.setAttr('y2', bounds.bottom);
+        el.setAttrInit('x1', screen_stat);
+        el.setAttrInit('y1', bounds.top);
+        el.setAttrInit('x2', screen_stat);
+        el.setAttrInit('y2', bounds.bottom);
         new_elements.push(el);
     }
     if(statistic == "Slope"){
@@ -188,10 +201,10 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
         let y1 = linearScale(min_x * slope + intercept, [min_y, max_y], [bounds.bottom, bounds.top]);
         let y2 = linearScale(max_x * slope + intercept, [min_y, max_y], [bounds.bottom, bounds.top]);
         let el = new visElement('overall'+statistic, 'line');
-        el.setAttr('x1', x1);
-        el.setAttr('y1', y1);
-        el.setAttr('x2', x2);
-        el.setAttr('y2', y2);
+        el.setAttrInit('x1', x1);
+        el.setAttrInit('y1', y1);
+        el.setAttrInit('x2', x2);
+        el.setAttrInit('y2', y2);
         new_elements.push(el);
 
     }
@@ -199,7 +212,7 @@ function statisticsFromElements(elements, dimensions, bounds, options, min, max)
     return new_elements;
 }
 
-function statisticsFromDistribution(distribution_stat, dimensions, bounds, options, min, max){
+function statisticsFromDistribution(distribution_stat, dimensions, bounds, options, min, max, s_i){
     let new_elements = [];
     let statistic = options.Statistic;
     let num_factors = dimensions.length > 1 ? dimensions[1].factors.length : 1;
@@ -209,27 +222,28 @@ function statisticsFromDistribution(distribution_stat, dimensions, bounds, optio
             let stat = distribution_stat;
             let screen_stat = linearScale(stat, [min, max], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('dist_stat_line' + f, 'line');
-            el.setAttr('x1', screen_stat);
-            el.setAttr('y1', factor_bounds.bottom);
-            el.setAttr('x2', screen_stat);
-            el.setAttr('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
-            el.setAttr('stat', distribution_stat);
+            el.setAttrInit('x1', screen_stat);
+            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('x2', screen_stat);
+            el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            el.setAttrInit('stat', distribution_stat);
             new_elements.push(el);
         }
     }
-    // if(statistic == 'proportion'){
-    //     for(let f = 0; f < num_factors; f++){
-    //         let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
-    //         let stat = distribution_stat;
-    //         let screen_stat = linearScale(stat, [0, 1], [factor_bounds.left, factor_bounds.right]);
-    //         let el = new visElement('dist_stat_line' + f, 'line');
-    //         el.setAttr('x1', screen_stat);
-    //         el.setAttr('y1', factor_bounds.bottom);
-    //         el.setAttr('x2', screen_stat);
-    //         el.setAttr('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
-    //         new_elements.push(el);
-    //     }
-    // }
+    if(statistic == 'proportion'){
+        for(let f = 0; f < num_factors; f++){
+            let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
+            let stat = distribution_stat;
+            let screen_stat = linearScale(stat, [0, 1], [factor_bounds.left, factor_bounds.right]);
+            let el = new visElement('dist_stat_line' + f, 'line');
+            el.setAttrInit('x1', screen_stat);
+            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('x2', screen_stat);
+            el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+            el.setAttrInit('stat', distribution_stat);
+            new_elements.push(el);
+        }
+    }
     // if(statistic == "Average Deviation" || statistic == "F Stat"){
     //     for(let f = 0; f < num_factors; f++){
     //         let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
@@ -247,13 +261,15 @@ function statisticsFromDistribution(distribution_stat, dimensions, bounds, optio
         let slope = distribution_stat;
         let x1 = bounds.innerLeft;
         let x2 = bounds.innerRight;
-        let y1 = linearScale(0, [Math.min(min, 0), Math.max(0, max)], [bounds.bottom, bounds.top]);
+        let y1 = linearScale(0, [min, max], [bounds.bottom, bounds.top]);
         let y2 = linearScale(slope, [min, max], [bounds.bottom, bounds.top]);
         let el = new visElement('dist_stat_lineline', 'line');
-        el.setAttr('x1', x1);
-        el.setAttr('y1', y1);
-        el.setAttr('x2', x2);
-        el.setAttr('y2', y2);
+        el.setAttrInit('x1', x1);
+        el.setAttrInit('y1', y1);
+        el.setAttrInit('x2', x2);
+        el.setAttrInit('y2', y2);
+        if(s_i == 4)console.log('stat', slope, min, max, bounds.bottom, bounds.top);
+        el.value = slope;
         new_elements.push(el);
 
     }
@@ -268,7 +284,7 @@ function elementsFromDistribution(dataset, dimensions, bounds, options, min, max
         el.setAttr('stat', options.Statistic);
         el.value = dataset[i];
         distribution_elements.push(el);
-        let dist_stat_els = statisticsFromDistribution(dataset[i], dimensions, bounds, options, min, max);
+        let dist_stat_els = statisticsFromDistribution(dataset[i], dimensions, bounds, options, min, max, i);
         distribution_stat_elements.push(dist_stat_els);
     }
     return [distribution_elements, distribution_stat_elements];
@@ -284,17 +300,15 @@ function placeElements(elements, dimensions, bounds, options, min, max){
                 console.log(elements);
             }else if(dimensions[1].type == 'numeric'){
                 let max_x = max == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : max;
-                let min_x = min == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : min;
+                let min_x = min == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 100000) : min;
                 let max_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] > a ? c.attrs[dimensions[1].name] : a, -100000);
                 let min_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] < a ? c.attrs[dimensions[1].name] : a, 1000000);
                 for(let i = 0; i < elements.all.length; i++){
                     let element = elements.all[i];
                     let screen_x = linearScale(element.attrs[dimensions[0].name], [min_x, max_x], [bounds.left, bounds.right] );
                     let screen_y = linearScale(element.attrs[dimensions[1].name], [min_y, max_y], [bounds.bottom, bounds.top] );
-                    element.setAttr('x', screen_x);
-                    element.setAttr('y', screen_y);
-                    element.setAttr('init_x', screen_x);
-                    element.setAttr('init_y', screen_y);
+                    element.setAttrInit('x', screen_x);
+                    element.setAttrInit('y', screen_y);
                 }
             }
         }else{
@@ -306,22 +320,16 @@ function placeElements(elements, dimensions, bounds, options, min, max){
             for(let e = 0; e < prop_items.length; e++){
                 let prop_rect = prop_items[e];
                 let width = linearScale(prop_rect.getAttr('prop'), [0, 1], [0, factor_bounds.right - factor_bounds.left]);
-                prop_rect.setAttr('y', mid_y - height/2);
-                prop_rect.setAttr('x', factor_bounds.left + sum);
-                prop_rect.setAttr('width', width);
-                prop_rect.setAttr('height', height);
-                prop_rect.setAttr('init_y', mid_y - height/2);
-                prop_rect.setAttr('init_x', factor_bounds.left + sum);
-                prop_rect.setAttr('init_width', width);
-                prop_rect.setAttr('init_height', height);
+                prop_rect.setAttrInit('y', mid_y - height/2);
+                prop_rect.setAttrInit('x', factor_bounds.left + sum);
+                prop_rect.setAttrInit('width', width);
+                prop_rect.setAttrInit('height', height);
 
                 let text_item = text_items[e];
-                text_item.setAttr('y', mid_y - height/2);
-                text_item.setAttr('x', factor_bounds.left + sum);
+                text_item.setAttrInit('y', mid_y - height/2);
+                text_item.setAttrInit('x', factor_bounds.left + sum);
                 text_item.setAttr('baseline', 'alphabetic');
                 text_item.setAttr('align', 'start');
-                text_item.setAttr('init_x', mid_y - height/2);
-                text_item.setAttr('init_y', factor_bounds.left + sum);
                 sum += width;
             }
             console.log(sum);
@@ -332,9 +340,9 @@ function placeElements(elements, dimensions, bounds, options, min, max){
 
 function placeDistribution(datapoints, area, vertical, min, max){
     if(! vertical){
-        heap(datapoints, area, min, max);
+        heap(datapoints, area, min, max, false, 5);
     }else{
-        heap(datapoints, area, min, max, true);
+        heap(datapoints, area, min, max, true, 5);
     }
     
 }
@@ -344,13 +352,15 @@ function linearScale(value, domain, range){
     return proportion * (range[1] - range[0]) + range[0];
 }
 
-function heap(elements, bounds, min, max, vertical){
+function heap(elements, bounds, min, max, vertical, base_margin){
+    
     let numBuckets = 300;
     let buckets = {};
     let tallestBucketHeight = 0;
     let max_v = max == undefined ? elements.reduce((a, c)=> c.value > a ? c.value : a, -100000) : max;
     let min_v = min == undefined ? elements.reduce((a, c)=> c.value < a ? c.value : a, 1000000) : min;
-    let screen_range = !vertical ? [bounds.left, bounds.right] : [bounds.bottom, bounds.top]
+    let screen_range = !vertical ? [bounds.left, bounds.right] : [bounds.bottom, bounds.top];
+    let screen_range_vert = !vertical ? [bounds.bottom, bounds.top] : [bounds.left, bounds.right];
     for(let d = 0; d < elements.length; d++){
         let datapoint = elements[d];
         let screen_x = linearScale(datapoint.value, [min_v, max_v], screen_range);
@@ -359,20 +369,18 @@ function heap(elements, bounds, min, max, vertical){
         buckets[bucket].push(datapoint);
         if(buckets[bucket].length > tallestBucketHeight) tallestBucketHeight = buckets[bucket].length;
     }
-    var spaceAvaliable = bounds.bottom - bounds.top;
+    var spaceAvaliable = Math.abs(screen_range_vert[0] - screen_range_vert[1]);
+    let base_margin_value = base_margin || Math.abs(bounds.bottom - bounds.top)/4
     var spacePerElement = Math.min(spaceAvaliable/tallestBucketHeight, 5);
     for(var b in buckets){
         for(var e in buckets[b]){
             if(!vertical){
-                buckets[b][e].setAttr('x', linearScale(buckets[b][e].value, [min_v, max_v], screen_range))
-                buckets[b][e].setAttr('y', bounds.bottom - spacePerElement * e)
-                buckets[b][e].setAttr('init_x', linearScale(buckets[b][e].value, [min_v, max_v], screen_range))
-                buckets[b][e].setAttr('init_y', bounds.bottom - spacePerElement * e)
+                buckets[b][e].setAttrInit('x', linearScale(buckets[b][e].value, [min_v, max_v], screen_range))
+                buckets[b][e].setAttrInit('y', bounds.bottom  - base_margin_value - spacePerElement * e)
             }else{
-                buckets[b][e].setAttr('y', linearScale(buckets[b][e].value, [min_v, max_v], screen_range))
-                buckets[b][e].setAttr('x', bounds.left + spacePerElement * e)
-                buckets[b][e].setAttr('init_y', linearScale(buckets[b][e].value, [min_v, max_v], screen_range))
-                buckets[b][e].setAttr('init_x', bounds.left + spacePerElement * e)
+                buckets[b][e].setAttrInit('y', linearScale(buckets[b][e].value, [min_v, max_v], screen_range))
+                buckets[b][e].setAttrInit('x', bounds.left + base_margin_value  + spacePerElement * e )
+                if(buckets[b][e].id == 4) console.log('point', buckets[b][e].value, min_v, max_v, screen_range[0], screen_range[1]);
             }
 
         }
@@ -398,15 +406,16 @@ function sectionAreas(overall_bounds){
     let ten = areas["sec2regL"].split(10, 1)[1];
     areas["sec2regL"+"title"] = new Area(sec_bounds.left, seventy, sec_bounds.top, ten);
     let ninty = areas["sec2regL"].split(10, 9)[1];
-    areas["sec2regL"+"display"] = new Area(sec_bounds.left, seventy, ten, ninty);
+    areas["sec2regL"+"display"] = new Area(sec_bounds.left, seventy, sec_bounds.top, sec_bounds.bottom);
     areas["sec2regL"+"axis"] = new Area(sec_bounds.left, seventy, ninty, sec_bounds.bottom);
 
     areas["sec2regR"] = new Area(seventy, sec_bounds.right, sec_bounds.top, sec_bounds.bottom);
-    ten = areas["sec2regR"].split(10, 1)[1];
-    areas["sec2regR"+"title"] = new Area(seventy, sec_bounds.right, sec_bounds.top, ten);
-    ninty = areas["sec2regR"].split(10, 9)[1];
-    areas["sec2regR"+"display"] = new Area(seventy, sec_bounds.right, ten, ninty);
-    areas["sec2regR"+"axis"] = new Area(seventy, sec_bounds.right, ninty, sec_bounds.bottom);
+    ten = areas["sec2regR"].split(10, 1)[0];
+    ninty = areas["sec2regR"].split(10, 9)[0];
+    areas["sec2regR"+"title"] = new Area(ninty, sec_bounds.right, sec_bounds.top, sec_bounds.bottom);
+    
+    areas["sec2regR"+"display"] = new Area(ten, ninty, sec_bounds.top, sec_bounds.bottom);
+    areas["sec2regR"+"axis"] = new Area(seventy, ten, sec_bounds.top, sec_bounds.bottom);
 
     return areas;
 }
@@ -432,4 +441,31 @@ class Area {
         let div_y = this.innerHeight / divisions;
         return [this.innerLeft + div_x * selected, this.innerTop + div_y * selected];
     }
+}
+
+// FROM d3-array
+// https://github.com/d3/d3-array/blob/master/src/ticks.js
+function tickIncrement(start, stop, count) {
+    var e10 = Math.sqrt(50),
+    e5 = Math.sqrt(10),
+    e2 = Math.sqrt(2);
+    var step = (stop - start) / Math.max(0, count),
+        power = Math.floor(Math.log(step) / Math.LN10),
+        error = step / Math.pow(10, power);
+    return power >= 0
+        ? (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1) * Math.pow(10, power)
+        : -Math.pow(10, -power) / (error >= e10 ? 10 : error >= e5 ? 5 : error >= e2 ? 2 : 1);
+}
+
+function tickStep(start, stop, count) {
+    var e10 = Math.sqrt(50),
+    e5 = Math.sqrt(10),
+    e2 = Math.sqrt(2);
+    var step0 = Math.abs(stop - start) / Math.max(0, count),
+        step1 = Math.pow(10, Math.floor(Math.log(step0) / Math.LN10)),
+        error = step0 / step1;
+    if (error >= e10) step1 *= 10;
+    else if (error >= e5) step1 *= 5;
+    else if (error >= e2) step1 *= 2;
+    return stop < start ? -step1 : step1;
 }

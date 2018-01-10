@@ -341,7 +341,14 @@ const model = {
         // }else{
             let sample = sample_generator(population_data, sample_size);
             let ds = createDataset(sample, this.dimensions, this.genStatistics(sample));
-            this.distribution.push(ds.statistics[stat]);
+            let dim = this.getSampleDimensions();
+            let stat_value = ds.statistics[stat];
+            if(dim.length > 1 && dim[1].factors.length == 2){
+                let f0_stat = ds[dim[0].name][dim[1].name][dim[1].factors[0]].statistics[stat];
+                let f1_stat = ds[dim[0].name][dim[1].name][dim[1].factors[1]].statistics[stat];
+                stat_value = f1_stat - f0_stat;
+            }
+            this.distribution.push(stat_value);
             this.samples.push(ds);
             controller.updateSampleProgress(i/1000);
         //}

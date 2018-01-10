@@ -219,6 +219,7 @@ const controller = {
     initAnimation: function(num_samples, include_distribution){
         console.log(num_samples +":"+include_distribution);
         vis.initAnimation(num_samples, include_distribution);
+        controller.unpause();
     }, 
     pause: function(){
         this.paused = true;
