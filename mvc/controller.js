@@ -14,7 +14,7 @@ const controller = {
         // New file, so want to clean up url.
         deleteFromUrl(['file','d0','d1','focus', 'statistic', 'ss']);
         model.getLocalFile(file);
-        this.fileParsed();
+        
     },
 
     urlFileSelected: async function(url){
@@ -59,6 +59,7 @@ const controller = {
     },
 
     fileParsed: function(){
+        model.resetAll();
         model.formatData().then((val)=>{
             let columns = model.getColumnNamesTypes();
             let selected_columns = model.getSelectedColumns();
@@ -69,6 +70,7 @@ const controller = {
     },
 
     columnSelected: function(e){
+        fc_clear_var_error();
         model.newColumnReset();
         // Reset URL
         deleteFromUrl(['d0', 'd1', 'focus']);
@@ -177,6 +179,8 @@ const controller = {
         let required_options = model.selected_module.options;
         let is_valid = true;
         for(let o in required_options){
+            let option = required_options[o];
+            if(option.is_valid == undefined) option.is_valid = option.validate(model.module_options[option.name], option);
             is_valid = is_valid && required_options[o].is_valid;
         }
         if(!is_valid) return false;
@@ -202,6 +206,7 @@ const controller = {
             ac_loadingDone();
             let ds = model.populationDataset();
             vis.initOptions(model.getOptions());
+            vis.initDimensions(model.dimensions, model.getSampleDimensions());
             vis.initPopulation(ds);
             vis.initSamples(model.samples, model.distribution);
         }
@@ -220,7 +225,11 @@ const controller = {
         console.log(num_samples +":"+include_distribution);
         vis.initAnimation(num_samples, include_distribution);
         controller.unpause();
-    }, 
+    },
+    showCI: function(){
+        vis.initCIAnimation();
+        controller.unpause();
+    },
     pause: function(){
         this.paused = true;
         vis.pause();

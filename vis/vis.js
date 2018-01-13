@@ -54,7 +54,15 @@ const vis = {
             this.popMax = 1;
             this.popMin = 0;
         }
-        let stat_markers = statisticsFromElements(this.staticElements.datapoints, this.population_dimensions, this.areas["sec0display"], this.options, dataset, this.popMin, this.popMax);
+        let stat_markers = statisticsFromElements(
+            this.staticElements.datapoints,
+            this.population_dimensions,
+            this.areas["sec0display"],
+            this.options,
+            dataset,
+            this.popMin,
+            this.popMax
+        );
         this.staticElements.stat_markers = stat_markers;
         this.staticElements.all = this.staticElements.all.concat(stat_markers);
         let axis = axisFromDataset(this.areas["sec0axis"], this.popMin, this.popMax);
@@ -77,7 +85,8 @@ const vis = {
         this.dataset = dataset;
         let statistic = this.options.Statistic;
         let datapoints = elementsFromDataset(dataset, this.population_dimensions, this.areas["sec0display"], this.options, statistic);
-        placeElements(datapoints, this.population_dimensions, this.areas["sec0display"], this.options);
+        
+        
         this.staticElements.datapoints = datapoints;
         this.staticElements.all = [].concat(datapoints.all);
 
@@ -89,7 +98,19 @@ const vis = {
         this.staticElements.section_labels = section_labels;
         this.staticElements.all = this.staticElements.all.concat(section_labels);
 
+        if(this.population_dimensions[0].type == 'numeric'){
+            this.popMax = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] > a ? c.attrs[this.population_dimensions[0].name] : a, -100000);
+            this.popMin = this.staticElements.datapoints.all.reduce((a, c)=> c.attrs[this.population_dimensions[0].name] < a ? c.attrs[this.population_dimensions[0].name] : a, 100000);
+            let scale = d3.scaleLinear().domain([this.popMin, this.popMax]).nice();
+            let extent = scale.domain();
+            this.popMax = extent[1];
+            this.popMin = extent[0];
 
+        }else{
+            this.popMax = 1;
+            this.popMin = 0;
+        }
+        placeElements(datapoints, this.population_dimensions, this.areas["sec0display"], this.options, this.popMin, this.popMax);
         this.drawStatic();
     },
     initDistribution: function(distribution){
@@ -101,13 +122,13 @@ const vis = {
             min = distribution.reduce((a, c)=> c < a ? c : a, 100000);
             min =Math.min(min, 0);
             max = Math.max(0, max);
-        }else if(statistic == 'proportion'){
+        }else if(this.sample_dimensions.length < 2 && statistic == 'proportion'){
             max = 1;
             min = 0; 
-        }else if(this.dimensions.length > 1 && this.dimensions[1].factors.length == 2){
+        }else if(this.sample_dimensions.length > 1 && this.sample_dimensions[1].factors.length == 2){
             max = 0 + (this.popMax - this.popMin)/2;
             min = 0 - (this.popMax - this.popMin)/2; 
-        }else if(this.dimensions.length > 1 && this.dimensions[1].factors.length > 2){
+        }else if(this.sample_dimensions.length > 1 && this.sample_dimensions[1].factors.length > 2){
             max = 0 + (this.popMax - this.popMin);
             min = 0; 
         }else {
@@ -125,13 +146,26 @@ const vis = {
             area_axis = this.areas["sec2regRaxis"];
             vertical = true;
         }
-        let [datapoints, stats] = elementsFromDistribution(distribution, this.samples, this.sample_dimensions, area_stat, this.options, min, max);
-        placeDistribution(datapoints, area_heap, vertical, min, max);
+        let [datapoints, stats, ci] = elementsFromDistribution(
+                distribution,
+                this.samples,
+                this.sample_dimensions,
+                area_stat, this.options,
+                this.popMin,
+                this.popMax,
+                min,
+                max,
+                this.module.inCI,
+                getPopulationStatistic(this.dataset, statistic, this.dimensions)
+            );
+        placeDistribution(datapoints, ci, area_heap, vertical, min, max);
         this.dynamicElements.distribution = {};
         this.dynamicElements.distribution.datapoints = datapoints;
         let prev_all = this.dynamicElements.all || [];
         //this.dynamicElements.all = prev_all.concat(datapoints);
         this.dynamicElements.distribution.stats = stats;
+        this.dynamicElements.distribution.ci = ci;
+        
 
         let axis = axisFromDataset(area_axis, min, max, vertical);
         this.staticElements.dist_axis = axis;
@@ -210,6 +244,21 @@ const vis = {
             this.loop_started = true;
         }
 
+    },
+    initCIAnimation(){
+        this.reps_left = 0;
+        let speed = 1;
+        this.include_distribution = false;
+        let animation = new Animation(`ci`);
+        ma_createCIAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample);
+        this.animation = animation;
+        this.animation.start();
+        [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
+        
+        if(!this.loop_started) {
+            this.loop(window.performance.now());
+            this.loop_started = true;
+        }
     },
     initInterpolators: function(interpolators){
         this.interpolators = interpolators;

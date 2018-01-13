@@ -12,8 +12,9 @@ const model = {
         this.selected_module = module;
         this.getDefaultOptions();
     },
-    getDefaultOptions: function(){
-        this.selected_module.generateOptions(this.dimensions);
+    getDefaultOptions: function(d){
+        this.selected_module.generateOptions(this.dimensions, d);
+        this.selected_module.generateInCi(this.dimensions);
         let options = this.selected_module.options;
         for(let i in options){
             let option = options[i];
@@ -117,10 +118,14 @@ const model = {
         let reader = new FileReader();
         reader.readAsText(file);
         this.dataSplit = {};
-        reader.onload = function(e){
-            let csv = e.target.result;
-            self.parseCSV(csv);
-        };
+        let p = new Promise((resolve, reject)=>{
+            reader.onload = function(e){
+                let csv = e.target.result;
+                self.parseCSV(csv);
+                resolve(csv);
+            };
+        }).then((data)=>{controller.fileParsed()});
+
     },
 
     getUrlFile: async function(url){
@@ -220,9 +225,31 @@ const model = {
 
     setDimensions: function(){
         this.dimensions = [...this.selected_columns];
+        this.setDimensionType(this.dimensions);
+        this.getDefaultOptions();
         let options = this.selected_module.options;
         //this.setStatisticsValues();
-        this.getDefaultOptions();
+        
+    },
+
+    setDimensionType: function(dimensions){
+        let stat_type = null;
+        let has_factors = false;
+        if(dimensions.length < 2){
+            stat_type = dimensions[0].type == 'numeric' ? 'single-mean' : 'single-prop';
+        }else if(dimensions.length == 2){
+            if(dimensions[1].type == 'numeric'){
+                stat_type = 'slope';
+            }else if(dimensions[1].factors.length == 2){
+                stat_type = dimensions[0].type == 'numeric' ? 'diff-mean' : 'diff-prop';
+                has_factors = true;
+            }else if(dimensions[1].factors.length > 2){
+                stat_type = dimensions[0].type == 'numeric' ? 'multi-mean' : 'multi-prop';
+                has_factors = true;
+            }
+        }
+        dimensions.stat_type = stat_type;
+        dimensions.has_factors = has_factors;
     },
 
     getSampleDimensions: function(){
@@ -231,8 +258,10 @@ const model = {
         }else{
             let num_groups = this.getOptions()['Groups'];
             let group_names = ["A", "B", "C", "D", "E"];
-            let new_dimension = {name: "synthetic", type: "categoric", factors: grop_names.slice(0, num_groups)};
-            return this.dimensions.concat([new_dimension]);
+            let new_dimension = {name: "synthetic", type: "categoric", factors: group_names.slice(0, num_groups)};
+            let s_dimension = this.dimensions.concat([new_dimension]);
+            this.setDimensionType(s_dimension);
+            return s_dimension;
         }
     },
 
@@ -275,39 +304,48 @@ const model = {
 
     populationDataset: function(){
         this.cleanData();
-        this.populationDS = createDataset(this.cleaned_data, this.dimensions, this.genStatistics(this.cleaned_data));
+        let stat = this.genStatistics(this.cleaned_data, this.dimensions);
+        this.populationDS = createDataset(this.cleaned_data, this.dimensions, stat);
+        // want to sort factors in terms of statistic
+        if(this.dimensions.has_factors && this.dimensions[0].type == 'numeric'){
+            let factors = this.populationDS[this.dimensions[0].name][this.dimensions[1].name];
+            this.dimensions[1].factors.sort((a, b)=> {
+                return factors[a].statistics["Mean"] - factors[b].statistics["Mean"];
+            });
+        }
         return this.populationDS;
     },
 
     getPopulationSize: function(){
+        if(!this.populationDS) return this.parsedData.length;
         return this.populationDS.all.length;
     },
 
-    genStatistics: function(cleaned_data){
+    genStatistics: function(cleaned_data, dimensions){
         let generator = {overall: [], // Statistics across all datapoints, I.E mean of everything
             fac1: [], // Statistics for each category of factor 1
             fac2: [], // Statistics for each category of factor 2
             both: []}; // Statistics for each combination of fac1, fac 2.
-        if(this.dimensions[0].type == 'numeric'){
-            generator.overall.push(meanGen('Mean', this.dimensions[0].name));
-            generator.fac2.push(meanGen('Mean', this.dimensions[0].name));
-            generator.both.push(meanGen('Mean', this.dimensions[0].name));
-            generator.overall.push(medianGen('Median', this.dimensions[0].name));
-            generator.fac2.push(medianGen('Median', this.dimensions[0].name));
-            generator.both.push(medianGen('Median', this.dimensions[0].name));
-            if(this.dimensions.length > 1){
-                generator.overall.push(avDev('Average Deviation', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, meanGen('', this.dimensions[0].name)[1]));
-                generator.overall.push(fStat('F Stat', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, meanGen('', this.dimensions[0].name)[1]));
-                generator.overall.push(slopeGen('Slope', this.dimensions[0].name, this.dimensions[1].name));
-                generator.overall.push(interceptGen('Intercept', this.dimensions[0].name, this.dimensions[1].name));
+        if(dimensions[0].type == 'numeric'){
+            generator.overall.push(meanGen('Mean', dimensions[0].name));
+            generator.fac2.push(meanGen('Mean', dimensions[0].name));
+            generator.both.push(meanGen('Mean', dimensions[0].name));
+            generator.overall.push(medianGen('Median', dimensions[0].name));
+            generator.fac2.push(medianGen('Median', dimensions[0].name));
+            generator.both.push(medianGen('Median', dimensions[0].name));
+            if(dimensions.length > 1){
+                generator.overall.push(avDev('Average Deviation', dimensions[0].name, dimensions[1].name, dimensions[1].factors, meanGen('', dimensions[0].name)[1]));
+                generator.overall.push(fStat('F Stat', dimensions[0].name, dimensions[1].name, dimensions[1].factors, meanGen('', dimensions[0].name)[1]));
+                generator.overall.push(slopeGen('Slope', dimensions[0].name, dimensions[1].name));
+                generator.overall.push(interceptGen('Intercept', dimensions[0].name, dimensions[1].name));
             }
 
         }else{
-            if(this.dimensions.length > 1) generator.fac2.push(propGen('proportion', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length));
-            generator.overall.push(propGen('proportion', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length));
-            if(this.dimensions.length > 1){
-                generator.overall.push(avDev('Average Deviation', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, propGen('', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length)[1] ));
-                generator.overall.push(fStat('F Stat', this.dimensions[0].name, this.dimensions[1].name, this.dimensions[1].factors, propGen('', this.dimensions[0].name, this.dimensions[0].focus, cleaned_data.length)[1]));
+            if(dimensions.length > 1) generator.fac2.push(propGen('proportion', dimensions[0].name, dimensions[0].focus, cleaned_data.length));
+            generator.overall.push(propGen('proportion', dimensions[0].name, dimensions[0].focus, cleaned_data.length));
+            if(dimensions.length > 1){
+                generator.overall.push(avDev('Average Deviation', dimensions[0].name, dimensions[1].name, dimensions[1].factors, propGen('', dimensions[0].name, dimensions[0].focus, cleaned_data.length)[1] ));
+                generator.overall.push(fStat('F Stat', dimensions[0].name, dimensions[1].name, dimensions[1].factors, propGen('', dimensions[0].name, dimensions[0].focus, cleaned_data.length)[1]));
             }
 
         }
@@ -342,7 +380,7 @@ const model = {
 
         // }else{
             let sample = sample_generator(population_data, sample_size);
-            let ds = createDataset(sample, this.dimensions, this.genStatistics(sample));
+            let ds = createDataset(sample, this.getSampleDimensions(), this.genStatistics(sample, this.getSampleDimensions()));
             let dim = this.getSampleDimensions();
             let stat_value = ds.statistics[stat];
             if(dim.length > 1 && dim[1].factors.length == 2){
@@ -354,6 +392,22 @@ const model = {
             this.samples.push(ds);
             controller.updateSampleProgress(i/1000);
         //}
+    },
+
+    resetAll: function(){
+        this.samples = null;
+        this.dimensions = null;
+        this.selected_columns = new Set();
+        this.populationDS = null;
+        this.module_options = [];
     }
 
+}
+
+function getYFactors(dimensions){
+    return dimensions.length < 2 || dimensions[1].type == 'numeric' ? [""] : dimensions[1].factors;
+}
+
+function getYFactorName(dimensions){
+    return dimensions.length < 2 || dimensions[1].type == 'numeric' ? "" : dimensions[1].name;
 }

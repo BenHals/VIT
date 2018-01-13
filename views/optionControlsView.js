@@ -83,6 +83,7 @@ function oc_validateNumber(name, e){
 function oc_populateOptions(required_options){
     for(let o = 0; o < required_options.length; o++){
         var option = required_options[o];
+        if(option.hide_option) continue;
         let option_name = option.name;
         let current_value = model.getOptions()[option_name];
         let input = genOption(option_name, option, current_value);
@@ -119,4 +120,17 @@ function oc_valid(o, new_val){
     $(`#${id}Panel`).addClass('has-success');
     $(`#${id}Panel .glyphicon`).addClass('glyphicon-ok');
     o.is_valid = true;
+}
+function oc_refresh_option(name, option, value){
+    let id = `${name.replace(/\s+/g, '')}Option`;
+    let panel = $(`#${id}Panel`);
+    let index = $("#options").children().index()
+    panel.remove();
+    if(index == 0){
+        $(`#options`).prepend(genOption(name, option, value));
+    }else{
+        $(`#options>div:eq(${index-1})`).after(genOption(name, option, value));
+    }
+    
+
 }

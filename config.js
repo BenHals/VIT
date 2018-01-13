@@ -37,6 +37,7 @@ config.modules =  {
             return null;
         },
         generateOptions: function(){return},
+        generateInCi: function(){return},
     },
     "Sampling Variation": {
         name: "Sampling Variation",
@@ -51,6 +52,25 @@ config.modules =  {
             if(dimensions[0].type == 'numeric'){
                 let sample_size = {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])};
                 this.options.push(sample_size);
+            }
+        },
+        inCI: function(distribution_sorted, dist_element, population_statistic){
+            let top_index = Math.floor(distribution_sorted.length * 0.95);
+            let middle_95 = distribution_sorted.slice(0, top_index);
+            return middle_95.includes(dist_element);
+        },
+        generateInCi: function(dimensions){
+            if(dimensions.length < 1) return;
+            if(dimensions.length > 1 && dimensions[1].factors.length > 2){
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    return dist_element > population_statistic;
+                }
+            }else{
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    let top_index = Math.floor(distribution_sorted.length * 0.95);
+                    let middle_95 = distribution_sorted.slice(0, top_index);
+                    return middle_95.includes(dist_element);
+                }
             }
         },
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
@@ -72,15 +92,45 @@ config.modules =  {
         baseControls: generateFileControls,
         allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c']],
         sampleSize:config.sampleSizeOptions['fullRange'],
-        generateSample:function(data, sampleSize, pop){
+        generateOptions: function(dimensions){
+            if(dimensions.length < 1) return;
+            this.options = [];
+            let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(dimensions), default: config.initStatistics(dimensions)[0], validate: (v, o)=> o.values.includes(v)};
+            this.options.push(statistics);
+            if(dimensions[0].type == 'numeric'){
+                let sample_size = {name: 'Sample Size', type: "number", range: [0, 10000], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])};
+                this.options.push(sample_size);
+            }
+        },
+        inCI: function(distribution_sorted, dist_element, population_statistic){
+            let top_index = Math.floor(distribution_sorted.length * 0.95);
+            let middle_95 = distribution_sorted.slice(0, top_index);
+            return middle_95.includes(dist_element);
+        },
+        generateInCi: function(dimensions){
+            if(dimensions.length < 1) return;
+            if(dimensions.length > 1 && dimensions[1].factors.length > 2){
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    return dist_element > population_statistic;
+                }
+            }else{
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    let top_index = Math.floor(distribution_sorted.length * 0.95);
+                    let middle_95 = distribution_sorted.slice(0, top_index);
+                    return middle_95.includes(dist_element);
+                }
+            }
+        },
+        options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
+                {name: 'Sample Size', type: "number", range: [0, 'any'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
+        generateSample:function(population_rows, sampleSize,){
             // Each sample should be sampleSize elements taken from the pop
             // with replacement (CAN take the same element twice).
-            var population = pop ? pop : data.allDataPoints;
             var sample = [];
             for(var i = 0; i < sampleSize; i++){
                 // Pick a random element
-                var popIndex = Math.floor(d3.randomUniform(population.length)());
-                sample = sample.concat(population.slice(popIndex,popIndex+1));
+                var popIndex = Math.floor(d3.randomUniform(population_rows.length)());
+                sample = sample.concat(population_rows.slice(popIndex,popIndex+1));
 
             }
             return sample;
@@ -95,17 +145,64 @@ config.modules =  {
         allowedVariables:[['n', null]],
         sampleSize:config.sampleSizeOptions['popSize'],
         sampleGroups:config.randVarGroups.slice(0, 2),
-        generateSample:function(data, sampleSize, pop){
+        generateOptions: function(dimensions, num){
+            if(dimensions.length < 1) return;
+            this.options = [];
+            let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(model.getSampleDimensions()), default: config.initStatistics(model.getSampleDimensions())[0], validate: (v, o)=> o.values.includes(v)};
+            this.options.push(statistics);
+            let groups = {name: 'Groups', type: "number", range: [0, 5], default: num || 2, validate: (v, o)=> {
+                let valid =  v > o.range[0] && v < o.range[1];
+                if(!valid) return false;
+                model.module_options['Groups'] = v;
+                let stat_values = config.initStatistics(model.getSampleDimensions());
+                for(let o = 0; o < model.selected_module.options.length; o++){
+                    let option = model.selected_module.options[o];
+                    if(option.name == 'Statistic'){
+                        option.values = stat_values;
+                        option.default = stat_values[0];
+                        model.module_options[option.name] = option.default;
+                        oc_refresh_option(option.name, option, option.default);
+                    }
+                }
+                return true;
+            }};
+            this.options.push(groups);
+            if(dimensions[0].type == 'numeric'){
+                let pop_size = model.getPopulationSize();
+                let sample_size = {name: 'Sample Size', type: "number", hide_option: true, range: [pop_size, pop_size], default: pop_size, validate: (v, o)=> (v >= o.range[0] && v <= o.range[1])};
+                this.options.push(sample_size);
+            }
+        },
+        inCI: function(distribution_sorted, dist_element, population_statistic){
+            return true;
+        },
+        generateInCi: function(dimensions){
+            if(dimensions.length < 1) return;
+            if(dimensions.length > 1 && dimensions[1].factors.length > 2){
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    return true;
+                }
+            }else{
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    return true;
+                }
+            }
+        },
+        options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
+                {name: 'Groups', type: "number", range: [0, 5], default: 2, validate: (v, o)=> (v > o.range[0] && v < o.range[1])},
+                {name: 'Sample Size', type: "number", hide_option:true, range: [0, 'any'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
+        generateSample:function(population_rows, sampleSize){
             // Sample Elements are the same as the population elements,
             // but with either A or B set as the group.
-            var population = pop ? pop : data.allDataPoints;
             var sample = [];
             for(var i = 0; i < sampleSize; i++){
                 // Pick a random element and copy it.
-                var popItem = $.extend(true, {}, population.slice(i,i+1)[0]);
-                var group = Math.random();
-                var group_index = Math.floor(group/(1/this.sampleGroups.length));
-                popItem.dimensionValues.push(this.sampleGroups[group_index]);
+                var popItem = $.extend(true, {}, population_rows.slice(i,i+1)[0]);
+                // var group = Math.random();
+                // var group_index = Math.floor(group/(1/this.sampleGroups.length));
+                let group = Math.floor(Math.random() * model.getOptions()['Groups']);
+                let dims = model.getSampleDimensions();
+                popItem[dims[1].name] = dims[1].factors[group];
                 sample.push(popItem);
 
             }
@@ -120,27 +217,58 @@ config.modules =  {
         baseControls: generateFileControls,
         allowedVariables:[['n', 'c'], ['c','c']],
         sampleSize:config.sampleSizeOptions['popSize'],
-        generateSample:function(data, sampleSize, pop){
+        generateOptions: function(dimensions){
+            if(dimensions.length < 1) return;
+            this.options = [];
+            let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(dimensions), default: config.initStatistics(dimensions)[0], validate: (v, o)=> o.values.includes(v)};
+            this.options.push(statistics);
+            if(dimensions[0].type == 'numeric'){
+                let pop_size = model.getPopulationSize();
+                let sample_size = {name: 'Sample Size', type: "number", hide_option: true, range: [pop_size, pop_size], default: pop_size, validate: (v, o)=> (v >= o.range[0] && v <= o.range[1])};
+                this.options.push(sample_size);
+            }
+        },
+        inCI: function(distribution_sorted, dist_element, population_statistic){
+            let top_index = Math.floor(distribution_sorted.length * 0.95);
+            let middle_95 = distribution_sorted.slice(0, top_index);
+            return middle_95.includes(dist_element);
+        },
+        generateInCi: function(dimensions){
+            if(dimensions.length < 1) return;
+            if(dimensions.length > 1 && dimensions[1].factors.length > 2){
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    return dist_element > population_statistic;
+                }
+            }else{
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    let top_index = Math.floor(distribution_sorted.length * 0.95);
+                    let middle_95 = distribution_sorted.slice(0, top_index);
+                    return middle_95.includes(dist_element);
+                }
+            }
+        },
+        options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
+                {name: 'Sample Size', type: "number", range: [0, 'any'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
+        generateSample:function(population_rows, sampleSize,){
             // Sample Elements are the same as the population elements,
             // but with the second dimension randomised, keeping the number of elements in 
             // each the same.
-            var population = pop ? pop : data.allDataPoints;
             var sample = [];
-            var categories = state.prunedData.dimensions[1].categories;
+            var categories = model.dimensions[1].factors;
             // Get the number of elements in each category
             var newCategories = [];
             for(var c in categories){
                 var category = categories[c];
-                var numInCategory = population.filter(function(element){return element.dimensionValues[1] == category}).length;
+                var numInCategory = population_rows.filter((e)=>e[model.dimensions[1].name] == category).length;
                 newCategories = newCategories.concat(Array(numInCategory).fill(c));
             }
             d3.shuffle(newCategories);
             for(var i = 0; i < sampleSize; i++){
                 // Pick a random element and copy it.
-                var popItem = $.extend(true, {}, population.slice(i,i+1)[0]);
+                var popItem = $.extend(true, {}, population_rows.slice(i,i+1)[0]);
                 
                 var group = newCategories[i];
-                popItem.dimensionValues[1] = categories[group];
+                popItem[model.dimensions[1].name] = categories[group];
                 sample.push(popItem);
 
             }

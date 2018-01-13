@@ -120,7 +120,11 @@ return `
             <select id="variableSelect" class="panel-body selectpicker" multiple='multiple'>
             </select>
             </div>
+            <div id="var-error" class="alert alert-danger" style="display:none;">
+                <strong>Success!</strong> You should <a href="#" class="alert-link">read this message</a>.
+            </div>
 
+          
             <div id="focusPanel" class="panel panel-default invisible">
             <div id="focusSelectHeader" class="panel-heading">
                 <h3 class="panel-title">Category to focus on</h3>
@@ -212,6 +216,7 @@ async function populateExampleFiles(){
     let example_files = await model.getExampleFileNames();
     let example_files_html = generateExampleFilesHTML(example_files);
     $("#presetDropdown").html(example_files_html);
+    $('#var-error').hide();
 }
 
 function fc_populateColumnSelect(columns, selected){
@@ -246,13 +251,19 @@ function fc_formatError(err){
 }
 
 function fc_tooManyVariables(err){
-    alert("too many columns");
+    $('#var-error').text("Too many columns selected");
+    $('#var-error').show();
 }
 
 function fc_wrongModule(err){
-    alert("Wrong column types for module");
+    $('#var-error').text("Wrong column types for module");
+    $('#var-error').show();
 }
 
 function fc_showContinue(){
     $('#sampleButton').show();
+}
+
+function fc_clear_var_error(){
+    $('#var-error').hide();
 }

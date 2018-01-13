@@ -23,7 +23,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
     if(sample_dimensions.length > 1 && sample_dimensions[1].factors.length == 2){
         dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index);
     }else{
-        dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index);
+        dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
     }
     
     animation.addStage(stage);
@@ -42,6 +42,7 @@ function point_fade_stage(static_elements, dynamic_elements, stage, sample_index
         stage.setTransition(element, 'y', pop_element.getAttr('init_y'), pop_element.getAttr('init_y'), 0, 1);
         stage.setTransition(element, 'fill-opacity', 0, 1, delay*i, delay*(i+1));
         stage.setTransition(element, 'stroke-opacity', 0, 1, delay*i, delay*(i+1));
+        stage.setTransition(element, 'selected', 0, 1, delay*i, delay*(i+1));
     }
     for(let i = 0; i < static_elements.datapoints.all.length; i++){
         let element = static_elements.datapoints.all[i];
@@ -111,13 +112,20 @@ function point_drop_stage(static_elements, dynamic_elements, stage){
     }
 }
 
-function dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index){
+function dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index, numeric){
     let stat_marker = dynamic_elements.stat_markers[dynamic_elements.stat_markers.length - 1];
     let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
     stage.setTransition(stat_marker, 'y1', stat_marker.getAttr('init_y1'), dist_elem.getAttr('init_y'), 0, 1);
     stage.setTransition(stat_marker, 'y2', stat_marker.getAttr('init_y2'), dist_elem.getAttr('init_y'), 0, 1);
+    stage.setTransition(stat_marker, 'selected', 0, 1, 0, 0);
     stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.9, 1);
     stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.9, 1);
+    if(numeric) {
+        for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
+            let element = dynamic_elements.datapoints.all[i];
+            stage.setTransition(element, 'selected', 1, 0, 0, 0);
+        }
+    }
 }
 function dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index){
     let stat_marker = dynamic_elements.stat_markers[dynamic_elements.stat_markers.length - 1];
@@ -170,5 +178,38 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
         stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 0);
         animation.addStage(stage);
     }
+    return animation;
+}
+
+function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index){
+    stage = new animStage('dist', animation.name, 1000);
+    stage.setFunc(function(){
+        vis.dynamicElements.all = [];
+        for(let i = 0; i < vis.dynamicElements.distribution.stats.length; i++){
+            //vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.stats[i]);
+            vis.dynamicElements.all = vis.dynamicElements.all.concat([vis.dynamicElements.distribution.datapoints[i]]);
+        }
+        vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.ci);
+    });
+    for(let i = 0; i < dynamic_elements.distribution.datapoints.length; i++){
+        let dist_datapoint = dynamic_elements.distribution.datapoints[i];
+        let opacity = dist_datapoint.getAttr('in_ci') ? 1 : 0.2;
+        stage.setTransition(dist_datapoint, 'stroke-opacity', 1, opacity, 0, 1);
+        stage.setTransition(dist_datapoint, 'fill-opacity', 1, opacity, 0, 1);
+    }
+    for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+        let dist_datapoint = dynamic_elements.distribution.ci[i];
+        stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 0, 0, 1);
+        stage.setTransition(dist_datapoint, 'fill-opacity', 0, 0, 0, 1);
+    }
+    animation.addStage(stage);
+
+    stage = new animStage('dist', animation.name, 1000);
+    for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+        let dist_datapoint = dynamic_elements.distribution.ci[i];
+        stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
+        stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 1);
+    }
+    animation.addStage(stage);
     return animation;
 }

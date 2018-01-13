@@ -97,7 +97,13 @@ function runStatGens(datapoints, functions){
 }
 
 function meanGen(stat_name, dim_name){
-    return [stat_name, function(dp){return dp.length > 0 ? dp.reduce((a, c)=>{return a+c[dim_name]}, 0) / dp.length : 0}];
+    return [stat_name, function(dp){
+        dp = dp || [];
+        if(dp.length < 1) return 0;
+        let sum = dp.reduce((a, c)=>{return a+parseFloat(c[dim_name]) || 0}, 0);
+        let avg = sum / dp.length;
+        return isNaN(avg) ? 0 : avg;
+    }];
 }
 function medianGen(stat_name, dim_name){
     return [stat_name, function(dp){
@@ -114,7 +120,7 @@ function medianGen(stat_name, dim_name){
     }];
 }
 function propGen(stat_name, dim_name, focus, total){
-    return [stat_name, function(dp){return dp.reduce((a, c) => c[dim_name] == focus ? a + 1 : a, 0) / dp.length}];
+    return [stat_name, function(dp){return (dp && dp.length > 1) ? dp.reduce((a, c) => c[dim_name] == focus ? a + 1 : a, 0) / dp.length : 0}];
 }
 
 function avDev(stat_name, dim_name, dim_name2, factors, mid_stat){
@@ -122,8 +128,13 @@ function avDev(stat_name, dim_name, dim_name2, factors, mid_stat){
         let mean = mid_stat(dp);
         let avg = 0;
         for(let f = 0; f < factors.length; f++){
+            let set_of_factors = dp.filter((e)=>e[dim_name2] == factors[f]);
+            let test = mid_stat(set_of_factors);
+            if(isNaN(test)){
+                test = mid_stat(set_of_factors);
+            }
             let factor_mean = mid_stat(dp.filter((e)=>e[dim_name2] == factors[f]));
-            avg += Math.abs(factor_mean);
+            avg += Math.abs( mean - factor_mean);
         }
         return avg / factors.length;
     }];

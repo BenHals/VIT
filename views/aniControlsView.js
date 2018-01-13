@@ -280,7 +280,7 @@ function ac_readNumSamples(input_elements){
 }
 
 function ac_showCI(){
-
+  controller.showCI();
 }
 
 $(document).on('input', '#visAnimProgress', function(e){
