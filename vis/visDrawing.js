@@ -102,9 +102,9 @@ let defaultDrawFuncs = {
     },
     "distribution": function(e, ctx){
         let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#1C3F95';
-        if(!(e.getAttr('in_ci'))){
-            backup_color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
-        }
+        // if(!(e.getAttr('in_ci'))){
+        //     backup_color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
+        // }
         let [stroke_color, fill_color] = elementColor(e, ctx, backup_color, backup_color);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
