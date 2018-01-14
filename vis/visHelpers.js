@@ -31,20 +31,38 @@ function elementsFromDataset(dataset, dimensions, bounds, options){
                 let y_factor = dimensions[1].factors[i];
                 let y_factor_ds = dataset[dimensions[1].name]["own"+y_factor];
                 let y_factor_prop = y_factor_ds.statistics.proportion;
+                let y_items = y_factor_ds.all.length;
                 for(let n = 0; n < 2; n++){
                     let x_factor = n == 0 ? dimensions[0].focus : dimensions[0].factors.length == 2 ? dimensions[0].factors[1 - dimensions[0].factors.indexOf(dimensions[0].focus)] : "Other";
                     let actual_prop = x_factor == dimensions[0].focus ? y_factor_prop : (1-y_factor_prop);
-                    createPropBar(parseInt(i) * parseInt(n) + parseInt(n), actual_prop, y_factor, x_factor, elements.all, elements.factors[dimensions[1].factors.indexOf(y_factor)], dimensions[0].focus);
+                    let total_items = actual_prop * y_items;
+                    createPropBar(parseInt(i) * parseInt(n) + parseInt(n),
+                    actual_prop,
+                    y_factor,
+                    x_factor,
+                    elements.all,
+                    elements.factors[dimensions[1].factors.indexOf(y_factor)],
+                    dimensions[0].focus,
+                    total_items);
                     
                 }
                 elements.factors[dimensions[1].factors.indexOf(y_factor)].statistics = y_factor_ds.statistics;
             }
         }else{
             let y_factor_prop = dataset.statistics.proportion;
+            let y_items = dataset.all.length;
             for(let n = 0; n < 2; n++){
                 let x_factor = n == 0 ? dimensions[0].focus : dimensions[0].factors.length == 2 ? dimensions[0].factors[1 - dimensions[0].factors.indexOf(dimensions[0].focus)] : "Other";
                 let actual_prop = x_factor == dimensions[0].focus ? y_factor_prop : (1-y_factor_prop);
-                createPropBar(parseInt(n), actual_prop, '', x_factor, elements.all, elements.factors[0], dimensions[0].focus);
+                let total_items = actual_prop * y_items;
+                createPropBar(parseInt(n),
+                actual_prop,
+                '',
+                x_factor,
+                elements.all,
+                elements.factors[0],
+                dimensions[0].focus,
+                total_items);
             }
             elements.factors[0].statistics = dataset.statistics;
         }
@@ -54,29 +72,31 @@ function elementsFromDataset(dataset, dimensions, bounds, options){
 
 }
 
-function createPropBar(id, prop, y, x, all_list, factor_list, focus){
+function createPropBar(id, prop, y, x, all_list, factor_list, focus, total_items){
     let el = new visElement(id, 'prop');
     el.setAttr('prop', prop);
     el.setAttr('factorY', y);
     el.setAttr('factorX', x);
-    el.setAttr('selected', x == focus);
-    all_list.push(el);
-    if(x == focus){
-        factor_list.unshift(el);
-    }else{
-        factor_list.push(el);
-    }
-    el = new visElement(id+'text', 'prop-text');
     el.setAttr('text', x);
-    el.setAttrInit('y', y);
-    el.setAttrInit('x', x);
     el.setAttr('selected', x == focus);
+    el.setAttrInit('items', total_items);
     all_list.push(el);
     if(x == focus){
         factor_list.unshift(el);
     }else{
         factor_list.push(el);
     }
+    // el = new visElement(id+'text', 'prop-text');
+    // el.setAttr('text', x);
+    // el.setAttrInit('y', y);
+    // el.setAttrInit('x', x);
+    // el.setAttr('selected', x == focus);
+    // all_list.push(el);
+    // if(x == focus){
+    //     factor_list.unshift(el);
+    // }else{
+    //     factor_list.push(el);
+    // }
 }
 
 function axisFromDataset(bounds, min, max, vertical, id){
@@ -155,9 +175,9 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
             let screen_factor_stat_2 = linearScale(factor_stat_2, [min, max], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('dist_stat_arrow_diff', 'arrow');
             el.setAttrInit('x1', screen_factor_stat_1);
-            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('y1', factor_bounds.bottom + (factor_bounds.bottom - factor_bounds.top)/5);
             el.setAttrInit('x2', screen_factor_stat_2);
-            el.setAttrInit('y2', factor_bounds.bottom);
+            el.setAttrInit('y2', factor_bounds.bottom + (factor_bounds.bottom - factor_bounds.top)/5);
             new_elements.push(el);
         }
     }
@@ -185,9 +205,9 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
             let screen_factor_stat_2 = linearScale(factor_stat_2, [min, max], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('dist_stat_arrow_diff', 'arrow');
             el.setAttrInit('x1', screen_factor_stat_1);
-            el.setAttrInit('y1', factor_bounds.bottom);
+            el.setAttrInit('y1', factor_bounds.bottom + (factor_bounds.bottom - factor_bounds.top)/10);
             el.setAttrInit('x2', screen_factor_stat_2);
-            el.setAttrInit('y2', factor_bounds.bottom);
+            el.setAttrInit('y2', factor_bounds.bottom + (factor_bounds.bottom - factor_bounds.top)/10);
             new_elements.push(el);
         }
     }
@@ -376,9 +396,9 @@ function placeElements(elements, dimensions, bounds, options, min, max){
                 heap(elements.factors[f], factor_bounds, min_x, max_x);
                 console.log(elements);
             }else if(dimensions[1].type == 'numeric'){
-
-                let max_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] > a ? c.attrs[dimensions[1].name] : a, -100000);
-                let min_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] < a ? c.attrs[dimensions[1].name] : a, 1000000);
+                let pop_elements = vis.staticElements || elements;
+                let max_y = pop_elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] > a ? c.attrs[dimensions[1].name] : a, -100000);
+                let min_y = pop_elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] < a ? c.attrs[dimensions[1].name] : a, 1000000);
                 for(let i = 0; i < elements.all.length; i++){
                     let element = elements.all[i];
                     let screen_x = linearScale(element.attrs[dimensions[0].name], [min_x, max_x], [bounds.left, bounds.right] );
@@ -401,11 +421,11 @@ function placeElements(elements, dimensions, bounds, options, min, max){
                 prop_rect.setAttrInit('width', width);
                 prop_rect.setAttrInit('height', height);
 
-                let text_item = text_items[e];
-                text_item.setAttrInit('y', mid_y - height/2);
-                text_item.setAttrInit('x', factor_bounds.left + sum);
-                text_item.setAttr('baseline', 'alphabetic');
-                text_item.setAttr('align', 'start');
+                // let text_item = text_items[e];
+                // text_item.setAttrInit('y', mid_y - height/2);
+                // text_item.setAttrInit('x', factor_bounds.left + sum);
+                // text_item.setAttr('baseline', 'alphabetic');
+                // text_item.setAttr('align', 'start');
                 sum += width;
             }
             console.log(sum);
@@ -432,7 +452,7 @@ function placeDistribution(datapoints, ci, area, vertical, min, max){
         if(dp.getAttr('in_ci') == 0) continue;
         min_ci_screen_x = min_ci_screen_x == null || dp.getAttr('x') < min_ci_screen_x ? dp.getAttr('x') : min_ci_screen_x;
         max_ci_screen_x = max_ci_screen_x == null || dp.getAttr('x') > max_ci_screen_x ? dp.getAttr('x') : max_ci_screen_x;
-        min_ci_screen_y = min_ci_screen_y == null || dp.getAttr('x') < min_ci_screen_y ? dp.getAttr('x') : min_ci_screen_y;
+        min_ci_screen_y = min_ci_screen_y == null || dp.getAttr('y') < min_ci_screen_y ? dp.getAttr('y') : min_ci_screen_y;
         max_ci_screen_y = max_ci_screen_y == null || dp.getAttr('y') > max_ci_screen_y ? dp.getAttr('y') : max_ci_screen_y;
     }
     let [cross_bar, ci_min, ci_max] = ci;

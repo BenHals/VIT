@@ -13,7 +13,18 @@ let defaultDrawFuncs = {
         let [stroke_color, fill_color] = elementColor(e, ctx, backup_color, backup_color, 1);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
-        ctx.fillRect(e.attrs.x, e.attrs.y, e.attrs.width, e.attrs.height); 
+        ctx.fillRect(e.attrs.x, e.attrs.y, e.attrs.width, e.attrs.height);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        let font = Math.min(e.attrs.height, e.attrs.width);
+        ctx.font = font+'px sans-serif';
+        ctx.fillStyle = d3.color(fill_color).brighter(1.5);
+        ctx.strokeStyle = 'black';
+        ctx.fillText(Math.round(e.getAttr('items')), e.attrs.x +(e.attrs.width / 2), e.attrs.y + e.attrs.height/2);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.font = '15px sans-serif';
+        ctx.fillText(e.getAttr('text'), e.attrs.x + 1, e.attrs.y); 
     },
     "prop-text": function(e, ctx){
         let backup_color = Math.round(e.getAttr('selected')) ? '#7D1935' : '#4A96AD';

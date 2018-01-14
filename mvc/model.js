@@ -16,10 +16,10 @@ const model = {
         this.selected_module.generateOptions(this.dimensions, d);
         this.selected_module.generateInCi(this.dimensions);
         let options = this.selected_module.options;
-        let options_url = JSON.parse(getURLParameter(window.location.href, 'options'));
+        let options_url = JSON.parse(getURLParameter(window.location.href, 'options')) || {};
         for(let i in options){
             let option = options[i];
-            let url_value = options_url[option.name];
+            let url_value = option.name in options_url ? options_url[option.name] : null;
             
             this.module_options[option.name] = (url_value && option.validate(url_value, option)) ? url_value : option.default;
         }

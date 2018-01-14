@@ -49,10 +49,10 @@ config.modules =  {
             this.options = [];
             let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(dimensions), default: config.initStatistics(dimensions)[0], validate: (v, o)=> o.values.includes(v)};
             this.options.push(statistics);
-            if(dimensions[0].type == 'numeric'){
+            //if(dimensions[0].type == 'numeric'){
                 let sample_size = {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])};
                 this.options.push(sample_size);
-            }
+            //}
         },
         inCI: function(distribution_sorted, dist_element, population_statistic){
             let top_index = Math.floor(distribution_sorted.length * 0.95);

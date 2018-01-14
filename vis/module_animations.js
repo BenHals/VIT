@@ -1,9 +1,11 @@
-function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index){
+function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, include_distribution){
     let stage = null;
     if(pop_dimensions[0].type == 'numeric'){
         stage = new animStage('fade', animation.name, 5000/speed);
         point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
         animation.addStage(stage);
+
+        delayStage(animation, 1000/speed);
 
         stage = new animStage('drop', animation.name, 5000/speed);
         point_drop_stage(static_elements, dynamic_elements, stage);
@@ -16,19 +18,29 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
         
     }
     
-    if(sample_dimensions.length < 2 || sample_dimensions[1].factors.length < 2){
 
+    if(include_distribution){
+        delayStage(animation, 1000/speed);
+
+        stage = new animStage('drop', animation.name, 5000/speed);
+        if(sample_dimensions.length > 1 && sample_dimensions[1].factors.length == 2){
+            dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index);
+        }else if(sample_dimensions.length < 2){
+            dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
+        }else if(sample_dimensions.length > 1 && sample_dimensions[1].type == 'numeric'){
+            dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_index);
+        }
+        
+        animation.addStage(stage);
     }
-    stage = new animStage('drop', animation.name, 5000/speed);
-    if(sample_dimensions.length > 1 && sample_dimensions[1].factors.length == 2){
-        dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index);
-    }else{
-        dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
-    }
+
+
     
+}
+
+function delayStage(animation, delay){
+    let stage = new animStage('delay', animation.name, delay);
     animation.addStage(stage);
-
-    
 }
 
 function point_fade_stage(static_elements, dynamic_elements, stage, sample_index){
@@ -137,7 +149,18 @@ function dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_i
     stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.9, 1);
     stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.9, 1);
 }
-
+function dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_index){
+    let stat_marker = dynamic_elements.stat_markers[dynamic_elements.stat_markers.length - 1];
+    let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
+    let dist_line = dynamic_elements.distribution.stats[sample_index][0];
+    stage.setTransition(stat_marker, 'y1', stat_marker.getAttr('init_y1'), dist_line.getAttr('init_y1'), 0, 1);
+    stage.setTransition(stat_marker, 'y2', stat_marker.getAttr('init_y2'), dist_line.getAttr('init_y2'), 0, 1);
+    stage.setTransition(stat_marker, 'x1', stat_marker.getAttr('init_x1'), dist_line.getAttr('init_x1'), 0, 1);
+    stage.setTransition(stat_marker, 'x2', stat_marker.getAttr('init_x2'), dist_line.getAttr('init_x2'), 0, 1);
+    stage.setTransition(stat_marker, 'selected', 0, 1, 0, 0);
+    stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.9, 1);
+    stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.9, 1);
+}
 function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index){
     stage = new animStage('dist', animation.name, 10);
     for(let x = 0; x < 1000; x ++){
