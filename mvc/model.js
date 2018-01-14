@@ -16,9 +16,12 @@ const model = {
         this.selected_module.generateOptions(this.dimensions, d);
         this.selected_module.generateInCi(this.dimensions);
         let options = this.selected_module.options;
+        let options_url = JSON.parse(getURLParameter(window.location.href, 'options'));
         for(let i in options){
             let option = options[i];
-            this.module_options[option.name] = option.default;
+            let url_value = options_url[option.name];
+            
+            this.module_options[option.name] = (url_value && option.validate(url_value, option)) ? url_value : option.default;
         }
         //this.setStatisticsValues();
     },
@@ -31,7 +34,6 @@ const model = {
                 option.values = stat_values;
                 option.default = stat_values[0];
                 this.module_options[option.name] = option.default;
-                console.log(option);
             } 
         }
     },
@@ -84,7 +86,6 @@ const model = {
                 row[c.trim()] = config.NA.some((e)=>e==el) ? 0 : el.trim();
             }
         }
-        console.log(this.parsedData);
     },
 
     formatData: async function(){
@@ -275,8 +276,9 @@ const model = {
 
     getDimensionFocus: function(){
         let focus = [];
+        let url_focus = getURLParameter(window.location.href, 'focus');
         for(let d = 0; d < this.dimensions.length; d++){
-            focus.push(this.dimensions[d].focus || this.dimensions[d].factors[0]);
+            focus.push(this.dimensions[d].focus || url_focus || this.dimensions[d].factors[0]);
         }
         return focus;
     },

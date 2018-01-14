@@ -14,6 +14,7 @@ const controller = {
         // New file, so want to clean up url.
         deleteFromUrl(['file','d0','d1','focus', 'statistic', 'ss']);
         model.getLocalFile(file);
+        model.resetAll();
         
     },
 
@@ -39,6 +40,7 @@ const controller = {
             }
             updateUrl('file', "url:"+url);
             updateUrl('urlParams', paramString);
+            model.resetAll();
             self.fileParsed();
         }, (err) =>{
             fc_urlError(err);
@@ -52,6 +54,7 @@ const controller = {
         model.getExampleFile(filename).then((val)=>{
             // Save file details in url for reloading. Needs formatting.
             updateUrl('file', "preset:"+filename);
+            model.resetAll();
             self.fileParsed();
         }, (err) =>{
             fc_exampleError(err);
@@ -59,11 +62,10 @@ const controller = {
     },
 
     fileParsed: function(){
-        model.resetAll();
         model.formatData().then((val)=>{
             let columns = model.getColumnNamesTypes();
             let selected_columns = model.getSelectedColumns();
-            fc_populateColumnSelect(columns, selected_columns);
+            fc_populateColumnSelect(columns, selected_columns.map((e)=>e.name));
         }, (err) =>{
             fc_formatError(err);
         });
@@ -173,7 +175,16 @@ const controller = {
     },
 
     setOption: function(o, new_val){
+        // if(model.module_options[o.name] != new_val && o.validate(new_val, o)){
+        //     user_changed_options[o.name] = new_val;
+        //     console.log(user_changed_options);
+        //     updateUrl('options', JSON.stringify(user_changed_options));
+        // }
         model.setOption(o.name, new_val);
+        user_changed_options[o.name] = new_val;
+        console.log(user_changed_options);
+        updateUrl('options', JSON.stringify(user_changed_options));
+
     },
     takeSamples: async function() {
         let required_options = model.selected_module.options;
