@@ -1,9 +1,13 @@
 function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, include_distribution){
     let stage = null;
     if(pop_dimensions[0].type == 'numeric'){
-        stage = new animStage('fade', animation.name, 5000/speed);
-        point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
-        animation.addStage(stage);
+        if(module.name == 'Bootstrapping'){
+            bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sample_index, dynamic_elements, static_elements, 5000);
+        }else{
+            stage = new animStage('fade', animation.name, 5000/speed);
+            point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+            animation.addStage(stage);
+        }
 
         delayStage(animation, 1000/speed);
 
@@ -41,6 +45,53 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
 function delayStage(animation, delay){
     let stage = new animStage('delay', animation.name, delay);
     animation.addStage(stage);
+}
+function bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sample_index, dynamic_elements, static_elements, time){
+    let sample = vis.samples[sample_index];
+    let sample_length = sample.all.length;
+    let stage_duration = time / sample_length;
+    let stage = new animStage('b_fade', animation.name, stage_duration);
+    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index);
+    
+    let sample_permute = new Array(sample_length).fill(0).map((e, i) => i);
+    
+    d3.shuffle(sample_permute);
+
+    for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
+        let stat_marker = dynamic_elements.stat_markers[i];
+        stage.setTransition(stat_marker, 'stroke-opacity', 0, 0, 0, 1);
+    }
+    animation.addStage(stage);
+    for(let i = 0; i < sample_length; i++){
+        stage = new animStage('b_fade', animation.name, stage_duration);
+        stage.setFunc(()=>{
+            if(!dd_showing) dd_toggle();
+            dd_clearDatapoints({all: d3.permute(sample.all, sample_permute)}, pop_dimensions, sample_dimensions);
+            dd_updateSingleDatapoints({all: d3.permute(sample.all, sample_permute)}, pop_dimensions, sample_dimensions, i, false);
+        });
+        
+        let element = dynamic_elements.datapoints.all[sample_permute[i]];
+        let element_id = element.getAttr('id');
+        let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
+        //pop_elements.push(pop_element);
+        for(let n = 0; n < i; n++){
+            let element = dynamic_elements.datapoints.all[sample_permute[n]];
+            let element_id = element.getAttr('id');
+            let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
+            //pop_elements.push(pop_element);
+            stage.setTransition(element, 'y', pop_element.getAttr('init_y'), pop_element.getAttr('init_y'), 0, 1);
+            stage.setTransition(element, 'fill-opacity', 1, 1, 0, 1);
+            stage.setTransition(element, 'stroke-opacity', 1, 1, 0, 1);
+            stage.setTransition(element, 'selected', n == i - 1 ? 1 : 0, 0, 0, 1);
+        }
+        stage.setTransition(element, 'y', pop_element.getAttr('init_y'), pop_element.getAttr('init_y'), 0, 1);
+        stage.setTransition(element, 'fill-opacity', 0, 1, 0, 0);
+        stage.setTransition(element, 'stroke-opacity', 0, 1, 0, 1);
+        stage.setTransition(element, 'selected', 1, 1, 0, 1);
+        animation.addStage(stage);
+        delayStage(animation, stage_duration);
+    }
+
 }
 
 function point_fade_stage(static_elements, dynamic_elements, stage, sample_index){

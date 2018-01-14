@@ -184,6 +184,6 @@ function clearCtx(ctx){
     if(ctx){
         var canvas = $('#popCanvas');
         if(!ctx) return;
-        ctx.clearRect(0,0, canvas.attr("width"), canvas.attr("height"));
+        ctx.clearRect(0,0, canvas.attr("width")*2, canvas.attr("height"));
     }
 }

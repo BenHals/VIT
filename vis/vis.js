@@ -201,6 +201,7 @@ const vis = {
         this.staticElements.all = this.staticElements.all.filter((e)=>e.id != 'sample_axis').concat(this.staticElements.sample_axis);
 
         this.drawDynamic();
+        dd_updateDatapoints(dataset, this.population_dimensions, this.sample_dimensions);
     },
     initSampleDistElements(datapoints){
         this.dynamicElements.all = [].concat(datapoints.all);
@@ -363,6 +364,13 @@ const vis = {
     },
     unpause: function(){
         this.paused = false;
+    },
+    scale: function(scale_x){
+        if(!this.ctx) return;
+        this.ctx.scale(scale_x, 1);
+        this.dynamicCtx.scale(scale_x, 1);
+        this.drawStatic();
+        this.drawDynamic();
     }
 }
 

@@ -141,6 +141,8 @@
 }
 #dataDisplay td{
   text-align: center;
+  padding-top: 1px;
+  padding-bottom: 1px;
 }
 #popStats {
   display: block;
@@ -239,3 +241,4 @@ input[type="range"]::-webkit-slider-thumb {
     display: block;
     height: 33%;
   }
+

@@ -70,7 +70,9 @@ const controller = {
             fc_formatError(err);
         });
     },
+    ddToggle: function(toggle){
 
+    },
     columnSelected: function(e){
         fc_clear_var_error();
         model.newColumnReset();
@@ -142,7 +144,8 @@ const controller = {
         this.resizeVis(vis_space, $("#display").innerHeight());
     },
     resizeVis: function(width, height){
-        view.resizeCanvas();
+        let scale_x = view.resizeCanvas();
+        vis.scale(scale_x);
     },
     doneSetup: function(){
         let ds = model.populationDataset();
