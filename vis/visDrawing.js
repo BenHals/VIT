@@ -5,26 +5,55 @@ let defaultDrawFuncs = {
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
         let offset = 5;
-        ctx.fillRect(e.attrs.x - offset, e.attrs.y - offset, offset*2, offset * 2); 
-        ctx.strokeRect(e.attrs.x - offset, e.attrs.y - offset, offset*2, offset * 2);
+        ctx.translate(0.5, 0.5);
+        // ctx.fillRect(parseInt(e.attrs.x - offset),
+        //             parseInt(e.attrs.y - offset),
+        //             parseInt(offset*2),
+        //             parseInt(offset * 2)); 
+        // ctx.strokeRect(parseInt(e.attrs.x - offset),
+        //             parseInt(e.attrs.y - offset),
+        //             parseInt(offset*2),
+        //             parseInt(offset * 2));
+        ctx.beginPath();
+        ctx.arc(parseInt(e.attrs.x),
+                parseInt(e.attrs.y),
+                10,
+                0,
+                Math.PI * 2);
+        ctx.stroke();
+        ctx.fill();
+        ctx.translate(-0.5, -0.5);
     },
     "prop": function(e, ctx){
         let backup_color = Math.round(e.getAttr('selected')) ? '#7D1935' : '#4A96AD';
         let [stroke_color, fill_color] = elementColor(e, ctx, backup_color, backup_color, 1);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
-        ctx.fillRect(e.attrs.x, e.attrs.y, e.attrs.width, e.attrs.height);
+        ctx.translate(0.5, 0.5);
+        ctx.fillRect(parseInt(e.attrs.x),
+            parseInt(e.attrs.y),
+            parseInt(e.attrs.width),
+            parseInt(e.attrs.height));
+        ctx.strokeRect(parseInt(e.attrs.x),
+            parseInt(e.attrs.y),
+            parseInt(e.attrs.width),
+            parseInt(e.attrs.height));
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         let font = Math.min(e.attrs.height, e.attrs.width);
         ctx.font = font+'px sans-serif';
         ctx.fillStyle = d3.color(fill_color).brighter(1.5);
         ctx.strokeStyle = 'black';
-        ctx.fillText(Math.round(e.getAttr('items')), e.attrs.x +(e.attrs.width / 2), e.attrs.y + e.attrs.height/2);
+        ctx.fillText(Math.round(e.getAttr('items')),
+            parseInt(e.attrs.x +(e.attrs.width / 2)),
+            parseInt(e.attrs.y + e.attrs.height/2));
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
         ctx.font = '15px sans-serif';
-        ctx.fillText(e.getAttr('text'), e.attrs.x + 1, e.attrs.y); 
+        ctx.fillText(e.getAttr('text'),
+            parseInt(e.attrs.x + 1),
+            parseInt(e.attrs.y));
+        ctx.translate(-0.5, -0.5);
     },
     "prop-text": function(e, ctx){
         let backup_color = Math.round(e.getAttr('selected')) ? '#7D1935' : '#4A96AD';
@@ -42,6 +71,7 @@ let defaultDrawFuncs = {
         ctx.textAlign = e.attrs['align'];
         ctx.textBaseline = e.attrs['baseline'];
         ctx.fillText(e.attrs.text, e.attrs.x, e.attrs.y);
+        //ctx.strokeText(e.attrs.text, e.attrs.x, e.attrs.y);
     },
     "line": function(e, ctx){
         ctx.save();
@@ -49,11 +79,13 @@ let defaultDrawFuncs = {
         let [stroke_color, fill_color] = elementColor(e, ctx, backup_color, backup_color);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
+        ctx.translate(0.5, 0.5);
         ctx.beginPath();
-        ctx.moveTo(e.getAttr('x1'), e.getAttr('y1'));
-        ctx.lineTo(e.getAttr('x2'), e.getAttr('y2'));
+        ctx.moveTo(parseInt(e.getAttr('x1')), parseInt(e.getAttr('y1')));
+        ctx.lineTo(parseInt(e.getAttr('x2')), parseInt(e.getAttr('y2')));
         ctx.closePath();
         ctx.stroke();
+        ctx.translate(-0.5, -0.5);
         ctx.restore();
     },
     "down-arrow": function(e, ctx){
@@ -109,9 +141,20 @@ let defaultDrawFuncs = {
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
         let offset = 5;
-        ctx.fillRect(e.attrs.x - offset, e.attrs.y - offset, offset*2, offset * 2); 
+        ctx.translate(0.5, 0.5);
+        //ctx.fillRect(e.attrs.x - offset, e.attrs.y - offset, offset*2, offset * 2);
+        ctx.beginPath();
+        ctx.arc(parseInt(e.attrs.x),
+                parseInt(e.attrs.y),
+            2,
+            0,
+            Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.translate(-0.5, -0.5);
     },
     "axis": function(e, ctx){
+        ctx.translate(0.5, 0.5);
         ctx.beginPath();
         let vertical = e.getAttr('vertical');
         let x1 = e.getAttr('x1');
@@ -119,11 +162,11 @@ let defaultDrawFuncs = {
         let y1 = e.getAttr('y1');
         let y2 = e.getAttr('y2');
         if(!vertical){
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y1);
+            ctx.moveTo(parseInt(x1), parseInt(y1));
+            ctx.lineTo(parseInt(x2), parseInt(y1));
         }else{
-            ctx.moveTo(x2, y1);
-            ctx.lineTo(x2, y2);
+            ctx.moveTo(parseInt(x2), parseInt(y1));
+            ctx.lineTo(parseInt(x2), parseInt(y2));
         }
         ctx.closePath();
         ctx.stroke();
@@ -146,11 +189,11 @@ let defaultDrawFuncs = {
             
             ctx.beginPath();
             if(!vertical){
-                ctx.moveTo(tick_screen_x, y1);
-                ctx.lineTo(tick_screen_x, y_half);
+                ctx.moveTo(parseInt(tick_screen_x), parseInt(y1));
+                ctx.lineTo(parseInt(tick_screen_x), parseInt(y_half));
             }else{
-                ctx.moveTo(x2, tick_screen_x);
-                ctx.lineTo(y_half, tick_screen_x);
+                ctx.moveTo(parseInt(x2), parseInt(tick_screen_x));
+                ctx.lineTo(parseInt(y_half), parseInt(tick_screen_x));
             }
             ctx.closePath();
             ctx.stroke();
@@ -165,6 +208,8 @@ let defaultDrawFuncs = {
                 tick_screen_x = linearScale(tick_x, [e.getAttr('min'), e.getAttr('max')], [y2, y1]);
             }
         } while(!vertical ? tick_screen_x <= stopper : tick_screen_x >= stopper);
+
+        ctx.translate(-0.5, -0.5);
     }
 }
 

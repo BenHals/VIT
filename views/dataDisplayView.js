@@ -76,6 +76,7 @@ function dd_updateDatapoints(dataset, dimensions, sample_dimensions, isPop){
     let start_td = isPop ? 0 : dimensions.length;
     let end_td = isPop ? dimensions.length : dimensions.length + sample_dimensions.length;
     rows.each(function(r){
+        if(r >= dataset.all.length) return;
         let td_elements = $(this).children();
         td_elements.each(function(d){
             if(d < start_td || d >= end_td) return;

@@ -22,7 +22,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
         
     }
     
-
+    delayStage(animation, 1000/speed);
     if(include_distribution){
         delayStage(animation, 1000/speed);
 
@@ -37,6 +37,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
         
         animation.addStage(stage);
     }
+    delayStage(animation, 1000/speed);
 
 
     
@@ -117,6 +118,15 @@ function point_fade_stage(static_elements, dynamic_elements, stage, sample_index
     for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
         let stat_marker = dynamic_elements.stat_markers[i];
         stage.setTransition(stat_marker, 'stroke-opacity', 0, 0, 0, 1);
+    }
+
+    let dimensions = model.getSampleDimensions();
+
+    if(dimensions.length > 1 && dimensions[1].type == 'numeric'){
+        let distribution_slopes = dynamic_elements.all.filter((e)=>e.id == "dist_stat_lineline");
+        for(let i = 0; i < distribution_slopes.length; i++){
+            stage.setTransition(distribution_slopes[i], 'stroke-opacity', 0, i == distribution_slopes.length -1 ? 0 : 0.2, 0, 0);
+        }
     }
 }
 

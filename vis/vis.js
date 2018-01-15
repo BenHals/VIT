@@ -188,9 +188,9 @@ const vis = {
         this.dynamicElements.factor_labels = factor_labels;
         this.dynamicElements.all = this.dynamicElements.all.concat(factor_labels);
 
-        let section_labels = labelsFromModule(this.module.labels, this.areas, this.options);
-        this.dynamicElements.section_labels = section_labels;
-        this.dynamicElements.all = this.dynamicElements.all.concat(section_labels);
+        // let section_labels = labelsFromModule(this.module.labels, this.areas, this.options);
+        // this.dynamicElements.section_labels = section_labels;
+        // this.dynamicElements.all = this.dynamicElements.all.concat(section_labels);
 
         let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.dataset, this.popMin, this.popMax);
         this.dynamicElements.stat_markers = sample_stat_markers;
@@ -313,6 +313,7 @@ const vis = {
     drawDynamic: function(){
         let ctx = this.dynamicCtx;
         clearCtx(ctx);
+        if(!this.dynamicElements.all) return;
         for(let i = 0; i < this.dynamicElements.all.length; i++){
             let element = this.dynamicElements.all[i];
             element.draw(ctx);

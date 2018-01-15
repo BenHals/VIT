@@ -72,6 +72,7 @@ function elementsFromDataset(dataset, dimensions, bounds, options){
 
 }
 
+
 function createPropBar(id, prop, y, x, all_list, factor_list, focus, total_items){
     let el = new visElement(id, 'prop');
     el.setAttr('prop', prop);
@@ -254,10 +255,11 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
     if(statistic == "Slope"){
         let slope = elements.all.statistics["Slope"];
         let intercept = elements.all.statistics["Intercept"];
-        let max_x = elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000);
-        let min_x = elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 1000000);
-        let max_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] > a ? c.attrs[dimensions[1].name] : a, -100000);
-        let min_y = elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] < a ? c.attrs[dimensions[1].name] : a, 1000000);
+        let max_x = max == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : max;
+        let min_x = min == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 100000) : min;
+        let pop_elements = vis.staticElements || elements;
+        let max_y = pop_elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] > a ? c.attrs[dimensions[1].name] : a, -100000);
+        let min_y = pop_elements.all.reduce((a, c)=> c.attrs[dimensions[1].name] < a ? c.attrs[dimensions[1].name] : a, 1000000);
         let x1 = bounds.innerLeft;
         let x2 = bounds.innerRight;
         let y1 = linearScale(min_x * slope + intercept, [min_y, max_y], [bounds.bottom, bounds.top]);
