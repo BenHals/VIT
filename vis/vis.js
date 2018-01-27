@@ -82,6 +82,7 @@ const vis = {
         this.drawDynamic();
     },
     initPreview: function(dataset){
+        clearSvg('popSvgContainer');
         this.dataset = dataset;
         let statistic = this.options.Statistic;
         let datapoints = elementsFromDataset(dataset, this.population_dimensions, this.areas["sec0display"], this.options, statistic);
@@ -174,6 +175,7 @@ const vis = {
         this.drawDynamic();
     },
     initSample: function(dataset, stats, dist){
+        clearSvg('dynSvgContainer');
         let statistic = this.options.Statistic;
         let datapoints = elementsFromDataset(dataset, this.sample_dimensions, this.areas["sec1display"], this.options, statistic);
         placeElements(datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.popMin, this.popMax);
@@ -301,7 +303,18 @@ const vis = {
         clearCtx(ctx);
         for(let i = 0; i < this.staticElements.all.length; i++){
             let element = this.staticElements.all[i];
-            element.draw(this.ctx);
+
+            if(config.element_draw_type[element.type] == "canvas"){
+                element.draw(ctx);
+            }else if(config.element_draw_type[element.type] == "svg"){
+                if(!element.svg_initialised){
+                    let svg_id = '#popSvgContainer';
+                    defaultSVGFuncs[element.type](element, svg_id);
+                    element.svg_initialised = true;
+                }
+                element.svgUpdate();
+            }
+            
         }
     },
     testSections: function(){
@@ -316,7 +329,16 @@ const vis = {
         if(!this.dynamicElements.all) return;
         for(let i = 0; i < this.dynamicElements.all.length; i++){
             let element = this.dynamicElements.all[i];
-            element.draw(ctx);
+            if(config.element_draw_type[element.type] == "canvas"){
+                element.draw(ctx);
+            }else if(config.element_draw_type[element.type] == "svg"){
+                if(!element.svg_initialised){
+                    let svg_id = '#dynSvgContainer';
+                    defaultSVGFuncs[element.type](element, svg_id);
+                    element.svg_initialised = true;
+                }
+                element.svgUpdate();
+            }
         }
     },
     loop: function(ts){
@@ -380,6 +402,7 @@ class visElement{
         this.id = id;
         this.type = type;
         this.attrs = {};
+        this.svg_id = type + '-' + id + "-" + Math.round(Math.random() * 100);
     }
     getAttr(attr){
         if(attr in this.attrs){
@@ -399,6 +422,42 @@ class visElement{
             this.drawFunc(ctx);
         }else{
             defaultDrawFuncs[this.type](this, ctx);
+        }
+    }
+    svgUpdate(){
+        let styles = ['fill-color', 'stroke-color'];
+        let svg_name_map = {'fill-color': 'fill', 'stroke-color': 'stoke',
+                            'x': 'cx', 'y': 'cy',
+                            'align': 'text-anchor', 'baseline': 'alignment-baseline',};
+        
+        let backup_color = Math.round(this.getAttr('selected')) ? '#C63D0F' : '#7E8F7C';
+        if(Math.round(this.getAttr('selected'))){
+            //console.log('sel');
+        }
+        let backup_fill_opacity = 0;
+        let backup_stroke_opacity = 1;
+        let fill_color = this.getAttr('fill-color') ? this.getAttr('fill-color') : backup_color ? backup_color : 'black';
+        let stroke_color = this.getAttr('stroke-color') ? this.getAttr('stroke-color') : backup_color ? backup_color : 'black';
+        let fill_opacity = this.getAttr('fill-opacity') ? this.getAttr('fill-opacity') : backup_fill_opacity;
+        let stroke_opacity = this.getAttr('stroke-opacity') ? this.getAttr('stroke-opacity') : backup_stroke_opacity;
+
+        //this.setAttr('fill-color', fill_color);
+        //this.setAttr('stroke-color', stroke_color);
+        this.setAttr('fill-opacity', fill_opacity);
+        this.setAttr('stroke-opacity', stroke_opacity);
+        d3.select('#'+this.svg_id).style('fill', fill_color);
+        d3.select('#'+this.svg_id).style('stroke', stroke_color);
+        for(let a in this.attrs){
+            if(a == 'id') continue;
+            let attr_name = a in svg_name_map ? svg_name_map[a] : a;
+            let value = this.attrs[a];
+            if(styles.includes(a)){
+                d3.select('#'+this.svg_id).style(attr_name, value);
+                d3.select('#'+this.svg_id).style(a, value);
+            }else{
+                d3.select('#'+this.svg_id).attr(attr_name, value);
+                d3.select('#'+this.svg_id).attr(a, value);
+            }
         }
     }
 }

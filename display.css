@@ -3,7 +3,7 @@
   display: block;
   height: 100%;
   overflow-x: hidden;
-  overflow-y: hidden;
+
 }
 
 #controls {
@@ -236,9 +236,11 @@ input[type="range"]::-webkit-slider-thumb {
   #visControls {
     display: block;
     height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
   .control-section {
     display: block;
-    height: 33%;
+    /* height: 33%; */
   }
 

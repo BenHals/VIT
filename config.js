@@ -2,14 +2,32 @@ const config = {
     numericalStatistics: ['Mean', 'Median'],
     categoricalStatistics: ['Proportion'],
     sampleSizeOptions: {"fullRange":0, "popSize":1},
+
+    // Names for synthetic groups created for randomisation variation.
     randVarGroups: ["A", "B", "C", "D", "E"],
+
+    // Location for server get requests.
     server: "https://www.stat.auckland.ac.nz/~wild/VITonline/",
+
+    // Variation on NA to check for when parsing csv files.
     NA: ["NA", "na", "N/A", "n/a", ""],
-    groupColorsList: [ "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"],
+
+    // Colors for factors
+    groupColorsList: [ "#ff9900", "#109618", "#990099", "#0099c6",
+                    "#dd4477", "#66aa00", "#b82e2e", "#316395",
+                    "#994499", "#22aa99", "#aaaa11", "#6633cc",
+                    "#e67300", "#8b0707", "#651067", "#329262",
+                    "#5574a6", "#3b3eac"],
+    
+    // Colors for proportion bars.
     proportionColorsList: ["#3366cc", "#dc3912",'#1b9e77','#d95f02','#7570b3'],
+
+    // Function to get statistics options users are able to select.
     initStatistics: function(dimensions){
         if(dimensions[0].type == 'numeric'){
-            if(dimensions.length < 2 || (dimensions[1].type == 'categoric' && dimensions[1].factors.length < 3)){
+            if( dimensions.length < 2 ||
+            (dimensions[1].type == 'categoric' &&
+            dimensions[1].factors.length < 3)){
                 return ["Mean", "Median"];
             }else if(dimensions[1].type == 'numeric'){
                 return ["Slope"];
@@ -26,8 +44,45 @@ const config = {
         }
     },
 
+    element_draw_type: {
+        "datapoint": "svg",
+        "prop": "canvas",
+        "prop-text": "canvas",
+        "text": "svg",
+        "line": "canvas",
+        "down-arrow": "canvas",
+        "arrow": "canvas",
+        "distribution": "canvas",
+        "axis": "canvas"    
+    }
+
 }
 
+// Options for modules.
+// name: Name of module, used for display and module checks.
+// baseHTML: function used to generate module html.
+// baseControls: function used to generate the default UI menu.
+// allowedVariables: combinations of variable types module supports.
+// generateOptions: function which takes in selected dimensions and
+//                  sets options for users to fill in.
+//                  An options has:
+//                  name: name user sees, and code sees.
+//                  hide_option: dont let user see this options.
+//                  type: number or category
+//                  values: if a category, values user can pick.
+//                  range: if a number, the valid range.
+//                  default: initial value.
+//                  validate: function to check if value is valid.
+// inCI: function which takes in the distribution sorted by 
+//              distance to the population statistic, the current 
+//              distribution element and the population statistic
+//              and returns if the element is in the confidence
+//              interval or not.
+// generateInCi: function to create the inCI function depending
+//              on dimensions selected.
+// generateSamples: function to generate a single sample.
+// labels: labels shown for each section.
+// playSectionLabels: labels shown on the control menu.
 config.modules =  {
     "Home": {
         name: "Home",
@@ -49,10 +104,8 @@ config.modules =  {
             this.options = [];
             let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(dimensions), default: config.initStatistics(dimensions)[0], validate: (v, o)=> o.values.includes(v)};
             this.options.push(statistics);
-            //if(dimensions[0].type == 'numeric'){
-                let sample_size = {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])};
-                this.options.push(sample_size);
-            //}
+            let sample_size = {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])};
+            this.options.push(sample_size);
         },
         inCI: function(distribution_sorted, dist_element, population_statistic){
             let top_index = Math.floor(distribution_sorted.length * 0.95);

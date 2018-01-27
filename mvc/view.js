@@ -33,7 +33,8 @@ const view = {
         $('#visualisation').html(`<div id="canvasWrapper">
             <canvas id="popCanvas" class="mainCanvas"></canvas>
             <canvas id="dynamicCanvas" class="mainCanvas"></canvas>
-            <svg id="dynamicSVG" class="mainCanvas"><g id="svgContainer"></g></svg>
+            <svg id="popSVG" class="mainCanvas"><g id="popSvgContainer"></g></svg>
+            <svg id="dynamicSVG" class="mainCanvas"><g id="dynSvgContainer"></g></svg>
             </div>`);
         this.resizeCanvas(true);
     },
@@ -48,6 +49,9 @@ const view = {
 
         $('#dynamicSVG').attr('width', vis_width);
         $('#dynamicSVG').attr('height', vis_height);
+
+        $('#popSVG').attr('width', vis_width);
+        $('#popSVG').attr('height', vis_height);
 
         if(init){
             $('#dynamicSVG').attr('data-normWidth', vis_width);
