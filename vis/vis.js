@@ -425,39 +425,6 @@ class visElement{
         }
     }
     svgUpdate(){
-        let styles = ['fill-color', 'stroke-color'];
-        let svg_name_map = {'fill-color': 'fill', 'stroke-color': 'stoke',
-                            'x': 'cx', 'y': 'cy',
-                            'align': 'text-anchor', 'baseline': 'alignment-baseline',};
-        
-        let backup_color = Math.round(this.getAttr('selected')) ? '#C63D0F' : '#7E8F7C';
-        if(Math.round(this.getAttr('selected'))){
-            //console.log('sel');
-        }
-        let backup_fill_opacity = 0;
-        let backup_stroke_opacity = 1;
-        let fill_color = this.getAttr('fill-color') ? this.getAttr('fill-color') : backup_color ? backup_color : 'black';
-        let stroke_color = this.getAttr('stroke-color') ? this.getAttr('stroke-color') : backup_color ? backup_color : 'black';
-        let fill_opacity = this.getAttr('fill-opacity') ? this.getAttr('fill-opacity') : backup_fill_opacity;
-        let stroke_opacity = this.getAttr('stroke-opacity') ? this.getAttr('stroke-opacity') : backup_stroke_opacity;
-
-        //this.setAttr('fill-color', fill_color);
-        //this.setAttr('stroke-color', stroke_color);
-        this.setAttr('fill-opacity', fill_opacity);
-        this.setAttr('stroke-opacity', stroke_opacity);
-        d3.select('#'+this.svg_id).style('fill', fill_color);
-        d3.select('#'+this.svg_id).style('stroke', stroke_color);
-        for(let a in this.attrs){
-            if(a == 'id') continue;
-            let attr_name = a in svg_name_map ? svg_name_map[a] : a;
-            let value = this.attrs[a];
-            if(styles.includes(a)){
-                d3.select('#'+this.svg_id).style(attr_name, value);
-                d3.select('#'+this.svg_id).style(a, value);
-            }else{
-                d3.select('#'+this.svg_id).attr(attr_name, value);
-                d3.select('#'+this.svg_id).attr(a, value);
-            }
-        }
+        defaultSVGUpdates[this.type](this);
     }
 }
