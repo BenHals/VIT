@@ -221,7 +221,7 @@ function dist_drop_devi_stage(static_elements, dynamic_elements, stage, sample_i
     let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
 
     let y_pos = vis.areas['sec2display'].top;
-    let middle_x = vis.areas['sec2display'].split(2, 0)[1];
+    let middle_x = vis.areas['sec2display'].innerLeft + vis.areas['sec2display'].innerWidth/2;
     for(let i = 0; i < stat_markers.length; i++){
         let marker = stat_markers[i];
         let width = marker.attrs['x2'] - marker.attrs['x1'];
