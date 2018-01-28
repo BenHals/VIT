@@ -27,15 +27,27 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
         delayStage(animation, 1000/speed);
 
         stage = new animStage('drop', animation.name, 5000/speed);
-        if(sample_dimensions.length > 1 && sample_dimensions[1].factors.length == 2){
-            dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index);
+        if(sample_dimensions.length > 1){
+            if(sample_dimensions[1].type == 'numeric'){
+                dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_index);
+            }else{
+                if(sample_dimensions[1].factors.length == 2){
+                    dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index);
+                }else if(sample_dimensions[1].factors.length > 2){
+                    dist_drop_devi_stage(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
+                }
+            }
         }else if(sample_dimensions.length < 2){
             dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
-        }else if(sample_dimensions.length > 1 && sample_dimensions[1].type == 'numeric'){
-            dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_index);
         }
         
         animation.addStage(stage);
+
+        if(sample_dimensions.length > 1 && sample_dimensions[1].factors.length > 2){
+            stage = new animStage('devi2', animation.name, 5000/speed);
+            dist_drop_devi_stage_2(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
+            animation.addStage(stage);
+        }
     }
     delayStage(animation, 1000/speed);
 
@@ -200,6 +212,71 @@ function dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_
         }
     }
 }
+
+function dist_drop_devi_stage(static_elements, dynamic_elements, stage, sample_index, numeric){
+    let stat_markers = dynamic_elements.stat_markers
+                        .slice(0, dynamic_elements.stat_markers.length - 2)
+                        .filter((e)=>e.type == 'arrow');
+    let deviation_arrow = dynamic_elements.stat_markers[dynamic_elements.stat_markers.length - 1];
+    let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
+
+    let y_pos = vis.areas['sec2display'].top;
+    let middle_x = vis.areas['sec2display'].split(2, 0)[1];
+    for(let i = 0; i < stat_markers.length; i++){
+        let marker = stat_markers[i];
+        let width = marker.attrs['x2'] - marker.attrs['x1'];
+        stage.setTransition(marker, 'y1', marker.getAttr('init_y1'), y_pos, 0, 0.6);
+        stage.setTransition(marker, 'y2', marker.getAttr('init_y2'), y_pos, 0, 0.6);
+        stage.setTransition(marker, 'x1', marker.getAttr('init_x1'), middle_x - width/2, 0, 0.6);
+        stage.setTransition(marker, 'x2', marker.getAttr('init_x2'), middle_x + width/2, 0, 0.6);
+        stage.setTransition(marker, 'selected', 0, 1, 0, 0);
+
+        y_pos += 10;
+    }
+    let width = deviation_arrow.attrs['x2'] - deviation_arrow.attrs['x1'];
+    stage.setTransition(deviation_arrow, 'y1', deviation_arrow.getAttr('init_y1'), y_pos, 0, 0);
+    stage.setTransition(deviation_arrow, 'y2', deviation_arrow.getAttr('init_y2'), y_pos, 0, 0);
+    stage.setTransition(deviation_arrow, 'x1', deviation_arrow.getAttr('init_x1'), middle_x - width/2, 0, 0);
+    stage.setTransition(deviation_arrow, 'x2', deviation_arrow.getAttr('init_x2'), middle_x + width/2, 0, 0);
+    stage.setTransition(deviation_arrow, 'selected', 0, 0, 0, 0);
+    stage.setTransition(deviation_arrow, 'stroke-opacity', 0, 1, 0.7, 1);
+
+
+}
+
+function dist_drop_devi_stage_2(static_elements, dynamic_elements, stage, sample_index, numeric){
+    let stat_markers = dynamic_elements.stat_markers
+                        .slice(0, dynamic_elements.stat_markers.length - 2)
+                        .filter((e)=>e.type == 'arrow');
+    let deviation_arrow = dynamic_elements.stat_markers[dynamic_elements.stat_markers.length - 1];
+    let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
+
+    let y_pos = vis.areas['sec2display'].top;
+    let middle_x = vis.areas['sec2display'].split(2, 0)[1];
+    for(let i = 0; i < stat_markers.length; i++){
+        let marker = stat_markers[i];
+        stage.setTransition(marker, 'selected', 1, 0, 0, 0.3);
+
+        y_pos += 10;
+    }
+    let width = deviation_arrow.attrs['x2'] - deviation_arrow.attrs['x1'];
+    stage.setTransition(deviation_arrow, 'y1', y_pos, dist_elem.getAttr('y'), 0.3, 1);
+    stage.setTransition(deviation_arrow, 'y2', y_pos, dist_elem.getAttr('y'), 0.3, 1);
+    stage.setTransition(deviation_arrow, 'x1', middle_x - width/2, vis.areas['sec2display'].innerLeft,  0.3, 1);
+    stage.setTransition(deviation_arrow, 'x2', middle_x + width/2, dist_elem.getAttr('x'), 0.3, 1);
+    stage.setTransition(deviation_arrow, 'selected', 0, 1, 0, 0.3);
+
+
+    stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.9, 1);
+    stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.9, 1);
+    if(numeric) {
+        for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
+            let element = dynamic_elements.datapoints.all[i];
+            stage.setTransition(element, 'selected', 1, 0, 0, 0);
+        }
+    }
+}
+
 function dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index){
     let stat_marker = dynamic_elements.stat_markers[dynamic_elements.stat_markers.length - 1];
     let dist_elem = dynamic_elements.distribution.datapoints[sample_index];

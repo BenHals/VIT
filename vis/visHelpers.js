@@ -251,6 +251,17 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
         el.setAttrInit('x2', screen_stat);
         el.setAttrInit('y2', bounds.bottom);
         new_elements.push(el);
+
+        let deviation = elements.all.statistics[statistic];
+        let screen_deviation = linearScale(deviation, [0, (max_x - min_x)], [bounds.innerLeft, bounds.innerRight]);
+        el = new visElement('devi_arrow', 'arrow');
+        el.setAttrInit('x1', 0);
+        el.setAttrInit('y1', -10);
+        el.setAttrInit('x2', screen_deviation);
+        el.setAttrInit('y2', -10);
+        el.setAttr('dev', deviation);
+        new_elements.push(el);
+
     }
     if(statistic == "Slope"){
         let slope = elements.all.statistics["Slope"];
