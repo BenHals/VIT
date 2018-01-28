@@ -145,7 +145,7 @@ function generateAniControlsHTML_old(module_name, labels){
             <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
           </button>
         </div>
-        <input id="visAnimProgress" type="range" min="0" list="stages">
+        <input id="visAnimProgress" type="range" min="0" max="1" step="any" list="stages">
         <datalist id="stages"></datalist>
       </div>
     </div>

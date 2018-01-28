@@ -233,12 +233,21 @@ input[type="range"]::-webkit-slider-thumb {
     display: block;
     height: 100%;
   }
+
+  #fileOptions {
+    display: block;
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+
   #visControls {
     display: block;
     height: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
   }
+  
   .control-section {
     display: block;
     /* height: 33%; */

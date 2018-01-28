@@ -195,7 +195,8 @@ $(document).on('click', '.exampleItems', function(){
 
 $(document).on('change', '#variableSelect', function(e){
     $('.varAlert').remove();
-    $('#focusPanel').addClass('invisible');
+    //$('#focusPanel').addClass('invisible');
+    $('#focusPanel').hide();
     controller.columnSelected(e);
 });
 
@@ -221,6 +222,7 @@ async function populateExampleFiles(){
 
 function fc_populateColumnSelect(columns, selected){
     $('#variablePanel').removeClass('invisible');
+    //$('#variablePanel').show();
     $('#variablePanel .panel-body').attr('size', Math.min(columns.length, 10));
     
     let columns_html = generateColumnsHTML(columns, selected);

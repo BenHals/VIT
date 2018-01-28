@@ -226,7 +226,7 @@ let defaultSVGFuncs = {
             .attr('class', e.type)
             .attr('x', e.attrs.x)
             .attr('y', e.attrs.y)
-            .attr('r', 10)
+            .attr('r', 5)
             .style('fill', fill_color)
             .style('stroke', stroke_color);
     },
