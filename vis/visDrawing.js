@@ -285,8 +285,105 @@ let defaultSVGFuncs = {
     "distribution": function(e, ctx){
 
     },
-    "axis": function(e, ctx){
+    "axis": function(e, svg_id){
+        let vertical = e.getAttr('vertical');
+        let x1 = e.getAttr('x1');
+        let x2 = e.getAttr('x2');
+        let y1 = e.getAttr('y1');
+        let y2 = e.getAttr('y2');
+        let [start_x, start_y] = [parseInt(x1), parseInt(y1)];
+        let [end_x, end_y] = [parseInt(x2), parseInt(y1)];
 
+        if(vertical){
+            [start_x, start_y] = [parseInt(x2), parseInt(y1)];
+            [end_x, end_y] = [parseInt(x2), parseInt(y2)];
+        }
+
+        d3.select(svg_id).append('line')
+        .attr('id', e.svg_id)
+        .attr('class', e.type)
+        .attr('x1', start_x)
+        .attr('x2', end_x)
+        .attr('y1', start_y)
+        .attr('y2', end_y)
+        .style('fill', 'black')
+        .style('stroke', 'black')
+        .style('stroke-opacity', 1);
+
+        let tick_x = e.getAttr('min');
+
+        let tick_screen_x = linearScale(tick_x, [e.getAttr('min'), e.getAttr('max')], [x1, x2]);
+        if(vertical){
+            tick_screen_x = linearScale(tick_x, [e.getAttr('min'), e.getAttr('max')], [y2, y1]);
+        }
+        let stopper = !vertical ? x2 : y1;
+        let text_el = null;
+        do{
+            tick_screen_x = linearScale(tick_x, [e.getAttr('min'), e.getAttr('max')], [x1, x2]);
+            let y_half = y1 + (y2 - y1)/3;
+            if(vertical){
+                tick_screen_x = linearScale(tick_x, [e.getAttr('min'), e.getAttr('max')], [y2, y1]);
+                y_half = x2 - (x2 - x1)/3;
+            }
+
+            let [tick_start_x, tick_start_y] = [parseInt(tick_screen_x), parseInt(y1)];
+            let [tick_end_x, tick_end_y] = [parseInt(tick_screen_x), parseInt(y_half)];
+    
+            if(vertical){
+                [tick_start_x, tick_start_y] = [parseInt(x2), parseInt(tick_screen_x)];
+                [tick_end_x, tick_end_y] = [parseInt(y_half), parseInt(tick_screen_x)];
+            }
+    
+            d3.select(svg_id).append('line')
+            .attr('id', e.svg_id)
+            .attr('class', e.type)
+            .attr('x1', tick_start_x)
+            .attr('x2', tick_end_x)
+            .attr('y1', tick_start_y)
+            .attr('y2', tick_end_y)
+            .style('fill', 'black')
+            .style('stroke', 'black')
+            .style('stroke-opacity', 1);
+
+            // ctx.font = '10px serif';
+            // ctx.fillStyle = '#000';
+            // ctx.textAlign = !vertical ? 'center' : 'end';
+            // ctx.textBaseline = !vertical ? 'hanging' : 'middle';
+            // if(!vertical){
+            //     ctx.fillText(Math.round(tick_x*100)/100, tick_screen_x, y_half);
+            // }else{
+            //     ctx.fillText(Math.round(tick_x*100)/100, y_half, tick_screen_x);
+            // }
+            let text_x = tick_screen_x;
+            let text_y = y_half;
+            if(vertical){
+                text_x = y_half;
+                text_y = tick_screen_x;
+            }
+
+            
+            text_el = d3.select(svg_id).append('text')
+                .attr('id', e.svg_id)
+                .attr('class', e.type)
+                .attr('x', text_x)
+                .attr('y', text_y)
+                .attr('font-size', '10')
+                .attr('text-anchor', !vertical ? 
+                    tick_x == e.getAttr('min') ? 'start' : 
+                    'middle' : 'end')
+                .attr('alignment-baseline', !vertical ? 'hanging' : 'middle')
+                .style('fill', 'black')
+                .style('stroke', 'black')
+                .style('stroke-width', 0)
+                .text(Math.round(tick_x*100)/100);
+
+            tick_x += e.getAttr('step');
+            tick_screen_x = linearScale(tick_x, [e.getAttr('min'), e.getAttr('max')], [x1, x2]);
+            if(vertical){
+                tick_screen_x = linearScale(tick_x, [e.getAttr('min'), e.getAttr('max')], [y2, y1]);
+            }
+        } while(!vertical ? tick_screen_x <= stopper : tick_screen_x >= stopper);
+        text_el.attr('text-anchor', 'end');
     }
 }
 
@@ -380,4 +477,12 @@ function clearCtx(ctx){
 function clearSvg(svg_id){
     d3.select("#" + svg_id).selectAll('.datapoint').remove();
     d3.select("#" + svg_id).selectAll('.line').remove();
+    d3.select("#" + svg_id).selectAll('.text').remove();
+    d3.select("#" + svg_id).selectAll('.axis').remove();
+}
+
+function clearSvgTextLines(svg_id){
+    d3.select("#" + svg_id).selectAll('.line').remove();
+    d3.select("#" + svg_id).selectAll('.text').remove();
+    d3.select("#" + svg_id).selectAll('.axis').remove();
 }

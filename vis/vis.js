@@ -176,6 +176,7 @@ const vis = {
     },
     initSample: function(dataset, stats, dist){
         clearSvg('dynSvgContainer');
+        clearSvgTextLines('popSvgContainer');
         let statistic = this.options.Statistic;
         let datapoints = elementsFromDataset(dataset, this.sample_dimensions, this.areas["sec1display"], this.options, statistic);
         placeElements(datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.popMin, this.popMax);
@@ -307,7 +308,7 @@ const vis = {
             if(config.element_draw_type[element.type] == "canvas"){
                 element.draw(ctx);
             }else if(config.element_draw_type[element.type] == "svg"){
-                if(!element.svg_initialised){
+                if(!element.svg_initialised || d3.select('#' + element.svg_id).empty()){
                     let svg_id = '#popSvgContainer';
                     defaultSVGFuncs[element.type](element, svg_id);
                     element.svg_initialised = true;

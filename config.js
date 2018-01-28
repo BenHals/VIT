@@ -53,7 +53,7 @@ const config = {
         "down-arrow": "canvas",
         "arrow": "canvas",
         "distribution": "canvas",
-        "axis": "canvas"    
+        "axis": "svg"    
     }
 
 }
