@@ -403,7 +403,7 @@ class visElement{
         this.id = id;
         this.type = type;
         this.attrs = {};
-        this.svg_id = type + '-' + id + "-" + Math.round(Math.random() * 100);
+        this.svg_id = type + '-' + id + "-" + Math.round(Math.random() * 10000);
     }
     getAttr(attr){
         if(attr in this.attrs){
