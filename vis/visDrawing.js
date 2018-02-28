@@ -38,9 +38,71 @@ let defaultDrawFuncs = {
             parseInt(e.attrs.y),
             parseInt(e.attrs.width),
             parseInt(e.attrs.height));
+
+
+
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         let font = Math.min(e.attrs.height, e.attrs.width);
+        ctx.font = font+'px sans-serif';
+        ctx.fillStyle = d3.color(fill_color).brighter(1.5);
+        ctx.strokeStyle = 'black';
+        ctx.fillText(Math.round(e.getAttr('items')),
+            parseInt(e.attrs.x +(e.attrs.width / 2)),
+            parseInt(e.attrs.y + e.attrs.height/2));
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.font = '15px sans-serif';
+        ctx.fillText(e.getAttr('text'),
+            parseInt(e.attrs.x + 1),
+            parseInt(e.attrs.y));
+
+        let items = e.getAttr('items');
+        console.log(items);
+        let width = e.attrs.width - 2;
+        let height = e.attrs.height - 2;
+        let min_r = 2;
+        let max_r = Math.min(width, height);
+        let radius = max_r;
+        let rows = 1;
+        let row_l = items;
+        let max_row_length = width / (min_r * 2);
+        let width_r = width / (row_l*2);
+        let height_r = height / (rows*2);
+        while(max_row_length < row_l || height_r > width_r * 2){
+            row_l = Math.ceil(row_l / 2);
+            rows = Math.ceil(items/row_l);
+            width_r = width / (row_l*2);
+            height_r = height / (rows*2);
+        }
+        rows = Math.ceil(items/row_l);
+        width_r = width / (row_l*2);
+        height_r = height / (rows*2);
+        radius = Math.min(width_r, height_r);
+        let r = 0;
+        let c = 0;
+        for(let i = 0; i < items; i++){
+
+            let x = e.attrs.x + 1 + radius + (radius * 2)*r;
+            let y = e.attrs.y + 1 + radius + (radius * 2)*c;
+            ctx.fillStyle = d3.color(fill_color).brighter(0.5);
+            ctx.beginPath();
+            ctx.arc(x,
+                    y,
+                    radius,
+                    0,
+                    Math.PI * 2);
+            ctx.stroke(); 
+            ctx.fill();
+            r++;
+            if(r == row_l){
+                c++;
+                r = 0;
+            }
+        }
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        font = Math.min(e.attrs.height, e.attrs.width);
         ctx.font = font+'px sans-serif';
         ctx.fillStyle = d3.color(fill_color).brighter(1.5);
         ctx.strokeStyle = 'black';

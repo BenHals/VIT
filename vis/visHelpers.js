@@ -87,6 +87,17 @@ function createPropBar(id, prop, y, x, all_list, factor_list, focus, total_items
     }else{
         factor_list.push(el);
     }
+
+    // create prop bar circles
+    for(let e = 0; e < total_items; e++){
+        let el = new visElement(id, 'datapoint');
+        el.setAttr('prop', prop);
+        el.setAttr('text', x);
+        all_list.push(el);
+    }
+
+
+
     // el = new visElement(id+'text', 'prop-text');
     // el.setAttr('text', x);
     // el.setAttrInit('y', y);
