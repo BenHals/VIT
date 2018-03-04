@@ -46,7 +46,6 @@ let defaultDrawFuncs = {
         let font = Math.min(e.attrs.height, e.attrs.width);
         ctx.font = font+'px sans-serif';
         ctx.fillStyle = d3.color(fill_color).brighter(1.5);
-        ctx.strokeStyle = 'black';
         ctx.fillText(Math.round(e.getAttr('items')),
             parseInt(e.attrs.x +(e.attrs.width / 2)),
             parseInt(e.attrs.y + e.attrs.height/2));
@@ -57,7 +56,7 @@ let defaultDrawFuncs = {
             parseInt(e.attrs.x + 1),
             parseInt(e.attrs.y));
 
-        let items = e.getAttr('items');
+        let items = parseInt(e.getAttr('items'));
         console.log(items);
         let width = e.attrs.width - 2;
         let height = e.attrs.height - 2;
@@ -79,12 +78,17 @@ let defaultDrawFuncs = {
         width_r = width / (row_l*2);
         height_r = height / (rows*2);
         radius = Math.min(width_r, height_r);
+        let y_free_space = height - (rows * radius * 2);
+        let y_top_margin = y_free_space / 2;
+        let x_free_space = width - (row_l * radius * 2);
+        let x_left_margin = x_free_space / 2;
         let r = 0;
         let c = 0;
-        for(let i = 0; i < items; i++){
+        let lim = Math.min(items, max_row_length * (height / (min_r *2)), 500);
+        for(let i = 0; i < lim; i++){
 
-            let x = e.attrs.x + 1 + radius + (radius * 2)*r;
-            let y = e.attrs.y + 1 + radius + (radius * 2)*c;
+            let x = e.attrs.x + x_left_margin + radius + (radius * 2)*r;
+            let y = e.attrs.y + y_top_margin + radius + (radius * 2)*c;
             ctx.fillStyle = d3.color(fill_color).brighter(0.5);
             ctx.beginPath();
             ctx.arc(x,
