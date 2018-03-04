@@ -68,11 +68,14 @@ let defaultDrawFuncs = {
         let max_row_length = width / (min_r * 2);
         let width_r = width / (row_l*2);
         let height_r = height / (rows*2);
-        while(max_row_length < row_l || height_r > width_r * 2){
-            row_l = Math.ceil(row_l / 2);
-            rows = Math.ceil(items/row_l);
+        let it_max = 20;
+        let it = 0;
+        while(it < it_max && (max_row_length < row_l || height_r > width_r * 1.5)){
+            rows++;
+            row_l = Math.ceil(items/rows);
             width_r = width / (row_l*2);
             height_r = height / (rows*2);
+            it++;
         }
         rows = Math.ceil(items/row_l);
         width_r = width / (row_l*2);
