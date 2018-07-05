@@ -393,7 +393,7 @@ const vis = {
         if(!this.ctx) return;
         this.ctx.scale(scale_x, 1);
         this.dynamicCtx.scale(scale_x, 1);
-        this.drawStatic();
+        clearCtx(this.ctx);
         this.drawDynamic();
     }
 }
