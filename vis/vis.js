@@ -77,7 +77,7 @@ const vis = {
         this.distribution = distribution;
         this.dynamicElements.all = [];
         this.initDistribution(this.distribution);
-        this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample], true);
+        //this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample], true);
         
         this.drawDynamic();
     },
