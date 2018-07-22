@@ -78,14 +78,26 @@ const model = {
     parseCSV: function(csv){
         if(csv.slice(0, 20).indexOf("DOCTYPE") != -1) return;
         this.parsedData = d3.csvParse(csv);
+        invalid_rows = [];
         for(var r in this.parsedData){
             var row = this.parsedData[r];
+            let has_invalid = false;
             for(var c in row){
                 var el = row[c];
                 delete row[c];
-                row[c.trim()] = config.NA.some((e)=>e==el) ? 0 : el.trim();
+                if(config.NA.some((e)=>e==el)){
+                    has_invalid = true;
+                    continue
+                }
+                row[c.trim()] = isNaN(el.trim()) ? el.trim() : el.trim() * 1;
+            }
+            if(has_invalid){
+                invalid_rows.push(r);
             }
         }
+        // for(let i = invalid_rows.length - 1; i >= 0; i--){
+        //     this.parsedData.splice(invalid_rows[i], 1);
+        // }
     },
 
     formatData: async function(){
@@ -98,6 +110,7 @@ const model = {
         data.columns.forEach((column_name) => {
             columns[column_name] = {name: column_name};
             let value_array = data.map((row) => isNaN((row[column_name])) ? row[column_name] : parseFloat(row[column_name]));
+            value_array = value_array.filter((row) => row != undefined);
             column_values[column_name] = value_array;
             columns[column_name].type = !value_array.some(isNaN) ? 'numeric' : 'categoric';
             if(columns[column_name].type == 'numeric'){
@@ -291,16 +304,25 @@ const model = {
 
     cleanData: function(){
         this.cleaned_data = [];
+        let id_val = 0;
         for(var r in this.parsedData){
             if(r == 'columns') break;
             var row = this.parsedData[r];
-            this.cleaned_data.push({id: r});
+            let row_obj = {id: id_val};
+            let is_valid = true;
             for(var d in this.dimensions){
                 let dim = this.dimensions[d];
                 var el = row[dim.name];
                 if(dim.type == 'numeric') el = parseFloat(el);
-                this.cleaned_data[r][dim.name] = el;
+                if(config.NA.some((e)=>e==el) || (dim.type == 'numeric' && isNaN(el)))
+                    is_valid = false;
+                row_obj[dim.name] = el;
             }
+            if(is_valid){
+                this.cleaned_data.push(row_obj);
+                id_val += 1;
+            }
+
         }
     },
 
