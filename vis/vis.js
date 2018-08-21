@@ -61,7 +61,8 @@ const vis = {
             this.options,
             dataset,
             this.popMin,
-            this.popMax
+            this.popMax,
+            this.areas
         );
         this.staticElements.stat_markers = stat_markers;
         this.staticElements.all = this.staticElements.all.concat(stat_markers);

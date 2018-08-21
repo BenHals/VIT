@@ -156,7 +156,7 @@ function labelsFromModule(labels, areas, options){
     return label_elements
 }
 
-function statisticsFromElements(elements, dimensions, bounds, options, dataset, min, max){
+function statisticsFromElements(elements, dimensions, bounds, options, dataset, min, max, areas){
     let new_elements = [];
     let statistic = options.Statistic;
     let num_factors = elements.factors.length;
@@ -176,6 +176,18 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
             el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             el.setAttrInit('stat', stat);
             new_elements.push(el);
+            if(areas){
+                el = new visElement('factor_dotted'+f+statistic, 'line');
+                el.setAttrInit('x1', screen_stat);
+                el.setAttrInit('y1', areas.overall.bottom);
+                el.setAttrInit('x2', screen_stat);
+                el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+                el.setAttrInit('stat', stat);
+                el.setAttrInit('dashed', true);
+                el.setAttrInit('stroke-opacity', 0.4);
+                new_elements.push(el);
+            }
+            
         }
         if(num_factors == 2){
             let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, 0)[1], bottom: bounds.split(num_factors, 1)[1]};

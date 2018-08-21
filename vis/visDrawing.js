@@ -148,6 +148,9 @@ let defaultDrawFuncs = {
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
+        if(e.getAttr("dashed")){
+            ctx.setLineDash([5, 8]);
+        }
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
         ctx.moveTo(parseInt(e.getAttr('x1')), parseInt(e.getAttr('y1')));
