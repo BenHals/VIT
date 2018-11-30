@@ -169,6 +169,9 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
             let stat = factor.statistics[statistic];
             console.log(stat);
             let screen_stat = linearScale(stat, [min_x, max_x], [factor_bounds.left, factor_bounds.right]);
+            let median = linearScale(factor.statistics['Median'], [min_x, max_x], [factor_bounds.left, factor_bounds.right]);
+            let lq = linearScale(factor.statistics['lq'], [min_x, max_x], [factor_bounds.left, factor_bounds.right]);
+            let uq = linearScale(factor.statistics['uq'], [min_x, max_x], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('factor'+f+statistic, 'line');
             el.setAttrInit('x1', screen_stat);
             el.setAttrInit('y1', factor_bounds.bottom);
@@ -176,7 +179,7 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
             el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             el.setAttrInit('stat', stat);
             new_elements.push(el);
-            if(areas){
+            if(areas && num_factors == 1){
                 el = new visElement('factor_dotted'+f+statistic, 'line');
                 el.setAttrInit('x1', screen_stat);
                 el.setAttrInit('y1', areas.overall.bottom);
@@ -186,6 +189,49 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
                 el.setAttrInit('dashed', true);
                 el.setAttrInit('stroke-opacity', 0.4);
                 new_elements.push(el);
+
+                let boxplottop = factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/4 + 13;
+                let boxplotbottom = factor_bounds.bottom;
+                el = new visElement('factor'+f+'median', 'line');
+                el.setAttrInit('x1', median);
+                el.setAttrInit('y1', boxplotbottom);
+                el.setAttrInit('x2', median);
+                el.setAttrInit('y2', boxplottop);
+                el.setAttrInit('stat', median);
+                el.setAttrInit('stroke-opacity', 0.2);
+                new_elements.push(el); 
+                el = new visElement('factor'+f+'lq', 'line');
+                el.setAttrInit('x1', lq);
+                el.setAttrInit('y1', boxplotbottom);
+                el.setAttrInit('x2', lq);
+                el.setAttrInit('y2', boxplottop);
+                el.setAttrInit('stat', lq);
+                el.setAttrInit('stroke-opacity', 0.2);
+                new_elements.push(el); 
+                el = new visElement('factor'+f+'uq', 'line');
+                el.setAttrInit('x1', uq);
+                el.setAttrInit('y1', boxplotbottom);
+                el.setAttrInit('x2', uq);
+                el.setAttrInit('y2', boxplottop);
+                el.setAttrInit('stat', uq);
+                el.setAttrInit('stroke-opacity', 0.2);
+                new_elements.push(el); 
+                el = new visElement('factor'+f+'boxtop', 'line');
+                el.setAttrInit('x1', lq);
+                el.setAttrInit('y1', boxplottop);
+                el.setAttrInit('x2', uq);
+                el.setAttrInit('y2', boxplottop);
+                el.setAttrInit('stat', uq);
+                el.setAttrInit('stroke-opacity', 0.2);
+                new_elements.push(el); 
+                el = new visElement('factor'+f+'boxbot', 'line');
+                el.setAttrInit('x1', lq);
+                el.setAttrInit('y1', boxplotbottom);
+                el.setAttrInit('x2', uq);
+                el.setAttrInit('y2', boxplotbottom);
+                el.setAttrInit('stat', uq);
+                el.setAttrInit('stroke-opacity', 0.2);
+                new_elements.push(el); 
             }
             
         }

@@ -8,6 +8,7 @@ Single Numerical
 -Show Axis on variable selection
 	-Done, doesnt change when stat changes
 -Show box-whisker plot on var select
+	-Done, no whiskers yet
 -Dotted line to base for pop stat
 -Label for pop stat
 -1 Sample stat mark ghost too early

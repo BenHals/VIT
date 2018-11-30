@@ -109,8 +109,36 @@ function medianGen(stat_name, dim_name){
     return [stat_name, function(dp){
         if (dp.length < 1) return 0;
         let sorted = dp.sort((a, b)=> a[dim_name] - b[dim_name]);
-        let mid_ceil = sorted[Math.floor(dp.length / 2)];
-        let mid_floor = sorted[Math.floor((dp.length-1) / 2)];
+        let mid_ceil = sorted[Math.floor((dp.length - 1) / 2)];
+        let mid_floor = sorted[Math.ceil((dp.length - 1) / 2)];
+        if(mid_ceil == undefined || mid_floor == undefined){
+            console.log(dp);
+            return 0;
+        }
+        
+        return (mid_ceil[dim_name] + mid_floor[dim_name])/2;
+    }];
+}
+function lqGen(stat_name, dim_name){
+    return [stat_name, function(dp){
+        if (dp.length < 1) return 0;
+        let sorted = dp.sort((a, b)=> a[dim_name] - b[dim_name]);
+        let mid_ceil = sorted[Math.floor((dp.length - 1) / 4)];
+        let mid_floor = sorted[Math.ceil((dp.length - 1) / 4)];
+        if(mid_ceil == undefined || mid_floor == undefined){
+            console.log(dp);
+            return 0;
+        }
+            
+        return (mid_ceil[dim_name] + mid_floor[dim_name])/2;
+    }];
+}
+function uqGen(stat_name, dim_name){
+    return [stat_name, function(dp){
+        if (dp.length < 1) return 0;
+        let sorted = dp.sort((a, b)=> a[dim_name] - b[dim_name]);
+        let mid_ceil = sorted[Math.floor(((dp.length - 1) / 4) * 3)];
+        let mid_floor = sorted[Math.ceil(((dp.length - 1) / 4) * 3)];
         if(mid_ceil == undefined || mid_floor == undefined){
             console.log(dp);
             return 0;

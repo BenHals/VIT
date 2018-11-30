@@ -79,7 +79,7 @@ const controller = {
         // Reset URL
         deleteFromUrl(['d0', 'd1', 'focus']);
   
-        let selected_labels = [...Array.prototype.slice.call(e.target.selectedOptions)].map(function(option){return option.innerText.slice(0, option.innerText.length-4)});
+        let selected_labels = [...Array.prototype.slice.call(e.target.selectedOptions)].map(function(option){return option.innerHTML.slice(0, option.innerHTML.length-4)});
         model.columnSelection(selected_labels);
         this.validateSelectedColumns();
 
