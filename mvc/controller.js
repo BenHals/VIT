@@ -227,6 +227,7 @@ const controller = {
         }
     },
     aniBack: function(){
+        vis.stopAndClear();
         this.gotoOption();
     },
     visAnimUserInput: function(new_progress){

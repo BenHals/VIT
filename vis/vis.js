@@ -405,6 +405,11 @@ const vis = {
         this.dynamicCtx.scale(scale_x, 1);
         clearCtx(this.ctx);
         this.drawDynamic();
+    },
+    stopAndClear(){
+        this.pause();
+        clearSvg('dynSvgContainer');
+        clearSvgTextLines('popSvgContainer');
     }
 }
 
