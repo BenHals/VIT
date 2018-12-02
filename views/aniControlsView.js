@@ -23,10 +23,16 @@ function generatevisualisationViewHTML(module){
           <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, false)">
             <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
           </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(20, false)">
+            <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+          </button>
           <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(1, true)">
             <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
           </button>
           <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, true)">
+            <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(20, true)">
             <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
           </button>
           <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
@@ -68,6 +74,10 @@ function generatevisualisationViewHTML(module){
               <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
               <span>5</span>
             </button>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(20, false)">
+              <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+              <span>20</span>
+            </button>
           </div>
 
           <div id="distPlayButtons" class="playSection panel panel-default">
@@ -79,6 +89,10 @@ function generatevisualisationViewHTML(module){
             <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(5, true)">
               <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
               <span>5</span>
+            </button>
+            <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(20, true)">
+              <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+              <span>20</span>
             </button>
             <button type="button" class="btn btn-default" aria-label="Back" onclick="distSequence(900, true)">
               <span class="glyphicon glyphicon-flash" aria-hidden="true"></span>
@@ -132,10 +146,16 @@ function generateAniControlsHTML_old(module_name, labels){
           <button type="button" class="btn btn-default" aria-label="Back" onclick="ac_playAnimation(5, false)">
             <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
           </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="ac_playAnimation(20, false)">
+            <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+          </button>
           <button type="button" class="btn btn-default" aria-label="Back" onclick="ac_playAnimation(1, true)">
             <span class="glyphicon glyphicon-step-forward" aria-hidden="true"></span>
           </button>
           <button type="button" class="btn btn-default" aria-label="Back" onclick="ac_playAnimation(5, true)">
+            <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+          </button>
+          <button type="button" class="btn btn-default" aria-label="Back" onclick="ac_playAnimation(20, true)">
             <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
           </button>
           <button type="button" class="btn btn-default" aria-label="Back" onclick="ac_playAnimation(900, true)">
@@ -191,6 +211,12 @@ function generateAniControlsHTML_old(module_name, labels){
               </div>
             </div>
             <div class = "row">
+              <div class="col-md-8 radioOption">
+                <input id="sampleOptions" type="radio" name="sampleOptions" value="20">
+                <label>20</label>
+              </div>
+            </div>
+            <div class = "row">
               <div class="panelButton col-md-11 ">
                 <button type="button" class="btn btn-primary btn-block" aria-label="Back" onclick="ac_readNumSamples('sampleOptions')">
                     Go
@@ -214,6 +240,12 @@ function generateAniControlsHTML_old(module_name, labels){
                 <div class="col-md-8 radioOption">
                   <input id="distOptions" type="radio" name="distOptions" value="5">
                   <label>5</label>
+                </div>
+              </div>
+              <div class = "row">
+                <div class="col-md-8 radioOption">
+                  <input id="distOptions" type="radio" name="distOptions" value="20">
+                  <label>20</label>
                 </div>
               </div>
               <div class = "row">
