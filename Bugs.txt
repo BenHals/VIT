@@ -2,6 +2,7 @@ General
 -Clear selected variables
 -Title Bar
 -Kill animation on back
+	-Done... pause and clear svg (not canvas tho)
 
 Single Numerical
 -NA counting as 0 (height, CaS)
@@ -11,7 +12,9 @@ Single Numerical
 -Show box-whisker plot on var select
 	-Done, no whiskers yet
 -Dotted line to base for pop stat
+	-Done, clean up
 -Label for pop stat
+	-Done, clean up
 -1 Sample stat mark ghost too early
 	-Done!
 -1 Sample drop too slow
@@ -26,6 +29,7 @@ Single Numerical
 
 Numerical Diff
 -NA counting as 0 (height-Gender, CaS)
+	-Done, some errors may remain
 -Color Population
 	-Done!
 -Title below data points

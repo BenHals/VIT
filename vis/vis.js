@@ -223,9 +223,10 @@ const vis = {
             this.dynamicElements.all = this.dynamicElements.all.concat([this.dynamicElements.distribution.datapoints[i]]);
         }
     },
-    initAnimation: function(reps, include_distribution){
+    initAnimation: function(reps, include_distribution, inherit_speed = false){
         this.reps_left = reps - 1;
-        let speed = this.speed || 1 + 0.75*(reps - 1);
+        // let speed = this.speed || 1 + 0.75*(reps - 1);
+        let speed = inherit_speed ? this.speed : 1 + 0.75*(reps - 1);
         this.speed = speed;
         this.include_distribution = include_distribution;
         let animation = new Animation(`${reps}:${include_distribution}`);
@@ -371,7 +372,7 @@ const vis = {
     animationDone: function(){
         if(this.reps_left > 0) {
             controller.unpause();
-            this.initAnimation(this.reps_left, this.include_distribution);
+            this.initAnimation(this.reps_left, this.include_distribution, true);
         }else{
             this.speed = null;
         }

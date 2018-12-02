@@ -1,29 +1,36 @@
 function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, include_distribution){
     let stage = null;
     if(pop_dimensions[0].type == 'numeric'){
-        if(module.name == 'Bootstrapping'){
-            bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sample_index, dynamic_elements, static_elements, 5000);
+        let skip = speed > 10;
+        if(!skip){
+            if(module.name == 'Bootstrapping'){
+                bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sample_index, dynamic_elements, static_elements, 5000);
+            }else{
+                stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
+                point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+                animation.addStage(stage);
+            }
+
+            delayStage(animation, 1000/speed);
+
+            stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
+            if(module.name == 'Randomisation Variation'){
+                point_center_drop_stage(static_elements, dynamic_elements, stage);
+                animation.addStage(stage);
+                stage = new animStage('drop2', animation.name, include_distribution ? 1000/speed : 5000/speed);
+                point_center_split_stage(static_elements, dynamic_elements, stage);
+            }else{
+                point_drop_stage(static_elements, dynamic_elements, stage);
+            }
+            
+            animation.addStage(stage);
         }else{
-            stage = new animStage('fade', animation.name, 5000/speed);
-            point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+            stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 2000/speed);
+            point_skip_drop(static_elements, dynamic_elements, stage, sample_index);
             animation.addStage(stage);
         }
-
-        delayStage(animation, 1000/speed);
-
-        stage = new animStage('drop', animation.name, 5000/speed);
-        if(module.name == 'Randomisation Variation'){
-            point_center_drop_stage(static_elements, dynamic_elements, stage);
-            animation.addStage(stage);
-            stage = new animStage('drop2', animation.name, 5000/speed);
-            point_center_split_stage(static_elements, dynamic_elements, stage);
-        }else{
-            point_drop_stage(static_elements, dynamic_elements, stage);
-        }
-        
-        animation.addStage(stage);
     }else{
-        stage = new animStage('fade', animation.name, 5000/speed);
+        stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
         prop_fade_stage(static_elements, dynamic_elements, stage, sample_index);
         animation.addStage(stage);
 
@@ -34,7 +41,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
     if(include_distribution){
         delayStage(animation, 1000/speed);
 
-        stage = new animStage('drop', animation.name, 5000/speed);
+        stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
         if(sample_dimensions.length > 1){
             if(sample_dimensions[1].type == 'numeric'){
                 dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_index);
@@ -149,6 +156,53 @@ function point_fade_stage(static_elements, dynamic_elements, stage, sample_index
         }
     }
 }
+
+function point_skip_drop(static_elements, dynamic_elements, stage, sample_index){
+    let pop_elements = [];
+    let delay = 1/dynamic_elements.datapoints.all.length;
+    for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
+        let element = dynamic_elements.datapoints.all[i];
+        let element_id = element.getAttr('id');
+        let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
+        pop_elements.push(pop_element);
+        stage.setTransition(element, 'y', pop_element.getAttr('init_y'), pop_element.getAttr('init_y'), 0, 1);
+        stage.setTransition(element, 'fill-opacity', 1, 1, 0, 1);
+        stage.setTransition(element, 'stroke-opacity', 1, 1, 0, 1);
+        stage.setTransition(element, 'selected', 1, 1, 0, 1);
+    }
+    for(let i = 0; i < static_elements.datapoints.all.length; i++){
+        let element = static_elements.datapoints.all[i];
+        let fill = pop_elements.includes(element) ? 1 : 0;
+        stage.setTransition(element, 'fill-opacity', fill, fill, 0, 1);
+    }
+    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index);
+    
+    for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
+        let stat_marker = dynamic_elements.stat_markers[i];
+        stage.setTransition(stat_marker, 'stroke-opacity', 0, 0, 0, 1);
+    }
+
+    let dimensions = model.getSampleDimensions();
+
+    if(dimensions.length > 1 && dimensions[1].type == 'numeric'){
+        let distribution_slopes = dynamic_elements.all.filter((e)=>e.id == "dist_stat_lineline");
+        for(let i = 0; i < distribution_slopes.length; i++){
+            stage.setTransition(distribution_slopes[i], 'stroke-opacity', 0, i == distribution_slopes.length -1 ? 0 : 0.2, 0, 0);
+        }
+    }
+
+    for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
+        let element = dynamic_elements.datapoints.all[i];
+        let element_id = element.getAttr('id');
+        let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
+        stage.setTransition(element, 'y', element.getAttr('init_y'), element.getAttr('init_y'), 0, 1);
+    }
+    for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
+        let stat_marker = dynamic_elements.stat_markers[i];
+        stage.setTransition(stat_marker, 'stroke-opacity', 1, 1, 0.8, 1);
+    }
+}
+
 
 function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index){
     for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
