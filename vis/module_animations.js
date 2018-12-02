@@ -169,12 +169,8 @@ function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index)
 }
 
 function stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index){
-    let distribution_stats = [];
-    for(let i = 0; i < dynamic_elements.distribution.stats.length && i <= sample_index; i++){
-        distribution_stats = distribution_stats.concat(dynamic_elements.distribution.stats[i]);
-    }
-    for(let i = 0; i < distribution_stats.length; i++){
-        let element = distribution_stats[i];
+    for(let i = 0; i < dynamic_elements.ghosts.length; i++){
+        let element = dynamic_elements.ghosts[i];
         let y1 = element.getAttr('init_y1');
         let y2 = element.getAttr('init_y2');
         let x1 = element.getAttr('init_x1');
@@ -183,8 +179,6 @@ function stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_inde
         stage.setTransition(element, 'stroke-opacity', 0.2, 0.2, 0, 1);
         if(x1 != x2) return;
         stage.setTransition(element, 'y2', y2 + (y1-y2)/1.5, y2 + (y1-y2)/1.5, 0, 1);
-
-        
     }
     let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
     stage.setTransition(dist_elem, 'stroke-opacity', 0, 0, 0, 1);
@@ -203,6 +197,7 @@ function point_drop_stage(static_elements, dynamic_elements, stage){
         let stat_marker = dynamic_elements.stat_markers[i];
         stage.setTransition(stat_marker, 'stroke-opacity', 0, 1, 0.8, 1);
     }
+
 }
 
 function point_center_drop_stage(static_elements, dynamic_elements, stage){

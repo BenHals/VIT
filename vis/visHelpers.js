@@ -189,6 +189,13 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
                 el.setAttrInit('dashed', true);
                 el.setAttrInit('stroke-opacity', 0.4);
                 new_elements.push(el);
+                el = new visElement('factor_text'+f+statistic, 'text');
+                el.setAttrInit('x', screen_stat);
+                el.setAttrInit('y', factor_bounds.bottom);
+                el.setAttrInit('text', Math.round(stat * 100) / 100 );
+                el.setAttrInit('dashed', true);
+                el.setAttrInit('stroke-opacity', 0.4);
+                new_elements.push(el);
 
                 let boxplottop = factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/4 + 13;
                 let boxplotbottom = factor_bounds.bottom;
@@ -264,7 +271,19 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
             el.setAttrInit('x2', screen_stat);
             el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             new_elements.push(el);
+            if(areas && num_factors == 1){
+                el = new visElement('factor_dotted'+f+statistic, 'line');
+                el.setAttrInit('x1', screen_stat);
+                el.setAttrInit('y1', areas.overall.bottom);
+                el.setAttrInit('x2', screen_stat);
+                el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
+                el.setAttrInit('stat', stat);
+                el.setAttrInit('dashed', true);
+                el.setAttrInit('stroke-opacity', 0.4);
+                new_elements.push(el);
+            }
         }
+
         if(num_factors == 2){
             let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, 0)[1], bottom: bounds.split(num_factors, 1)[1]};
             let factor_1 = elements.factors[0];

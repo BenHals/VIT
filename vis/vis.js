@@ -197,7 +197,7 @@ const vis = {
         // this.dynamicElements.all = this.dynamicElements.all.concat(section_labels);
 
         let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.dataset, this.popMin, this.popMax);
-        this.dynamicElements.stat_markers = sample_stat_markers;
+        this.dynamicElements.stat_markers = this.dynamicElements.stat_markers.concat(sample_stat_markers);
         this.dynamicElements.all = this.dynamicElements.all.concat(sample_stat_markers);
 
         let axis = axisFromDataset(this.areas["sec1axis"], this.popMin, this.popMax, false, 'sample_axis');
@@ -209,8 +209,17 @@ const vis = {
     },
     initSampleDistElements(datapoints){
         this.dynamicElements.all = [].concat(datapoints.all);
+        if(this.dynamicElements.ghosts){
+            this.dynamicElements.ghosts = this.dynamicElements.ghosts.concat(this.dynamicElements.new_ghosts);
+            this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.new_ghosts);
+        }else{
+            this.dynamicElements.ghosts = [];
+        }
+        this.dynamicElements.new_ghosts = [];
+        this.dynamicElements.stat_markers = [];
         for(let i = 0; i < this.dynamicElements.distribution.stats.length && i <= this.current_sample; i++){
-            this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.distribution.stats[i]);
+            //this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.distribution.stats[i]);
+            this.dynamicElements.new_ghosts = this.dynamicElements.new_ghosts.concat(this.dynamicElements.distribution.stats[i]);
             this.dynamicElements.all = this.dynamicElements.all.concat([this.dynamicElements.distribution.datapoints[i]]);
         }
     },
