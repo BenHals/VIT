@@ -1,7 +1,8 @@
 var colorScale = ['#4A96AD','#7D1935', '#1b9e77', '#d95f02', '#7570b3']
 let defaultDrawFuncs = {
     "datapoint": function(e, ctx){
-        let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#7E8F7C';
+        // let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : e.getAttr('stroke-color') ? d3.color(e.getAttr('stroke-color')).darker() : '#7E8F7C';
+        let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : e.getAttr('stroke-color') ? d3.color(e.getAttr('stroke-color')).darker() : '#7E8F7C';
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
@@ -289,7 +290,7 @@ let defaultDrawFuncs = {
 
 let defaultSVGFuncs = {
     "datapoint": function(e, svg_id){
-        let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#7E8F7C';
+        let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : e.getAttr('stroke-color') ? d3.color(e.getAttr('stroke-color')).darker() : '#7E8F7C';
         let backup_opacity = 0;
         let fill_color = e.getAttr('fill-color') ? e.getAttr('fill-color') : backup_color ? backup_color : 'black';
         let stroke_color = e.getAttr('stroke-color') ? e.getAttr('stroke-color') : backup_color ? backup_color : 'black';
@@ -531,8 +532,9 @@ function elementColor(e, s_c, f_c, backup_opacity){
     backup_opacity = backup_opacity || 0;
     let stroke_opacity = e.getAttr('stroke-opacity') == undefined ? 1 : e.getAttr('stroke-opacity');
     let fill_opacity = e.getAttr('fill-opacity') == undefined ? backup_opacity : e.getAttr('fill-opacity');
-    let fill_c = e.getAttr('fill-color') ? e.getAttr('fill-color') : f_c ? f_c : 'black';
+    
     let stroke_c = e.getAttr('stroke-color') ? e.getAttr('stroke-color') : s_c ? s_c : 'black';
+    let fill_c = e.getAttr('fill-color') ? e.getAttr('fill-color') : f_c ? f_c : 'black';
     let stroke_color = d3.color(stroke_c);
     stroke_color.opacity = stroke_opacity;
     let fill_color = d3.color(fill_c);

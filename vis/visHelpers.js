@@ -16,7 +16,11 @@ function elementsFromDataset(dataset, dimensions, bounds, options){
                 el.setAttr(attr, val);
             }
             el.setAttr('factor', y_factor);
-            el.setAttrInit('stroke-color', config.groupColorsList[y_factor_index]);
+            if(num_factors > 1){
+                el.setAttrInit('stroke-color', config.groupColorsList[y_factor_index]);
+                el.setAttrInit('fill-color', d3.color(config.groupColorsList[y_factor_index]).darker());
+            }
+            
             el.value = datapoint[dimensions[0].name];
             elements.all.push(el);
             if(!elements.factors[y_factor_index]){
