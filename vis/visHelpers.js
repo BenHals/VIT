@@ -16,9 +16,15 @@ function elementsFromDataset(dataset, dimensions, bounds, options){
                 el.setAttr(attr, val);
             }
             el.setAttr('factor', y_factor);
+            el.setAttrInit('stroke-color', config.groupColorsList[y_factor_index]);
             el.value = datapoint[dimensions[0].name];
             elements.all.push(el);
+            if(!elements.factors[y_factor_index]){
+                console.log(y_factor_index);
+                console.log(y_factor);
+            }
             elements.factors[y_factor_index].push(el);
+            
         }
         elements.all.statistics = dataset.statistics;
         for(let f = 0; f < elements.factors.length; f++){
@@ -136,6 +142,7 @@ function labelsFromDimensions(dimensions, bounds, options){
         el.setAttrInit('y', factor_bounds.top);
         el.setAttr('baseline', 'hanging');
         el.setAttr('align', 'end');
+        el.setAttrInit('fill-color', config.groupColorsList[i]);
         return el;
     });
     return label_elements
@@ -506,6 +513,7 @@ function placeElements(elements, dimensions, bounds, options, min, max){
                     let screen_y = linearScale(element.attrs[dimensions[1].name], [min_y, max_y], [bounds.bottom, bounds.top] );
                     element.setAttrInit('x', screen_x);
                     element.setAttrInit('y', screen_y);
+                    
                 }
             }
         }else{

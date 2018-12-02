@@ -312,9 +312,10 @@ const model = {
             let is_valid = true;
             for(var d in this.dimensions){
                 let dim = this.dimensions[d];
+                if(!dim.name) continue;
                 var el = row[dim.name];
                 if(dim.type == 'numeric') el = parseFloat(el);
-                if(config.NA.some((e)=>e==el) || (dim.type == 'numeric' && isNaN(el)))
+                if(config.NA.some((e)=>e==el) || (dim.type == 'numeric' && isNaN(el)) || el == undefined)
                     is_valid = false;
                 row_obj[dim.name] = el;
             }

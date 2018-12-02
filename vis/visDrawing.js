@@ -1,3 +1,4 @@
+var colorScale = ['#4A96AD','#7D1935', '#1b9e77', '#d95f02', '#7570b3']
 let defaultDrawFuncs = {
     "datapoint": function(e, ctx){
         let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#7E8F7C';

@@ -1,6 +1,7 @@
 General
 -Clear selected variables
 -Title Bar
+-Kill animation on back
 
 Single Numerical
 -NA counting as 0 (height, CaS)
@@ -26,6 +27,7 @@ Single Numerical
 Numerical Diff
 -NA counting as 0 (height-Gender, CaS)
 -Color Population
+	-Done!
 -Title below data points
 -Show population statistic on bottom plot
 -SHow 0 on bottom plot
