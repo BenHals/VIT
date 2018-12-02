@@ -4,7 +4,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
         let skip = speed > 10;
         if(!skip){
             if(module.name == 'Bootstrapping'){
-                bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sample_index, dynamic_elements, static_elements, 5000);
+                bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sample_index, dynamic_elements, static_elements, 5000/speed);
             }else{
                 stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
                 point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
