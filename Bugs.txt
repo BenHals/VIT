@@ -12,8 +12,10 @@ Single Numerical
 -Dotted line to base for pop stat
 -Label for pop stat
 -1 Sample stat mark ghost too early
+	-Done!
 -1 Sample drop too slow
 -5 Sample stat mark ghost
+	-Done!
 -20 Sample Missing
 -1 Dist too slow
 -5 Dist skip pick and drop
