@@ -220,10 +220,10 @@ let defaultDrawFuncs = {
         ctx.beginPath();
         ctx.arc(parseInt(e.attrs.x),
                 parseInt(e.attrs.y),
-            2,
+            5,
             0,
             Math.PI * 2);
-        ctx.fill();
+        //ctx.fill();
         ctx.stroke();
         ctx.translate(-0.5, -0.5);
     },

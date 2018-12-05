@@ -197,6 +197,7 @@ const vis = {
         // this.dynamicElements.all = this.dynamicElements.all.concat(section_labels);
 
         let sample_stat_markers = statisticsFromElements(this.dynamicElements.datapoints, this.sample_dimensions, this.areas["sec1display"], this.options, this.dataset, this.popMin, this.popMax);
+        if(!this.dynamicElements.stat_markers) this.dynamicElements.stat_markers = [];
         this.dynamicElements.stat_markers = this.dynamicElements.stat_markers.concat(sample_stat_markers);
         this.dynamicElements.all = this.dynamicElements.all.concat(sample_stat_markers);
 
