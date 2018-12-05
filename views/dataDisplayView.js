@@ -97,33 +97,83 @@ function dd_clearDatapoints(dataset, dimensions, sample_dimensions, isPop){
     rows.each(function(r){
         let td_elements = $(this).children();
         td_elements.each(function(d){
+            let fs = $(this).css('font-size');
+            let ofs = $(this).attr('data-ofont');
+            $(this).css('font-weight', 'Normal');
+            $(this).css('font-size', ofs);
+
+            if(sample_dimensions[0].type == 'categoric'){
+                let colorIndex = sample_dimensions[0].factors.indexOf(row_value);
+                $(this).css("color", 0 == 0 ? config.proportionColorsList[colorIndex] : config.groupColorsList[colorIndex]);
+            }else{
+                $(this).css("color", 'black');
+            }
+
             if(d < start_td || d >= end_td) return;
             let dim_index = d - start_td;
             let row_value = "";
             $(this).html(row_value);
+            
+
         })
     })
 }
-function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sample_index, isPop){
+function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sample_index, display_index, isPop){
     let rows = $("#prunedTable > tbody > tr");
     let start_td = isPop ? 0 : dimensions.length;
     let end_td = isPop ? dimensions.length : dimensions.length + sample_dimensions.length;
+    let sample_point = dataset.permuted[display_index];
+    let pop_id = sample_point['id'];
+    let pop_index = 0;
+    for(let d = 0; d < dataset.all.length; d++){
+        if(dataset.all[d]['id'] == pop_id){
+            pop_index = d;
+            break;
+        }
+    }
     rows.each(function(r){
-        if(r > sample_index) return;
+        //
+
         let td_elements = $(this).children();
         td_elements.each(function(d){
-            if(d < start_td || d >= end_td) return;
-            let dim_index = d - start_td;
-            let row_value = dataset.all[r][sample_dimensions[dim_index].name];
-            $(this).html(row_value);
-            if(r == sample_index){
+            let fs = $(this).css('font-size');
+            let ofs = $(this).attr('data-ofont');
+            if(r == pop_index && d == 0){
                 $(this).css("color", 'red');
+                $(this).css('font-weight', 'Bold');
+                $(this).attr('data-ofont', ofs ? ofs : fs);
+                $(this).css('font-size', ofs);
+                $(this).css('font-size', "+=5");
             }else{
-                if(sample_dimensions[dim_index].type == 'categoric'){
-                    let colorIndex = sample_dimensions[dim_index].factors.indexOf(row_value);
-                    $(this).css("color", dim_index == 0 ? config.proportionColorsList[colorIndex] : config.groupColorsList[colorIndex]);
+                $(this).css('font-weight', 'Normal');
+                $(this).css('font-size', ofs);
+                if(sample_dimensions[0].type == 'categoric'){
+                    let colorIndex = sample_dimensions[0].factors.indexOf(row_value);
+                    $(this).css("color", 0 == 0 ? config.proportionColorsList[colorIndex] : config.groupColorsList[colorIndex]);
                 }else{
                     $(this).css("color", 'black');
+                }
+            }
+            if(r <= display_index){
+                if(d < start_td || d >= end_td) return;
+                let dim_index = d - start_td;
+                let row_value = dataset.permuted[r][sample_dimensions[dim_index].name];
+                $(this).html(row_value);
+                if(r == display_index){
+                    $(this).css("color", 'red');
+                    $(this).css('font-weight', 'Bold');
+                    $(this).attr('data-ofont', ofs ? ofs : fs);
+                    $(this).css('font-size', ofs);
+                    $(this).css('font-size', "+=5");
+                }else{
+                    $(this).css('font-weight', 'Normal');
+                    $(this).css('font-size', ofs);
+                    if(sample_dimensions[dim_index].type == 'categoric'){
+                        let colorIndex = sample_dimensions[dim_index].factors.indexOf(row_value);
+                        $(this).css("color", dim_index == 0 ? config.proportionColorsList[colorIndex] : config.groupColorsList[colorIndex]);
+                    }else{
+                        $(this).css("color", 'black');
+                    }
                 }
             }
 

@@ -18,12 +18,15 @@ Single Numerical
 -1 Sample stat mark ghost too early
 	-Done!
 -1 Sample drop too slow
+	-partial
 -5 Sample stat mark ghost
 	-Done!
 -20 Sample Missing
 	-Done!
 -1 Dist too slow
+	-partial
 -5 Dist skip pick and drop
+	-Partial
 -? Show Theoretical Distribution
 
 

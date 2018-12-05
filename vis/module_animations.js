@@ -26,6 +26,13 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             animation.addStage(stage);
         }else{
             stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 2000/speed);
+            if(module.name == "Bootstrapping"){
+                stage.setFunc(()=>{
+                    if(!dd_showing) dd_toggle();
+                    dd_clearDatapoints({}, pop_dimensions, sample_dimensions);
+                    dd_updateDatapoints({all: vis.samples[sample_index].all}, pop_dimensions, sample_dimensions, false)
+                });
+            }
             point_skip_drop(static_elements, dynamic_elements, stage, sample_index);
             animation.addStage(stage);
         }
@@ -95,7 +102,7 @@ function bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sample_
         stage.setFunc(()=>{
             if(!dd_showing) dd_toggle();
             dd_clearDatapoints({all: d3.permute(sample.all, sample_permute)}, pop_dimensions, sample_dimensions);
-            dd_updateSingleDatapoints({all: d3.permute(sample.all, sample_permute)}, pop_dimensions, sample_dimensions, i, false);
+            dd_updateSingleDatapoints({all: vis.dataset.all, permuted: d3.permute(sample.all, sample_permute)}, pop_dimensions, sample_dimensions, sample_permute[i], i, false);
         });
         
         let element = dynamic_elements.datapoints.all[sample_permute[i]];
@@ -383,6 +390,13 @@ function dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_
 }
 function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index){
     stage = new animStage('dist', animation.name, 10);
+    if(module.name == "Bootstrapping"){
+        stage.setFunc(()=>{
+            if(!dd_showing) dd_toggle();
+            dd_clearDatapoints({}, pop_dimensions, sample_dimensions);
+            dd_updateDatapoints({all: vis.samples[sample_index].all}, pop_dimensions, sample_dimensions, false)
+        });
+    }
     for(let x = 0; x < 1000; x ++){
         let sample_markers = dynamic_elements.distribution.stats[x];
         for(let n = 0; n < sample_markers.length; n++){
