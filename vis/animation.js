@@ -49,7 +49,7 @@ class Animation {
 			let endings = pre_stage.getEndings();
 			vis.initStageInitials(endings);
 		}
-		for(let e = this.stages.length - 1; e > stageIndex; e--){
+		for(let e = this.stages.length - 1; e >= stageIndex; e--){
 			let post_stage = this.stages[e];
 			let startings = post_stage.getStartings();
 			vis.initStageInitials(startings);

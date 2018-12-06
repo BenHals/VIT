@@ -1,20 +1,24 @@
 let dd_showing = false;
 function generateDataDisplay(dataset){
     let base_html = `
-    <button type="button" class="btn btn-default hidden" aria-label="hide" onclick="dd_toggle()">
-        <span id="hideDD" class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-        <span id="showDD" class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
-    </button>
-    <div class="table-responsive">
-        <table id='prunedTable' class = 'table'>
-            <thead>
-                <tr id='sampleNum'></tr>
-                <tr id='tableHeadings'></tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>`;
+    <div id="t-container">
+        <button type="button" class="btn btn-default hidden" aria-label="hide" onclick="dd_toggle()">
+            <span id="hideDD" class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+            <span id="showDD" class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+        </button>
+        <div class="table-responsive">
+            <table id='prunedTable' class = 'table'>
+                <thead>
+                    <tr id='sampleNum'></tr>
+                    <tr id='tableHeadings'></tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <canvas id="ddaug" width="0" height="0" style="position:absolute">
+    </canvas>`;
     return [base_html, [dd_populateInit.bind(this, dataset, model.dimensions, model.getSampleDimensions()), dd_populateStatistics.bind(this, dataset)]];
 }
 
@@ -91,6 +95,10 @@ function dd_updateDatapoints(dataset, dimensions, sample_dimensions, isPop){
     })
 }
 function dd_clearDatapoints(dataset, dimensions, sample_dimensions, isPop){
+    let augCanvas = document.getElementById('ddaug');
+    let augCtx = augCanvas.getContext('2d');
+    let canvasBox = augCanvas.getBoundingClientRect();
+    augCtx.clearRect(0, 0, canvasBox.width, canvasBox.height);
     let rows = $("#prunedTable > tbody > tr");
     let start_td = isPop ? 0 : dimensions.length;
     let end_td = isPop ? dimensions.length : dimensions.length + sample_dimensions.length;
@@ -131,6 +139,11 @@ function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sampl
             break;
         }
     }
+    let augCanvas = document.getElementById('ddaug');
+    let augCtx = augCanvas.getContext('2d');
+    let canvasBox = augCanvas.getBoundingClientRect();
+    let popBox = null;
+    let box = null;
     rows.each(function(r){
         //
 
@@ -138,12 +151,20 @@ function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sampl
         td_elements.each(function(d){
             let fs = $(this).css('font-size');
             let ofs = $(this).attr('data-ofont');
+            
             if(r == pop_index && d == 0){
-                $(this).css("color", 'red');
-                $(this).css('font-weight', 'Bold');
-                $(this).attr('data-ofont', ofs ? ofs : fs);
-                $(this).css('font-size', ofs);
-                $(this).css('font-size', "+=5");
+                $(this).css("color", '#f5f5f5');
+                //$(this).css('font-weight', 'Bold');
+                //$(this).attr('data-ofont', ofs ? ofs : fs);
+                //$(this).css('font-size', ofs);
+                //$(this).css('font-size', "+=5");
+                popBox = $(this)[0].getBoundingClientRect();
+
+                augCtx.font = `${parseInt(fs) + 5}px sans-serif`;
+                augCtx.textAlign = 'center';
+                augCtx.textBaseline = 'middle';
+                augCtx.fillStyle = 'red';
+                augCtx.fillText(dataset.permuted[display_index][sample_dimensions[0].name], (popBox.left + popBox.right)/2 - canvasBox.left, (popBox.top + popBox.bottom) / 2 - canvasBox.top);
             }else{
                 $(this).css('font-weight', 'Normal');
                 $(this).css('font-size', ofs);
@@ -159,12 +180,26 @@ function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sampl
                 let dim_index = d - start_td;
                 let row_value = dataset.permuted[r][sample_dimensions[dim_index].name];
                 $(this).html(row_value);
+                //box = $(this)[0].getBoundingClientRect();
+
                 if(r == display_index){
-                    $(this).css("color", 'red');
-                    $(this).css('font-weight', 'Bold');
-                    $(this).attr('data-ofont', ofs ? ofs : fs);
-                    $(this).css('font-size', ofs);
-                    $(this).css('font-size', "+=5");
+                    //$(this).css("color", 'white');
+                    // $(this).css('font-weight', 'Bold');
+                    // $(this).attr('data-ofont', ofs ? ofs : fs);
+                    // $(this).css('font-size', ofs);
+                    // $(this).css('font-size', "+=5");
+                    $(this).css("color", '#f5f5f5');
+                    //$(this).css('font-weight', 'Bold');
+                    //$(this).attr('data-ofont', ofs ? ofs : fs);
+                    //$(this).css('font-size', ofs);
+                    //$(this).css('font-size', "+=5");
+                    box = $(this)[0].getBoundingClientRect();
+    
+                    augCtx.font = `${parseInt(fs) + 5}px sans-serif`;
+                    augCtx.textAlign = 'center';
+                    augCtx.textBaseline = 'middle';
+                    augCtx.fillStyle = 'red';
+                    augCtx.fillText(dataset.permuted[display_index][sample_dimensions[dim_index].name], (box.left + box.right)/2 - canvasBox.left, (box.top + box.bottom) / 2 - canvasBox.top);
                 }else{
                     $(this).css('font-weight', 'Normal');
                     $(this).css('font-size', ofs);
@@ -175,10 +210,29 @@ function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sampl
                         $(this).css("color", 'black');
                     }
                 }
+
             }
 
         })
-    })
+    });
+    
+    // augCtx.fillStyle = 'red';
+    // augCtx.strokeStyle = 'red';
+    // let x1 = popBox.right - 10 - canvasBox.left;
+    // let x2 = box.left + 10 - canvasBox.left;
+    // let y1 = (popBox.top + popBox.bottom) / 2 - canvasBox.top;
+    // let y2 = (box.top + box.bottom) / 2  - canvasBox.top;
+    // let direction = (x2 - x1) > 0 ? 1 : -1;
+    // let arrow_head_x = x2 - direction * 5;
+    // augCtx.beginPath();
+    // augCtx.moveTo(x1, y1);
+    // augCtx.lineTo(x2, y2);
+    // // augCtx.lineTo(arrow_head_x, y2 + direction * 3);
+    // // augCtx.moveTo(x2, y2);
+    // // augCtx.lineTo(arrow_head_x, y2 - direction * 3);
+    // augCtx.closePath();
+    // augCtx.stroke();
+
 }
 
 function dd_populateStatistics(dataset){
@@ -193,6 +247,9 @@ function dd_populateStatistics(dataset){
 function dd_show(){
     $("#prunedTable").show();
     $("#hideDD").show();
+    $("#ddaug").show();
+    $("#ddaug").attr('width', $("#t-container").width());
+    $("#ddaug").attr('height', $("#t-container").height());
     $("#showDD").hide();
     dd_showing = true;
 }
@@ -200,6 +257,8 @@ function dd_show(){
 function dd_hide(){
     $("#prunedTable").hide();
     $("#hideDD").hide();
+    $("#ddaug").hide();
     $("#showDD").show();
+
     dd_showing = false;
 }
