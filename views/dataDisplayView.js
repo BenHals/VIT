@@ -234,6 +234,87 @@ function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sampl
     // augCtx.stroke();
 
 }
+function dd_linkSingleDatapoint(dataset, dimensions, sample_dimensions, sample_index, display_index, isPop){
+    let rows = $("#prunedTable > tbody > tr");
+    let start_td = isPop ? 0 : dimensions.length;
+    let end_td = isPop ? dimensions.length : dimensions.length + sample_dimensions.length;
+    let augCanvas = document.getElementById('ddaug');
+    let augCtx = augCanvas.getContext('2d');
+    let canvasBox = augCanvas.getBoundingClientRect();
+    let popBox = null;
+    let boxs_to = []
+    rows.each(function(r){
+        let td_elements = $(this).children();
+        td_elements.each(function(d){
+            let fs = $(this).css('font-size');
+            let ofs = $(this).attr('data-ofont');
+            if(r == display_index && d == 0){
+                $(this).css("color", '#f5f5f5');
+                popBox = $(this)[0].getBoundingClientRect();
+                augCtx.font = `${parseInt(fs) + 5}px sans-serif`;
+                augCtx.textAlign = 'center';
+                augCtx.textBaseline = 'middle';
+                augCtx.fillStyle = 'red';
+                augCtx.fillText(dataset.all[display_index][sample_dimensions[0].name], (popBox.left + popBox.right)/2 - canvasBox.left, (popBox.top + popBox.bottom) / 2 - canvasBox.top);
+            }else{
+                $(this).css('font-weight', 'Normal');
+                $(this).css('font-size', ofs);
+                if(sample_dimensions[0].type == 'categoric'){
+                    let colorIndex = sample_dimensions[0].factors.indexOf(row_value);
+                    $(this).css("color", 0 == 0 ? config.proportionColorsList[colorIndex] : config.groupColorsList[colorIndex]);
+                }else{
+                    $(this).css("color", 'black');
+                }
+            }
+            if(d < start_td || d >= end_td) return;
+            let dim_index = d - start_td;
+            let row_value = dataset.permuted[r][sample_dimensions[dim_index].name];
+            $(this).html(row_value);
+            if(dataset.permuted[r].id == dataset.all[display_index].id){
+                $(this).css("color", '#f5f5f5');
+                box = $(this)[0].getBoundingClientRect();
+                augCtx.font = `${parseInt(fs) + 5}px sans-serif`;
+                augCtx.textAlign = 'center';
+                augCtx.textBaseline = 'middle';
+                augCtx.fillStyle = 'red';
+                augCtx.fillText(dataset.all[display_index][sample_dimensions[dim_index].name], (box.left + box.right)/2 - canvasBox.left, (box.top + box.bottom) / 2 - canvasBox.top);
+                boxs_to.push(box);
+            }else{
+                $(this).css('font-weight', 'Normal');
+                $(this).css('font-size', ofs);
+                if(sample_dimensions[dim_index].type == 'categoric'){
+                    let colorIndex = sample_dimensions[dim_index].factors.indexOf(row_value);
+                    $(this).css("color", dim_index == 0 ? config.proportionColorsList[colorIndex] : config.groupColorsList[colorIndex]);
+                }else{
+                    $(this).css("color", 'black');
+                }
+            }
+
+        })
+    });
+    
+    for(let b = 0; b < boxs_to.length; b++){
+        let box = boxs_to[b];
+        augCtx.fillStyle = 'red';
+        augCtx.strokeStyle = 'red';
+        let x1 = popBox.right - 10 - canvasBox.left;
+        let x2 = box.left + 10 - canvasBox.left;
+        let y1 = (popBox.top + popBox.bottom) / 2 - canvasBox.top;
+        let y2 = (box.top + box.bottom) / 2  - canvasBox.top;
+        let direction = (x2 - x1) > 0 ? 1 : -1;
+        let arrow_head_x = x2 - direction * 5;
+        augCtx.beginPath();
+        augCtx.moveTo(x1, y1);
+        augCtx.lineTo(x2, y2);
+        // augCtx.lineTo(arrow_head_x, y2 + direction * 3);
+        // augCtx.moveTo(x2, y2);
+        // augCtx.lineTo(arrow_head_x, y2 - direction * 3);
+        augCtx.closePath();
+        augCtx.stroke();
+    }
+
+
+}
 
 function dd_populateStatistics(dataset){
     // $('#dataDisplay').append("<div id='popStats' class='panel panel-default'><div class='panel-heading'><p style='font-weight:bold'>Statistics</p></div></div>")

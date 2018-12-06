@@ -224,7 +224,7 @@ const vis = {
             this.dynamicElements.all = this.dynamicElements.all.concat([this.dynamicElements.distribution.datapoints[i]]);
         }
     },
-    initAnimation: function(reps, include_distribution, inherit_speed = false){
+    initAnimation: function(reps, include_distribution, track, inherit_speed = false){
         this.reps_left = reps - 1;
         // let speed = this.speed || 1 + 0.75*(reps - 1);
         let speed = inherit_speed ? this.speed : (1 + 0.75*(reps - 1)) * (1 + 2 * include_distribution);
@@ -238,7 +238,7 @@ const vis = {
             }
             this.initSample(this.samples[this.current_sample], this.dynamicElements.distribution.stats[this.current_sample], true);
             
-            ma_createAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample, include_distribution);
+            ma_createAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample, include_distribution, track);
             this.animation = animation;
             this.animation.start();
             this.current_sample = (this.current_sample + 1)%(this.samples.length);
@@ -373,7 +373,7 @@ const vis = {
     animationDone: function(){
         if(this.reps_left > 0) {
             controller.unpause();
-            this.initAnimation(this.reps_left, this.include_distribution, true);
+            this.initAnimation(this.reps_left, this.include_distribution, false, true);
         }else{
             this.speed = null;
         }

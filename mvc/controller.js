@@ -237,9 +237,9 @@ const controller = {
             vis.setProgress(new_progress);
         } 
     },
-    initAnimation: function(num_samples, include_distribution){
+    initAnimation: function(num_samples, include_distribution, track){
         console.log(num_samples +":"+include_distribution);
-        vis.initAnimation(num_samples, include_distribution);
+        vis.initAnimation(num_samples, include_distribution, track);
         controller.unpause();
     },
     showCI: function(){

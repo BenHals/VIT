@@ -217,6 +217,12 @@ function generateAniControlsHTML_old(module_name, labels){
               </div>
             </div>
             <div class = "row">
+              <div class="col-md-8 radioOption" id="trackDiv">
+                <input id="trackpints" type="checkbox" name="sampleOptions" value="20">
+                <label class ="form-check-label" for="trackpints" disabled>Animate points and track samples</label>
+              </div>
+            </div>
+            <div class = "row">
               <div class="panelButton col-md-11 ">
                 <button type="button" class="btn btn-primary btn-block" aria-label="Back" onclick="ac_readNumSamples('sampleOptions')">
                     Go
@@ -283,7 +289,7 @@ function generateAniControls(old, module_name){
 
     // Returns the html for the controls, and functions to populate fields.
     let generator = old ? generateAniControlsHTML_old : generateAniControlsHTML;
-    return [generator(module_name, labels), [ac_initHide]];
+    return [generator(module_name, labels), [ac_initHide(module_name)]];
 }
 
 // ********** Ani Control Events **********
@@ -299,22 +305,29 @@ function ac_pauseToggle(){
   }
 }
 
-function ac_playAnimation(num_samples, include_distribution){
-  controller.initAnimation(num_samples, include_distribution);
+function ac_playAnimation(num_samples, include_distribution, track){
+  controller.initAnimation(num_samples, include_distribution, track);
 }
 
 function ac_readNumSamples(input_elements){
   let radioGroup = $("input:radio[name='"+input_elements+"']:checked");
   let num = radioGroup.val();
-
+  let track = $('#trackpints').prop('checked');
   // Second parameter should be true if the distribution animation is playing.
-  ac_playAnimation(num, input_elements=="distOptions");
+  ac_playAnimation(num, input_elements=="distOptions", track && input_elements=="sampleOptions");
 }
 
 function ac_showCI(){
   controller.showCI();
 }
-
+$(document).on('change', 'input[type="radio"]', function(){
+  if(this.value == 1 && this.name == "sampleOptions"){
+    $('#trackpints').prop('disabled', false);
+  }else{
+    $('#trackpints').prop('disabled', true);
+    $('#trackpints').prop('checked', false);
+  }
+})
 $(document).on('input', '#visAnimProgress', function(e){
   controller.visAnimUserInput(parseFloat($('#visAnimProgress').val()));
 });
@@ -322,8 +335,15 @@ $(document).on('change', '#visAnimProgress', function(e){
     //visAnimUserRelease(e);
 });
 // ********** Ani Control Updates **********
-function ac_initHide(){
-  $('#visControls').hide();
+function ac_initHide(module_name){
+  return function(){
+    $('#visControls').hide();
+    if(module_name != 'Bootstrapping'){
+      $('#trackDiv').hide();
+    }else{
+      $('#trackDiv').show();
+    }
+  }
 }
 function ac_unpause(){
   $('#pausePlay span').removeClass('glyphicon-play');
