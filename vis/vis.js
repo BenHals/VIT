@@ -26,7 +26,9 @@ const vis = {
         this.paused = false;
         this.loop_started = false;
         this.reqAnimationFrame = undefined;
+        this.static_draw_index = 0;
         this.current_sample = 0;
+
     },
     initModule: function(module, options){
         this.module = module;
@@ -70,7 +72,7 @@ const vis = {
         let axis = axisFromDataset(this.areas["sec0axis"], this.popMin, this.popMax);
         this.staticElements.pop_axis = axis;
         this.staticElements.all = this.staticElements.all.concat(axis);
-        //this.drawStatic();
+        this.drawStatic();
         
     },
     initSamples: function(samples, distribution){
@@ -207,6 +209,7 @@ const vis = {
         this.staticElements.all = this.staticElements.all.filter((e)=>e.id != 'sample_axis').concat(this.staticElements.sample_axis);
 
         this.drawDynamic();
+        this.drawStatic();
         dd_updateDatapoints(dataset, this.population_dimensions, this.sample_dimensions);
     },
     initSampleDistElements(datapoints){
@@ -367,7 +370,11 @@ const vis = {
         //this.drawStatic();
         
         this.drawDynamic();
-        this.drawStatic();
+        if(this.static_draw_index == 0){
+            this.drawStatic();
+        }
+        this.static_draw_index += 1;
+        this.static_draw_index %= 3;
         this.last_frame = ts;
         //console.log(window.performance.now() - start_t);
         this.reqAnimationFrame = requestAnimationFrame(this.loop.bind(this));
