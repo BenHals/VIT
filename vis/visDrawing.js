@@ -27,7 +27,7 @@ let defaultDrawFuncs = {
         ctx.translate(-0.5, -0.5);
     },
     "prop": function(e, ctx){
-        let backup_color = Math.round(e.getAttr('selected')) ? '#7D1935' : '#4A96AD';
+        let backup_color = Math.round(e.getAttr('selected')) ? '#4A96AD' : '#7D1935';
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color, 1);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
@@ -153,6 +153,7 @@ let defaultDrawFuncs = {
         if(e.getAttr("dashed")){
             ctx.setLineDash([5, 8]);
         }
+        ctx.lineWidth = e.getAttr('lineWidth') ? e.getAttr('lineWidth') : 1;
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
         ctx.moveTo(parseInt(e.getAttr('x1')), parseInt(e.getAttr('y1')));
@@ -336,7 +337,7 @@ let defaultSVGFuncs = {
         let backup_opacity = 0;
         let fill_color = e.getAttr('fill-color') ? e.getAttr('fill-color') : backup_color ? backup_color : 'black';
         let stroke_color = e.getAttr('stroke-color') ? e.getAttr('stroke-color') : backup_color ? backup_color : 'black';
-        e.setAttr('stroke-width', 1);
+        e.setAttr('stroke-width', 10);
         e.setAttr('fill-color', fill_color);
 
         d3.select(svg_id).append('line')
@@ -348,6 +349,7 @@ let defaultSVGFuncs = {
             .attr('y2', e.attrs.y2)
             .style('fill', fill_color)
             .style('stroke', stroke_color)
+            .style('stroke-width', 10)
             .style('stroke-opacity', 0);
     },
     "down-arrow": function(e, ctx){
@@ -505,8 +507,8 @@ function svgAttrUpdate(e){
     let backup_stroke_opacity = e.type == 'line' ? 0 : 1;
     let fill_color = e.getAttr('fill-color') ? e.getAttr('fill-color') : backup_color ? backup_color : 'black';
     let stroke_color = e.getAttr('stroke-color') ? e.getAttr('stroke-color') : backup_color ? backup_color : 'black';
-    let fill_opacity = e.getAttr('fill-opacity') ? e.getAttr('fill-opacity') : backup_fill_opacity;
-    let stroke_opacity = e.getAttr('stroke-opacity') ? e.getAttr('stroke-opacity') : backup_stroke_opacity;
+    let fill_opacity = e.getAttr('fill-opacity') != undefined ? e.getAttr('fill-opacity') : backup_fill_opacity;
+    let stroke_opacity = e.getAttr('stroke-opacity') != undefined ? e.getAttr('stroke-opacity') : backup_stroke_opacity;
 
     //e.setAttr('fill-color', fill_color);
     //e.setAttr('stroke-color', stroke_color);

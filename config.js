@@ -20,7 +20,7 @@ const config = {
                     "#5574a6", "#3b3eac"],
     
     // Colors for proportion bars.
-    proportionColorsList: ["#3366cc", "#dc3912",'#1b9e77','#d95f02','#7570b3'],
+    proportionColorsList: ['#4A96AD' , '#7D1935', "#3366cc", "#dc3912",'#1b9e77','#d95f02','#7570b3'],
 
     // Function to get statistics options users are able to select.
     initStatistics: function(dimensions){

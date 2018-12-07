@@ -50,6 +50,9 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
         }
     }else{
         stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
+        prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+        animation.addStage(stage);
+        stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
         prop_fade_stage(static_elements, dynamic_elements, stage, sample_index);
         animation.addStage(stage);
 
@@ -231,6 +234,71 @@ function point_fade_stage(static_elements, dynamic_elements, stage, sample_index
         }
     }
 }
+function prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index){
+    let pop_elements = [];
+    let delay = 1/dynamic_elements.datapoints.all.length;
+    let factor_names = [];
+    let factor_items = {};
+    for(let pop_circle_id = 0; pop_circle_id < static_elements.datapoints.all.length; pop_circle_id++){
+
+        let pop_circle = static_elements.datapoints.all[pop_circle_id];
+        if(pop_circle.type != 'datapoint') continue;
+        let factor_name = pop_circle.attrs.text;
+        if(!(factor_name in factor_items)){
+            factor_names.push(factor_name);
+            factor_items[factor_name] = [];
+        }
+        factor_items[factor_name].push(pop_circle);
+    }
+    let sample_factor_names = [];
+    let sample_factor_items = {};
+    for(let samp_circle_id = 0; samp_circle_id < dynamic_elements.datapoints.all.length; samp_circle_id++){
+
+        let samp_circle = dynamic_elements.datapoints.all[samp_circle_id];
+        if(samp_circle.type != 'datapoint') continue;
+        let sample_factor_name = samp_circle.attrs.text;
+        if(!(sample_factor_name in sample_factor_items)){
+            sample_factor_names.push(sample_factor_name);
+            sample_factor_items[sample_factor_name] = [];
+        }
+        sample_factor_items[sample_factor_name].push(samp_circle);
+    }
+    let selected_pop_elems = [];
+    for(let n = 0; n < sample_factor_names.length; n++){
+        let fac_name = sample_factor_names[n];
+        d3.shuffle(factor_items[fac_name]);
+        selected_pop_elems.push(factor_items[fac_name].slice(0, sample_factor_items[fac_name].length));
+    }
+    let selected_flat = selected_pop_elems.flat();
+    // for(let i = 0; i < selected_flat.length; i++){
+    //     let element = selected_flat[i];
+    //     let element_id = element.getAttr('id');
+    //     let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
+    //     pop_elements.push(pop_element);
+    //     stage.setTransition(element, 'y', pop_element.getAttr('init_y'), pop_element.getAttr('init_y'), 0, 1);
+    //     stage.setTransition(element, 'fill-opacity', 0, 1, delay*i, delay*(i+1));
+    //     stage.setTransition(element, 'stroke-opacity', 0, 1, delay*i, delay*(i+1));
+    //     stage.setTransition(element, 'selected', 0, 1, delay*i, delay*(i+1));
+    // }
+    for(let i = 0; i < static_elements.datapoints.all.length; i++){
+        let element = static_elements.datapoints.all[i];
+        if(element.type != 'datapoint') continue;
+        let fill = selected_flat.includes(element) ? 1 : 0;
+        stage.setTransition(element, 'fill-opacity', 0, fill, 0, fill);
+        stage.setTransition(element, 'stroke-opacity', 0, fill, 0, fill);
+        // stage.setTransition(element, 'x', 0, 100 * fill, 0, fill);
+        // stage.setTransition(element, 'y', 0, 100 * fill, 0, fill);
+
+    }
+    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index);
+    
+    for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
+        let stat_marker = dynamic_elements.stat_markers[i];
+        stage.setTransition(stat_marker, 'stroke-opacity', 0, 0, 0, 1);
+        stage.setTransition(stat_marker, 'fill-opacity', 0, 1, 0, 1);
+    }
+
+}
 
 function point_skip_drop(static_elements, dynamic_elements, stage, sample_index){
     let pop_elements = [];
@@ -280,8 +348,8 @@ function point_skip_drop(static_elements, dynamic_elements, stage, sample_index)
 
 
 function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index){
-    for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
-        let element = dynamic_elements.datapoints.all[i];
+    for(let i = 0; i < dynamic_elements.datapoints.factors[0].length; i++){
+        let element = dynamic_elements.datapoints.factors[0][i];
         let element_id = element.getAttr('id');
         let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
         stage.setTransition(element, 'fill-opacity', 0, 1, 0, 1);
@@ -358,9 +426,11 @@ function dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_
     let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
     stage.setTransition(stat_marker, 'y1', stat_marker.getAttr('init_y1'), dist_elem.getAttr('init_y'), 0, 1);
     stage.setTransition(stat_marker, 'y2', stat_marker.getAttr('init_y2'), dist_elem.getAttr('init_y'), 0, 1);
+    stage.setTransition(stat_marker, 'lineWidth', 1, 3, 0, 0);
     stage.setTransition(stat_marker, 'selected', 0, 1, 0, 0);
-    stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.9, 1);
-    stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.9, 1);
+    stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.8, 1);
+    stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.8, 1);
+
     if(numeric) {
         for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
             let element = dynamic_elements.datapoints.all[i];

@@ -227,7 +227,7 @@ const vis = {
     initAnimation: function(reps, include_distribution, track, inherit_speed = false){
         this.reps_left = reps - 1;
         // let speed = this.speed || 1 + 0.75*(reps - 1);
-        let speed = inherit_speed ? this.speed : (1 + 0.75*(reps - 1)) * (1 + 2 * include_distribution);
+        let speed = inherit_speed ? this.speed : (1 + 0.75*(reps - 1)) * (1 + 1 * include_distribution);
         this.speed = speed;
         this.include_distribution = include_distribution;
         let animation = new Animation(`${reps}:${include_distribution}`);
@@ -420,7 +420,14 @@ class visElement{
         this.id = id;
         this.type = type;
         this.attrs = {};
-        this.svg_id = type + '-' + id + "-" + Math.round(Math.random() * 10000);
+        this.svg_id = this.getUniqueId();
+    }
+    getUniqueId(){
+        let id = this.type + '-' + this.id + "-" + Math.round(Math.random() * 100000);
+        while(!(d3.select('#' + id).empty())){
+            id = this.type + '-' + this.id + "-" + Math.round(Math.random() * 100000);
+        }
+        return id;
     }
     getAttr(attr){
         if(attr in this.attrs){

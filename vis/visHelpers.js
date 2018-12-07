@@ -99,7 +99,7 @@ function createPropBar(id, prop, y, x, all_list, factor_list, focus, total_items
     }
 
     // create prop bar circles
-    for(let e = 0; e < total_items; e++){
+    for(let e = 0; e < Math.round(total_items); e++){
         let el = new visElement(id, 'datapoint');
         el.setAttr('prop', prop);
         el.setAttr('text', x);
@@ -526,6 +526,7 @@ function placeElements(elements, dimensions, bounds, options, min, max){
             let mid_y = ( height) + factor_bounds.top;
             let prop_items = elements.factors[f].filter((e) => e.type=='prop');
             let text_items = elements.factors[f].filter((e) => e.type=='prop-text');
+            
             for(let e = 0; e < prop_items.length; e++){
                 let prop_rect = prop_items[e];
                 let width = linearScale(prop_rect.getAttr('prop'), [0, 1], [0, factor_bounds.right - factor_bounds.left]);
@@ -540,7 +541,57 @@ function placeElements(elements, dimensions, bounds, options, min, max){
                 // text_item.setAttr('baseline', 'alphabetic');
                 // text_item.setAttr('align', 'start');
                 sum += width;
+                let prop_circles = elements.all.filter((e) => e.type=='datapoint' && e.attrs.text == prop_rect.getAttr('factorX'));
+                let items = parseInt(prop_rect.getAttr('items'));
+                let min_r = 2;
+                let max_r = Math.min(width, height);
+                let radius = max_r;
+                let rows = 1;
+                let row_l = items;
+                let max_row_length = width / (min_r * 2);
+                let width_r = width / (row_l*2);
+                let height_r = height / (rows*2);
+                let it_max = 20;
+                let it = 0;
+                while(it < it_max && (max_row_length < row_l || height_r > width_r * 1.5)){
+                    rows++;
+                    row_l = Math.ceil(items/rows);
+                    width_r = width / (row_l*2);
+                    height_r = height / (rows*2);
+                    it++;
+                }
+                rows = Math.ceil(items/row_l);
+                width_r = width / (row_l*2);
+                height_r = height / (rows*2);
+                radius = Math.min(width_r, height_r);
+                let y_free_space = height - (rows * radius * 2);
+                let y_top_margin = y_free_space / 2;
+                let x_free_space = width - (row_l * radius * 2);
+                let x_left_margin = x_free_space / 2;
+                let r = 0;
+                let c = 0;
+                let lim = Math.min(items, max_row_length * (height / (min_r *2)), 500);
+                for(let i = 0; i < lim; i++){
+                    
+                    let x = prop_rect.attrs.x + x_left_margin + radius + (radius * 2)*r;
+                    let y = prop_rect.attrs.y + y_top_margin + radius + (radius * 2)*c;
+                    prop_circles[i].setAttrInit('x', x);
+                    prop_circles[i].setAttrInit('y', y);
+                    prop_circles[i].setAttrInit('r', radius);
+                    prop_circles[i].setAttrInit('stroke-color', d3.color(config.proportionColorsList[e]).brighter(2));
+                    prop_circles[i].setAttrInit('fill-color', d3.color(config.proportionColorsList[e]).brighter(2));
+                    prop_circles[i].setAttrInit('fill-opacity', 0);
+                    prop_circles[i].setAttrInit('stroke-opacity', 0);
+                    prop_circles[i].setAttr('stroke-opacity', 0);
+                    r++;
+                    if(r == row_l){
+                        c++;
+                        r = 0;
+                    }
+                }
             }
+
+
             console.log(sum);
         }
         
