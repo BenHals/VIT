@@ -1,5 +1,6 @@
 const vis = {
     init: function(){
+        this.destroy();
         this.canvas = document.getElementById('popCanvas');
         this.dynamicCanvas = document.getElementById('dynamicCanvas');
         this.ctx = this.canvas.getContext('2d');
@@ -24,7 +25,7 @@ const vis = {
         this.current_animation_percent = 0;
         this.paused = false;
         this.loop_started = false;
-
+        this.reqAnimationFrame = undefined;
         this.current_sample = 0;
     },
     initModule: function(module, options){
@@ -69,7 +70,7 @@ const vis = {
         let axis = axisFromDataset(this.areas["sec0axis"], this.popMin, this.popMax);
         this.staticElements.pop_axis = axis;
         this.staticElements.all = this.staticElements.all.concat(axis);
-        this.drawStatic();
+        //this.drawStatic();
         
     },
     initSamples: function(samples, distribution){
@@ -356,6 +357,7 @@ const vis = {
     },
     loop: function(ts){
         //let start_t = window.performance.now();
+        //if(!this.loop_started) return;
         this.last_frame = this.last_frame || ts;
         if(!this.paused){
             this.current_animation_percent += (ts-this.last_frame) / this.animation.total_duration;
@@ -368,7 +370,7 @@ const vis = {
         this.drawStatic();
         this.last_frame = ts;
         //console.log(window.performance.now() - start_t);
-        requestAnimationFrame(this.loop.bind(this));
+        this.reqAnimationFrame = requestAnimationFrame(this.loop.bind(this));
     },
     animationDone: function(){
         if(this.reps_left > 0) {
@@ -412,6 +414,12 @@ const vis = {
         this.pause();
         clearSvg('dynSvgContainer');
         clearSvgTextLines('popSvgContainer');
+    },
+    destroy(){
+        if(this.reqAnimationFrame){
+            cancelAnimationFrame(this.reqAnimationFrame);  
+        }
+        
     }
 }
 
