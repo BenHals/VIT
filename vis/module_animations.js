@@ -290,8 +290,8 @@ function prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_
         let element = static_elements.datapoints.all[i];
         if(element.type != 'datapoint') continue;
         let fill = selected_flat.includes(element) ? 1 : 0;
-        stage.setTransition(element, 'fill-opacity', 0, fill, delay*elem_counter, delay*(elem_counter+1));
-        stage.setTransition(element, 'stroke-opacity', 0, fill, delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(element, 'fill-opacity', 0, fill*0.5, delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(element, 'stroke-opacity', 0, fill*0.5, delay*elem_counter, delay*(elem_counter+1));
         let pop_factorX = element.getAttr('factorX');
 
         if (!fill || elem_counter >= dyn_elems.length) continue;
@@ -303,7 +303,7 @@ function prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_
         stage.setTransition(dyn_element, 'parent-y', element.getAttr('init_y'), element.getAttr('init_y'), delay*elem_counter, delay*(elem_counter+1));
         stage.setTransition(dyn_element, 'x', element.getAttr('init_x'), element.getAttr('init_x'), delay*elem_counter, delay*(elem_counter+1));
         stage.setTransition(dyn_element, 'parent-x', element.getAttr('init_x'), element.getAttr('init_x'), delay*elem_counter, delay*(elem_counter+1));
-        stage.setTransition(dyn_element, 'fill-opacity', 0, 1, delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(dyn_element, 'fill-opacity', 0, 0.5, delay*elem_counter, delay*(elem_counter+1));
         sample_factor_count[pop_factorX]++;
         elem_counter += fill;
         // stage.setTransition(element, 'x', 0, 100 * fill, 0, fill);
@@ -374,7 +374,7 @@ function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index)
         let element_id = element.getAttr('id');
         let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
         let fill = element.type == 'datapoint' ? 0 : 1;
-        stage.setTransition(element, 'fill-opacity', !fill, fill, 0, 1);
+        stage.setTransition(element, 'fill-opacity', (!fill)*0.5, fill, 0, 1);
         stage.setTransition(element, 'stroke-opacity', !fill, fill, 0, 1);
     }
     element = dynamic_elements.stat_markers[0];
