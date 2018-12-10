@@ -53,3 +53,6 @@ Bootstrap
 -Animations
 
 
+Many differences:
+	If 0 are chosen from that category, counts as 0 for proportion rather than not being counted. Still draws bar and arrow
+
