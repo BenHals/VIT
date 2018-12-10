@@ -49,10 +49,13 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             animation.addStage(stage);
         }
     }else{
-        stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
-        prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+        stage = new animStage('fadePoint', animation.name, include_distribution ? 1000/speed : 5000/speed);
+        let selected_elements = prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
         animation.addStage(stage);
-        stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
+        stage = new animStage('pointDrop', animation.name, include_distribution ? 1000/speed : 5000/speed);
+        prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
+        animation.addStage(stage);
+        stage = new animStage('fadeBar', animation.name, include_distribution ? 1000/speed : 5000/speed);
         prop_fade_stage(static_elements, dynamic_elements, stage, sample_index);
         animation.addStage(stage);
 
@@ -280,12 +283,29 @@ function prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_
     //     stage.setTransition(element, 'stroke-opacity', 0, 1, delay*i, delay*(i+1));
     //     stage.setTransition(element, 'selected', 0, 1, delay*i, delay*(i+1));
     // }
+    let elem_counter = 0;
+    let dyn_elems = dynamic_elements.datapoints.all.filter((e) => e.type == 'datapoint');
+    let sample_factor_count = {};
     for(let i = 0; i < static_elements.datapoints.all.length; i++){
         let element = static_elements.datapoints.all[i];
         if(element.type != 'datapoint') continue;
         let fill = selected_flat.includes(element) ? 1 : 0;
-        stage.setTransition(element, 'fill-opacity', 0, fill, 0, fill);
-        stage.setTransition(element, 'stroke-opacity', 0, fill, 0, fill);
+        stage.setTransition(element, 'fill-opacity', 0, fill, delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(element, 'stroke-opacity', 0, fill, delay*elem_counter, delay*(elem_counter+1));
+        let pop_factorX = element.getAttr('factorX');
+
+        if (!fill || elem_counter >= dyn_elems.length) continue;
+        if(!(pop_factorX in sample_factor_count)){
+            sample_factor_count[pop_factorX] = 0;
+        }
+        let dyn_element = sample_factor_items[pop_factorX][sample_factor_count[pop_factorX] ];
+        stage.setTransition(dyn_element, 'y', element.getAttr('init_y'), element.getAttr('init_y'), delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(dyn_element, 'parent-y', element.getAttr('init_y'), element.getAttr('init_y'), delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(dyn_element, 'x', element.getAttr('init_x'), element.getAttr('init_x'), delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(dyn_element, 'parent-x', element.getAttr('init_x'), element.getAttr('init_x'), delay*elem_counter, delay*(elem_counter+1));
+        stage.setTransition(dyn_element, 'fill-opacity', 0, 1, delay*elem_counter, delay*(elem_counter+1));
+        sample_factor_count[pop_factorX]++;
+        elem_counter += fill;
         // stage.setTransition(element, 'x', 0, 100 * fill, 0, fill);
         // stage.setTransition(element, 'y', 0, 100 * fill, 0, fill);
 
@@ -297,6 +317,7 @@ function prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_
         stage.setTransition(stat_marker, 'stroke-opacity', 0, 0, 0, 1);
         stage.setTransition(stat_marker, 'fill-opacity', 0, 1, 0, 1);
     }
+    return selected_flat;
 
 }
 
@@ -348,12 +369,13 @@ function point_skip_drop(static_elements, dynamic_elements, stage, sample_index)
 
 
 function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index){
-    for(let i = 0; i < dynamic_elements.datapoints.factors[0].length; i++){
-        let element = dynamic_elements.datapoints.factors[0][i];
+    for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
+        let element = dynamic_elements.datapoints.all[i];
         let element_id = element.getAttr('id');
         let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
-        stage.setTransition(element, 'fill-opacity', 0, 1, 0, 1);
-        stage.setTransition(element, 'stroke-opacity', 0, 1, 0, 1);
+        let fill = element.type == 'datapoint' ? 0 : 1;
+        stage.setTransition(element, 'fill-opacity', !fill, fill, 0, 1);
+        stage.setTransition(element, 'stroke-opacity', !fill, fill, 0, 1);
     }
     element = dynamic_elements.stat_markers[0];
     stage.setTransition(element, 'fill-opacity', 0, 1, 0, 1);
@@ -383,7 +405,7 @@ function stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_inde
 }
 
 
-function point_drop_stage(static_elements, dynamic_elements, stage){
+function point_drop_stage(static_elements, dynamic_elements, stage, sample_index){
     for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
         let element = dynamic_elements.datapoints.all[i];
         let element_id = element.getAttr('id');
@@ -394,6 +416,21 @@ function point_drop_stage(static_elements, dynamic_elements, stage){
         let stat_marker = dynamic_elements.stat_markers[i];
         stage.setTransition(stat_marker, 'stroke-opacity', 0, 1, 0.8, 1);
     }
+
+}
+function prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements){
+    for(let i = 0; i < selected_elements.length; i++){
+        let element = dynamic_elements.datapoints.all.filter((e) => e.type == 'datapoint')[i];
+        let element_id = element.getAttr('id');
+        let pop_element = selected_elements[i];
+        stage.setTransition(element, 'y', pop_element.getAttr('init_y'), element.getAttr('init_y'), 0, 1);
+        stage.setTransition(element, 'x', pop_element.getAttr('init_x'), element.getAttr('init_x'), 0, 1);
+        stage.setTransition(element, 'r', pop_element.getAttr('r'), element.getAttr('r'), 0.5, 1);
+    }
+    // for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
+    //     let stat_marker = dynamic_elements.stat_markers[i];
+    //     stage.setTransition(stat_marker, 'stroke-opacity', 0, 1, 0.8, 1);
+    // }
 
 }
 

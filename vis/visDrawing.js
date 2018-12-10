@@ -59,7 +59,6 @@ let defaultDrawFuncs = {
             parseInt(e.attrs.y));
 
         let items = parseInt(e.getAttr('items'));
-        console.log(items);
         let width = e.attrs.width - 2;
         let height = e.attrs.height - 2;
         let min_r = 2;

@@ -103,6 +103,8 @@ function createPropBar(id, prop, y, x, all_list, factor_list, focus, total_items
         let el = new visElement(id, 'datapoint');
         el.setAttr('prop', prop);
         el.setAttr('text', x);
+        el.setAttr('factorX', x);
+        el.setAttr('factorY', y);
         all_list.push(el);
     }
 
@@ -541,7 +543,7 @@ function placeElements(elements, dimensions, bounds, options, min, max){
                 // text_item.setAttr('baseline', 'alphabetic');
                 // text_item.setAttr('align', 'start');
                 sum += width;
-                let prop_circles = elements.all.filter((e) => e.type=='datapoint' && e.attrs.text == prop_rect.getAttr('factorX'));
+                let prop_circles = elements.all.filter((e) => e.type=='datapoint' && e.attrs.factorX == prop_rect.getAttr('factorX') && e.attrs.factorY == prop_rect.getAttr('factorY'));
                 let items = parseInt(prop_rect.getAttr('items'));
                 let min_r = 2;
                 let max_r = Math.min(width, height);
