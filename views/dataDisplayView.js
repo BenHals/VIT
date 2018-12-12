@@ -17,7 +17,7 @@ function generateDataDisplay(dataset){
             </table>
         </div>
     </div>
-    <canvas id="ddaug" width="0" height="0" style="position:absolute">
+    <canvas id="ddaug" width="0" height="0" style="position:absolute; pointer-events:none">
     </canvas>`;
     return [base_html, [dd_populateInit.bind(this, dataset, model.dimensions, model.getSampleDimensions()), dd_populateStatistics.bind(this, dataset)]];
 }
@@ -105,11 +105,13 @@ function dd_clearDatapoints(dataset, dimensions, sample_dimensions, isPop){
     rows.each(function(r){
         let td_elements = $(this).children();
         td_elements.each(function(d){
+            if(d < start_td || d >= end_td) return;
+            let dim_index = d - start_td;
             let fs = $(this).css('font-size');
             let ofs = $(this).attr('data-ofont');
             $(this).css('font-weight', 'Normal');
             $(this).css('font-size', ofs);
-
+            let row_value = dataset.all[r][sample_dimensions[dim_index].name];
             if(sample_dimensions[0].type == 'categoric'){
                 let colorIndex = sample_dimensions[0].factors.indexOf(row_value);
                 $(this).css("color", 0 == 0 ? config.proportionColorsList[colorIndex] : config.groupColorsList[colorIndex]);
@@ -117,9 +119,9 @@ function dd_clearDatapoints(dataset, dimensions, sample_dimensions, isPop){
                 $(this).css("color", 'black');
             }
 
-            if(d < start_td || d >= end_td) return;
-            let dim_index = d - start_td;
-            let row_value = "";
+            
+            
+            row_value = "";
             $(this).html(row_value);
             
 
@@ -166,6 +168,8 @@ function dd_updateSingleDatapoints(dataset, dimensions, sample_dimensions, sampl
                 augCtx.fillStyle = 'red';
                 augCtx.fillText(dataset.permuted[display_index][sample_dimensions[0].name], (popBox.left + popBox.right)/2 - canvasBox.left, (popBox.top + popBox.bottom) / 2 - canvasBox.top);
             }else{
+                let dim_index = d % (end_td - start_td);
+                let row_value = dataset.permuted[r][sample_dimensions[dim_index].name];
                 $(this).css('font-weight', 'Normal');
                 $(this).css('font-size', ofs);
                 if(sample_dimensions[0].type == 'categoric'){
@@ -257,6 +261,8 @@ function dd_linkSingleDatapoint(dataset, dimensions, sample_dimensions, sample_i
                 augCtx.fillStyle = 'red';
                 augCtx.fillText(dataset.all[display_index][sample_dimensions[0].name], (popBox.left + popBox.right)/2 - canvasBox.left, (popBox.top + popBox.bottom) / 2 - canvasBox.top);
             }else{
+                let dim_index = d % (end_td - start_td);
+                let row_value = dataset.permuted[r][sample_dimensions[dim_index].name];
                 $(this).css('font-weight', 'Normal');
                 $(this).css('font-size', ofs);
                 if(sample_dimensions[0].type == 'categoric'){

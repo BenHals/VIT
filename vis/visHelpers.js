@@ -544,35 +544,37 @@ function placeElements(elements, dimensions, bounds, options, min, max){
                 // text_item.setAttr('align', 'start');
                 sum += width;
                 let prop_circles = elements.all.filter((e) => e.type=='datapoint' && e.attrs.factorX == prop_rect.getAttr('factorX') && e.attrs.factorY == prop_rect.getAttr('factorY'));
+                let width_margin = width - 2;
+                let height_margin = height - 2;
                 let items = parseInt(prop_rect.getAttr('items'));
                 let min_r = 2;
-                let max_r = Math.min(width, height);
+                let max_r = Math.min(width_margin, height_margin);
                 let radius = max_r;
                 let rows = 1;
                 let row_l = items;
-                let max_row_length = width / (min_r * 2);
-                let width_r = width / (row_l*2);
-                let height_r = height / (rows*2);
+                let max_row_length = width_margin / (min_r * 2);
+                let width_r = width_margin / (row_l*2);
+                let height_r = height_margin / (rows*2);
                 let it_max = 20;
                 let it = 0;
                 while(it < it_max && (max_row_length < row_l || height_r > width_r * 1.5)){
                     rows++;
                     row_l = Math.ceil(items/rows);
-                    width_r = width / (row_l*2);
-                    height_r = height / (rows*2);
+                    width_r = width_margin / (row_l*2);
+                    height_r = height_margin / (rows*2);
                     it++;
                 }
                 rows = Math.ceil(items/row_l);
-                width_r = width / (row_l*2);
-                height_r = height / (rows*2);
+                width_r = width_margin / (row_l*2);
+                height_r = height_margin / (rows*2);
                 radius = Math.min(width_r, height_r);
-                let y_free_space = height - (rows * radius * 2);
+                let y_free_space = height_margin - (rows * radius * 2);
                 let y_top_margin = y_free_space / 2;
-                let x_free_space = width - (row_l * radius * 2);
+                let x_free_space = width_margin - (row_l * radius * 2);
                 let x_left_margin = x_free_space / 2;
                 let r = 0;
                 let c = 0;
-                let lim = Math.min(items, max_row_length * (height / (min_r *2)), 500);
+                let lim = Math.min(items, max_row_length * (height_margin / (min_r *2)), 500);
                 for(let i = 0; i < lim; i++){
                     
                     let x = prop_rect.attrs.x + x_left_margin + radius + (radius * 2)*r;
