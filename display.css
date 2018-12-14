@@ -3,6 +3,7 @@
   display: block;
   height: 100%;
   overflow-x: hidden;
+  overflow-y: hidden;
 
 }
 
@@ -45,6 +46,9 @@
 @media (max-width : 768px) {
   #display {
     height: 90%;
+  }
+  #moduleContent {
+    overflow-y:  scroll;
   }
 }
 
