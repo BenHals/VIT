@@ -187,7 +187,7 @@ config.modules =  {
             }
         },
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
-                {name: 'Sample Size', type: "number", range: [0, 'any'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
+                    ],
         generateSample:function(population_rows, sampleSize,){
             // Each sample should be sampleSize elements taken from the pop
             // with replacement (CAN take the same element twice).
@@ -232,11 +232,11 @@ config.modules =  {
                 return true;
             }};
             this.options.push(groups);
-            if(dimensions[0].type == 'numeric'){
+            //if(dimensions[0].type == 'numeric'){
                 let pop_size = model.getPopulationSize();
                 let sample_size = {name: 'Sample Size', type: "number", hide_option: true, range: [pop_size, pop_size], default: pop_size, validate: (v, o)=> (v >= o.range[0] && v <= o.range[1])};
                 this.options.push(sample_size);
-            }
+            //}
         },
         inCI: function(distribution_sorted, dist_element, population_statistic){
             return true;
@@ -254,8 +254,7 @@ config.modules =  {
             }
         },
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
-                {name: 'Groups', type: "number", range: [0, 5], default: 2, validate: (v, o)=> (v > o.range[0] && v < o.range[1])},
-                {name: 'Sample Size', type: "number", hide_option:true, range: [0, 'any'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
+                {name: 'Groups', type: "number", range: [0, 5], default: 2, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
         generateSample:function(population_rows, sampleSize){
             // Sample Elements are the same as the population elements,
             // but with either A or B set as the group.
@@ -287,7 +286,8 @@ config.modules =  {
             this.options = [];
             let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(dimensions), default: config.initStatistics(dimensions)[0], validate: (v, o)=> o.values.includes(v)};
             this.options.push(statistics);
-            if(dimensions[0].type == 'numeric'){
+            if(true){
+            // if(dimensions[0].type == 'numeric'){
                 let pop_size = model.getPopulationSize();
                 let sample_size = {name: 'Sample Size', type: "number", hide_option: true, range: [pop_size, pop_size], default: pop_size, validate: (v, o)=> (v >= o.range[0] && v <= o.range[1])};
                 this.options.push(sample_size);
@@ -313,7 +313,7 @@ config.modules =  {
             }
         },
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
-                {name: 'Sample Size', type: "number", range: [0, 'any'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
+                ],
         generateSample:function(population_rows, sampleSize,){
             // Sample Elements are the same as the population elements,
             // but with the second dimension randomised, keeping the number of elements in 

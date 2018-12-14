@@ -98,6 +98,7 @@ const model = {
         // for(let i = invalid_rows.length - 1; i >= 0; i--){
         //     this.parsedData.splice(invalid_rows[i], 1);
         // }
+        this.cleanData();
     },
 
     formatData: async function(){
@@ -342,7 +343,7 @@ const model = {
     },
 
     getPopulationSize: function(){
-        if(!this.populationDS) return this.parsedData.length;
+        if(!this.populationDS) return this.cleaned_data.length;
         return this.populationDS.all.length;
     },
 
@@ -381,7 +382,7 @@ const model = {
     
     takeSamples: async function(){
         let population_data = this.cleaned_data;
-        let sample_size = this.getOptions()["Sample Size"];
+        let sample_size = Math.min(this.getOptions()["Sample Size"], population_data.length);
         let sample_generator = this.selected_module.generateSample;
         this.samples = [];
         this.distribution = [];

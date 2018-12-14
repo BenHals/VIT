@@ -148,7 +148,9 @@ function uqGen(stat_name, dim_name){
     }];
 }
 function propGen(stat_name, dim_name, focus, total){
-    return [stat_name, function(dp){return (dp && dp.length > 1) ? dp.reduce((a, c) => c[dim_name] == focus ? a + 1 : a, 0) / dp.length : 0}];
+    return [stat_name, function(dp){
+        return (dp && dp.length > 1) ? dp.reduce((a, c) => c[dim_name] == focus ? a + 1 : a, 0) / dp.length : dp[0][dim_name] == focus;
+    }];
 }
 
 function avDev(stat_name, dim_name, dim_name2, factors, mid_stat){
