@@ -281,7 +281,9 @@ function prop_bootstrap_fade_in(animation, pop_dimensions, sample_dimensions, sa
             let pop_elements = static_elements.datapoints.all.filter((e)=>e.type=="datapoint");
             for(let e = 0; e < pop_elements.length; e++){
                 let pop_element = pop_elements[e];
-                pop_element.setAttr('fill-opacity', faded_in.includes(pop_element));
+                // pop_element.setAttr('fill-opacity', faded_in.includes(pop_element));
+                //pop_element.setAttr('fill-opacity', 0);
+            
             }
         });
         animation.addStage(stage);

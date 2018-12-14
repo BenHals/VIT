@@ -149,6 +149,7 @@ function uqGen(stat_name, dim_name){
 }
 function propGen(stat_name, dim_name, focus, total){
     return [stat_name, function(dp){
+        if(dp.length == 0) return 0;
         return (dp && dp.length > 1) ? dp.reduce((a, c) => c[dim_name] == focus ? a + 1 : a, 0) / dp.length : dp[0][dim_name] == focus;
     }];
 }
