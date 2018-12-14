@@ -479,6 +479,8 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
     let distribution_elements = [];
     let distribution_stat_elements = [];
     let distribution_CI_elements = [];
+    let min_in_CI = null;
+    let max_in_CI = null;
     for(let i = 0; i < distribution.length; i++){
         let el = new visElement(i, 'distribution');
         el.setAttr('stat', options.Statistic);
@@ -486,15 +488,29 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
         let dist_distance_from_pop = distribution.slice().sort(function(a, b){return Math.abs(a - population_statistic) - Math.abs(b-population_statistic)});
         let in_ci = inCI(dist_distance_from_pop, distribution[i], population_statistic);
         el.setAttr('in_ci', in_ci);
+        if(in_ci && (min_in_CI == null || el.value < min_in_CI)) min_in_CI = el.value;
+        if(in_ci && (max_in_CI == null || el.value > max_in_CI)) max_in_CI = el.value;
         distribution_elements.push(el);
         let dist_stat_els = statisticsFromDistribution(distribution[i], datasets[i], dimensions, bounds, options, popMin, popMax, min, max, i);
         distribution_stat_elements.push(dist_stat_els);
     }
     let cross_bar = new visElement('ci_cross_bar', 'line');
     cross_bar.setAttr('selected', 1);
+    let cross_bar_mid = new visElement('ci_cross_bar_mid', 'line');
+    cross_bar_mid.setAttr('selected', 1);
+    let cross_bar_top = new visElement('ci_cross_bar_top', 'line');
+    cross_bar_top.setAttr('selected', 1);
     let ci_min = new visElement('ci_min', 'down-arrow');
     let ci_max = new visElement('ci_max', 'down-arrow');
-    distribution_CI_elements = [cross_bar, ci_min, ci_max];
+    let ci_min_text = new visElement('ci_min_text', 'text');
+    let ci_max_text = new visElement('ci_max_text', 'text');
+    let ci_min_top = new visElement('ci_min_top', 'down-arrow');
+    let ci_max_top = new visElement('ci_max_top', 'down-arrow');
+    let ci_min_text_top = new visElement('ci_min_text_top', 'text');
+    let ci_max_text_top = new visElement('ci_max_text_top', 'text');
+    ci_min_text.setAttr('value', min_in_CI);
+    ci_max_text.setAttr('value', max_in_CI);
+    distribution_CI_elements = [cross_bar, cross_bar_mid, cross_bar_top,  ci_min, ci_max, ci_min_text, ci_max_text, ci_min_top, ci_max_top, ci_min_text_top, ci_max_text_top];
     return [distribution_elements, distribution_stat_elements, distribution_CI_elements];
 }
 
@@ -623,12 +639,20 @@ function placeDistribution(datapoints, ci, area, vertical, min, max){
         min_ci_screen_y = min_ci_screen_y == null || dp.getAttr('y') < min_ci_screen_y ? dp.getAttr('y') : min_ci_screen_y;
         max_ci_screen_y = max_ci_screen_y == null || dp.getAttr('y') > max_ci_screen_y ? dp.getAttr('y') : max_ci_screen_y;
     }
-    let [cross_bar, ci_min, ci_max] = ci;
+    let [cross_bar, cross_bar_mid, cross_bar_top, ci_min, ci_max, ci_min_text, ci_max_text, ci_min_top, ci_max_top, ci_min_text_top, ci_max_text_top] = ci;
     if(!vertical){
         cross_bar.setAttr('x1', min_ci_screen_x);
         cross_bar.setAttr('x2', max_ci_screen_x);
         cross_bar.setAttr('y1', area.split(2, 1)[1]);
         cross_bar.setAttr('y2', area.split(2, 1)[1]);
+        cross_bar_mid.setAttr('x1', min_ci_screen_x);
+        cross_bar_mid.setAttr('x2', max_ci_screen_x);
+        cross_bar_mid.setAttr('y1', area.split(2, 1)[1]);
+        cross_bar_mid.setAttr('y2', area.split(2, 1)[1]);
+        cross_bar_top.setAttr('x1', min_ci_screen_x);
+        cross_bar_top.setAttr('x2', max_ci_screen_x);
+        cross_bar_top.setAttr('y1', area.split(2, 1)[1]);
+        cross_bar_top.setAttr('y2', area.split(2, 1)[1]);
         ci_min.setAttr('x1', min_ci_screen_x);
         ci_min.setAttr('x2', min_ci_screen_x);
         ci_min.setAttr('y1', area.split(2, 1)[1]);
@@ -637,6 +661,34 @@ function placeDistribution(datapoints, ci, area, vertical, min, max){
         ci_max.setAttr('x2', max_ci_screen_x);
         ci_max.setAttr('y1', area.split(2, 1)[1]);
         ci_max.setAttr('y2', area.split(2, 2)[1]);
+        ci_min_text.setAttr('x', min_ci_screen_x);
+        ci_min_text.setAttr('y',area.split(2, 2)[1] + 30);
+        ci_min_text.setAttr('text', Math.round(ci_min_text.getAttr('value')));
+        ci_min_text.setAttr('fill-color', 'red');
+        ci_min_text.setAttr('align', 'middle');
+        ci_max_text.setAttr('x', max_ci_screen_x);
+        ci_max_text.setAttr('y',area.split(2, 2)[1] + 30);
+        ci_max_text.setAttr('text', Math.round(ci_max_text.getAttr('value')));
+        ci_max_text.setAttr('fill-color', 'red');
+        ci_max_text.setAttr('align', 'middle');
+        ci_min_top.setAttr('x1', min_ci_screen_x);
+        ci_min_top.setAttr('x2', min_ci_screen_x);
+        ci_min_top.setAttr('y1', area.split(2, 1)[1]);
+        ci_min_top.setAttr('y2', area.split(2, 2)[1]);
+        ci_max_top.setAttr('x1', max_ci_screen_x);
+        ci_max_top.setAttr('x2', max_ci_screen_x);
+        ci_max_top.setAttr('y1', area.split(2, 1)[1]);
+        ci_max_top.setAttr('y2', area.split(2, 2)[1]);
+        ci_min_text_top.setAttr('x', min_ci_screen_x);
+        ci_min_text_top.setAttr('y',area.split(2, 2)[1] + 30);
+        ci_min_text_top.setAttr('text', Math.round(ci_min_text.getAttr('value')));
+        ci_min_text_top.setAttr('fill-color', 'red');
+        ci_min_text_top.setAttr('align', 'middle');
+        ci_max_text_top.setAttr('x', max_ci_screen_x);
+        ci_max_text_top.setAttr('y',area.split(2, 2)[1] + 30);
+        ci_max_text_top.setAttr('text', Math.round(ci_max_text.getAttr('value')));
+        ci_max_text_top.setAttr('fill-color', 'red');
+        ci_max_text_top.setAttr('align', 'middle');
     }else{
         cross_bar.setAttr('y1', min_ci_screen_y);
         cross_bar.setAttr('y2', max_ci_screen_y);

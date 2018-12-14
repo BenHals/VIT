@@ -247,6 +247,10 @@ const vis = {
             this.animation.start();
             this.current_sample = (this.current_sample + 1)%(this.samples.length);
         }else{
+            if(this.current_sample >= 1000){
+                this.current_sample = 0;
+                this.dynamicElements.all = [];
+            }
             this.dynamicElements.all = [];
             for(let i = 0; i < this.dynamicElements.distribution.stats.length; i++){
                 this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.distribution.stats[i]);
@@ -273,11 +277,13 @@ const vis = {
         let speed = 1;
         this.include_distribution = false;
         let animation = new Animation(`ci`);
-        ma_createCIAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample);
+        ma_createCIAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample, this.areas);
         this.animation = animation;
         this.animation.start();
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
-        
+        this.paused = false;
+        ac_unpause();
+        this.last_frame = window.performance.now();
         if(!this.loop_started) {
             this.loop(window.performance.now());
             this.loop_started = true;
@@ -351,7 +357,7 @@ const vis = {
             if(config.element_draw_type[element.type] == "canvas"){
                 element.draw(ctx);
             }else if(config.element_draw_type[element.type] == "svg"){
-                if(!element.svg_initialised){
+                if(!element.svg_initialised || d3.select('#' + element.svg_id).empty()){
                     let svg_id = '#dynSvgContainer';
                     defaultSVGFuncs[element.type](element, svg_id);
                     element.svg_initialised = true;

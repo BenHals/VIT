@@ -747,7 +747,7 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
     return animation;
 }
 
-function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index){
+function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, areas){
     stage = new animStage('dist', animation.name, 1000);
     stage.setFunc(function(){
         vis.dynamicElements.all = [];
@@ -776,6 +776,39 @@ function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, stat
         stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
         stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 1);
     }
+    animation.addStage(stage);
+    stage = new animStage('dist', animation.name, 1000);
+    let cross_bar = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar")[0];
+    let cross_bar_mid = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar_mid")[0];
+    let cross_bar_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar_top")[0];
+    let ci_min = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min")[0];
+    let ci_max = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max")[0];
+    let ci_min_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_text")[0];
+    let ci_max_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_text")[0];
+    let ci_min_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_top")[0];
+    let ci_max_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_top")[0];
+    let ci_min_text_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_text_top")[0];
+    let ci_max_text_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_text_top")[0];
+    stage.setTransition(cross_bar_mid, 'y1', cross_bar.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(cross_bar_mid, 'y2', cross_bar.getAttr('y2'), areas['sec1display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(cross_bar_top, 'y1', cross_bar.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(cross_bar_top, 'y2', cross_bar.getAttr('y2'), areas['sec1display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(ci_min_top, 'y1', ci_min.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(ci_min_top, 'y2', ci_min.getAttr('y2'), areas['sec1display'].split(8, 8)[1], 0, 1);
+    stage.setTransition(ci_max_top, 'y1', ci_max.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(ci_max_top, 'y2', ci_max.getAttr('y2'), areas['sec1display'].split(8, 8)[1], 0, 1);
+    stage.setTransition(ci_min_text_top, 'y', ci_min_text.getAttr('y'), areas['sec1display'].split(8, 8)[1], 0, 1);
+    stage.setTransition(ci_max_text_top, 'y', ci_max_text.getAttr('y'), areas['sec1display'].split(8, 8)[1], 0, 1);
+    animation.addStage(stage);
+    stage = new animStage('dist', animation.name, 1000);
+    stage.setTransition(cross_bar_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(cross_bar_top, 'y2', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(ci_min_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(ci_min_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
+    stage.setTransition(ci_max_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+    stage.setTransition(ci_max_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
+    stage.setTransition(ci_min_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 30, 0, 1);
+    stage.setTransition(ci_max_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 30, 0, 1);
     animation.addStage(stage);
     return animation;
 }
