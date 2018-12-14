@@ -76,6 +76,7 @@ const model = {
     },
 
     parseCSV: function(csv){
+        this.resetAll();
         if(csv.slice(0, 20).indexOf("DOCTYPE") != -1) return;
         this.parsedData = d3.csvParse(csv);
         invalid_rows = [];
