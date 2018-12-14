@@ -19,7 +19,7 @@ let defaultDrawFuncs = {
         ctx.beginPath();
         ctx.arc(parseInt(e.attrs.x),
                 parseInt(e.attrs.y),
-                10,
+                e.getAttr('r') || 5,
                 0,
                 Math.PI * 2);
         ctx.stroke();

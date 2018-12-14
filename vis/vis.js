@@ -259,7 +259,9 @@ const vis = {
             this.reps_left = 0;
         }
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
-
+        this.paused = false;
+        ac_unpause();
+        this.last_frame = window.performance.now();
         if(!this.loop_started) {
             this.loop(window.performance.now());
             this.loop_started = true;
@@ -377,14 +379,19 @@ const vis = {
         this.static_draw_index %= 3;
         this.last_frame = ts;
         //console.log(window.performance.now() - start_t);
-        this.reqAnimationFrame = requestAnimationFrame(this.loop.bind(this));
+        if(!this.paused){
+            this.reqAnimationFrame = requestAnimationFrame(this.loop.bind(this));
+        }
+        
     },
     animationDone: function(){
         if(this.reps_left > 0) {
-            controller.unpause();
+            
             this.initAnimation(this.reps_left, this.include_distribution, false, true);
         }else{
             this.speed = null;
+            controller.pause();
+            controller.animationDone();
         }
         
     },
@@ -392,7 +399,7 @@ const vis = {
     setProgress: function(p){
         
         this.current_animation_percent = p;
-        this.animation.percentUpdate(this.current_animation_percent);
+        // this.animation.percentUpdate(this.current_animation_percent);
         let [stage, stage_percentage] = this.animation.percentUpdate(this.current_animation_percent);
         if(stage != this.current_stage){
             this.animation.startStage(stage);
@@ -402,13 +409,27 @@ const vis = {
         this.updateDynamic(stage_percentage);
         
         controller.setPlaybackProgress(p);
+
+        if(this.paused){
+            this.drawDynamic();
+            this.drawStatic();
+        }
         
     },
     pause: function(){
         this.paused = true;
+        if(this.reqAnimationFrame){
+            cancelAnimationFrame(this.reqAnimationFrame);  
+            this.loop_started = false;
+        }
+        this.last_frame = null;
     },
     unpause: function(){
         this.paused = false;
+        if(!this.loop_started) {
+            this.loop(window.performance.now());
+            this.loop_started = true;
+        }
     },
     scale: function(scale_x){
         if(!this.ctx) return;
@@ -418,7 +439,7 @@ const vis = {
         this.drawDynamic();
     },
     stopAndClear(){
-        this.pause();
+        controller.pause();
         clearSvg('dynSvgContainer');
         clearSvgTextLines('popSvgContainer');
     },

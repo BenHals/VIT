@@ -88,7 +88,6 @@ class Animation {
 		return this.stages[this.currentStage];
 	}
 	finish(){
-		controller.pause();
 		vis.animationDone();
 	}
 	percentUpdate(p){

@@ -242,19 +242,25 @@ const controller = {
         vis.initAnimation(num_samples, include_distribution, track);
         controller.unpause();
     },
+    animationDone(){
+        return;
+    },
     showCI: function(){
         vis.initCIAnimation();
         controller.unpause();
     },
     pause: function(){
         this.paused = true;
-        vis.pause();
         ac_pause();
+        vis.pause();
+        
     },
     unpause: function(){
+        if(vis.current_animation_percent >= 1) return;
         this.paused = false;
-        vis.unpause();
         ac_unpause();
+        vis.unpause();
+        
     },
     setPlaybackProgress: function(p){
         ac_setPlaybackProgress(p);
