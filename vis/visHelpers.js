@@ -662,13 +662,13 @@ function placeDistribution(datapoints, ci, area, vertical, min, max){
         ci_max.setAttr('y1', area.split(2, 1)[1]);
         ci_max.setAttr('y2', area.split(2, 2)[1]);
         ci_min_text.setAttr('x', min_ci_screen_x);
-        ci_min_text.setAttr('y',area.split(2, 2)[1] + 30);
-        ci_min_text.setAttr('text', Math.round(ci_min_text.getAttr('value')));
+        ci_min_text.setAttr('y',area.split(2, 2)[1] + 50);
+        ci_min_text.setAttr('text', Math.round(ci_min_text.getAttr('value') * 100) / 100);
         ci_min_text.setAttr('fill-color', 'red');
         ci_min_text.setAttr('align', 'middle');
         ci_max_text.setAttr('x', max_ci_screen_x);
-        ci_max_text.setAttr('y',area.split(2, 2)[1] + 30);
-        ci_max_text.setAttr('text', Math.round(ci_max_text.getAttr('value')));
+        ci_max_text.setAttr('y',area.split(2, 2)[1] + 50);
+        ci_max_text.setAttr('text', Math.round(ci_max_text.getAttr('value') * 100) / 100);
         ci_max_text.setAttr('fill-color', 'red');
         ci_max_text.setAttr('align', 'middle');
         ci_min_top.setAttr('x1', min_ci_screen_x);
@@ -680,13 +680,13 @@ function placeDistribution(datapoints, ci, area, vertical, min, max){
         ci_max_top.setAttr('y1', area.split(2, 1)[1]);
         ci_max_top.setAttr('y2', area.split(2, 2)[1]);
         ci_min_text_top.setAttr('x', min_ci_screen_x);
-        ci_min_text_top.setAttr('y',area.split(2, 2)[1] + 30);
-        ci_min_text_top.setAttr('text', Math.round(ci_min_text.getAttr('value')));
+        ci_min_text_top.setAttr('y',area.split(2, 2)[1] + 50);
+        ci_min_text_top.setAttr('text', Math.round(ci_min_text.getAttr('value') * 100) / 100);
         ci_min_text_top.setAttr('fill-color', 'red');
         ci_min_text_top.setAttr('align', 'middle');
         ci_max_text_top.setAttr('x', max_ci_screen_x);
-        ci_max_text_top.setAttr('y',area.split(2, 2)[1] + 30);
-        ci_max_text_top.setAttr('text', Math.round(ci_max_text.getAttr('value')));
+        ci_max_text_top.setAttr('y',area.split(2, 2)[1] + 50);
+        ci_max_text_top.setAttr('text', Math.round(ci_max_text.getAttr('value') * 100) / 100);
         ci_max_text_top.setAttr('fill-color', 'red');
         ci_max_text_top.setAttr('align', 'middle');
     }else{

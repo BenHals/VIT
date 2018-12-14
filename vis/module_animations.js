@@ -807,8 +807,8 @@ function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, stat
     stage.setTransition(ci_min_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
     stage.setTransition(ci_max_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
     stage.setTransition(ci_max_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
-    stage.setTransition(ci_min_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 30, 0, 1);
-    stage.setTransition(ci_max_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 30, 0, 1);
+    stage.setTransition(ci_min_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 50, 0, 1);
+    stage.setTransition(ci_max_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 50, 0, 1);
     animation.addStage(stage);
     return animation;
 }
