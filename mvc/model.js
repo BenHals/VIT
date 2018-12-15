@@ -340,6 +340,7 @@ const model = {
                 return factors[a].statistics["Mean"] - factors[b].statistics["Mean"];
             });
         }
+        this.populationDS.largeCI = this.largeCI;
         return this.populationDS;
     },
 
@@ -387,11 +388,22 @@ const model = {
         let sample_generator = this.selected_module.generateSample;
         this.samples = [];
         this.distribution = [];
+        this.largeSampleFinished = false;
         let stat = model.getOptions()["Statistic"];
         for(let i = 1; i <= 1000; i++){
             let sample_dataset = null;
             setTimeout(()=> {this.genSample(population_data, sample_size, sample_generator, stat, i)}, 0);
         }
+        if(this.selected_module.name == "Bootstrapping"){
+            this.largeSampleStats = [];
+            for(let i = 1; i <= 10000; i++){
+                setTimeout(()=> {this.genLargeSample(population_data, sample_size, sample_generator, stat, i)}, 0);
+            }
+        }else{
+            this.largeSampleFinished = true;
+        }
+
+        
     },
     genSample: async function(population_data, sample_size, sample_generator, stat, i){
         // if(window.Worker){
@@ -421,6 +433,35 @@ const model = {
             this.samples.push(ds);
             controller.updateSampleProgress(i/1000);
         //}
+    },
+    genLargeSample: async function(population_data, sample_size, sample_generator, stat, i){
+        let sample = sample_generator(population_data, sample_size);
+        let ds = createDataset(sample, this.getSampleDimensions(), this.genStatistics(sample, this.getSampleDimensions()));
+        let dim = this.getSampleDimensions();
+        let stat_value = ds.statistics[stat];
+        if(dim.length > 1 && dim[1].factors.length == 2){
+            let f0_stat = ds[dim[0].name][dim[1].name][dim[1].factors[0]].statistics[stat];
+            let f1_stat = ds[dim[0].name][dim[1].name][dim[1].factors[1]].statistics[stat];
+            stat_value = f1_stat - f0_stat;
+        }
+        this.largeSampleStats.push(stat_value);
+        controller.updateSampleProgress(i/1000);
+        if(this.largeSampleStats.length == 10000){
+            
+            let stat = getPopulationStatistic(this.populationDS, this.getOptions().Statistic, this.dimensions)[0];
+            let sorted_dist = this.largeSampleStats.sort(function(a, b){return Math.abs(a - stat) - Math.abs(b-stat)});
+            let min_stat = null;
+            let max_stat = null;
+            for(let ls = 0; ls < sorted_dist.length; ls++){
+                let in_ci = this.selected_module.inCI(sorted_dist, sorted_dist[ls], stat);
+                if(in_ci && (min_stat == null || sorted_dist[ls] < min_stat)) min_stat = sorted_dist[ls];
+                if(in_ci && (max_stat == null || sorted_dist[ls] > max_stat)) max_stat = sorted_dist[ls];
+            }
+            this.largeCI = [min_stat, max_stat];
+            this.populationDS.largeCI = [min_stat, max_stat];
+            this.largeSampleFinished = true;
+            controller.updateSampleProgress(i/1000);
+        }
     },
 
     resetAll: function(){

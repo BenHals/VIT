@@ -475,7 +475,7 @@ function statisticsFromDistribution(distribution_stat, dataset, dimensions, boun
 
     return new_elements;
 }
-function elementsFromDistribution(distribution, datasets, dimensions, bounds, options, popMin, popMax, min, max, inCI, population_statistic){
+function elementsFromDistribution(distribution, datasets, dimensions, bounds, options, popMin, popMax, min, max, inCI, population_statistic, largeCI){
     let distribution_elements = [];
     let distribution_stat_elements = [];
     let distribution_CI_elements = [];
@@ -509,8 +509,8 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
     let ci_max_top = new visElement('ci_max_top', 'down-arrow');
     let ci_min_text_top = new visElement('ci_min_text_top', 'text');
     let ci_max_text_top = new visElement('ci_max_text_top', 'text');
-    ci_min_text.setAttr('value', min_in_CI);
-    ci_max_text.setAttr('value', max_in_CI);
+    ci_min_text.setAttr('actual_value', min_in_CI);
+    ci_max_text.setAttr('actual_value', max_in_CI);
     let ci_pop_stat_arrow = new visElement('ci_pop_stat_arrow', 'arrow');
     let ci_pop_stat_text = new visElement('ci_pop_stat_text', 'text');
     if(population_statistic.length > 1){
@@ -634,7 +634,7 @@ function placeElements(elements, dimensions, bounds, options, min, max){
 function placeCI(ci, area, min, max, dimensions){
 
 }
-function placeDistribution(datapoints, ci, area, vertical, min, max, stat_markers){
+function placeDistribution(datapoints, ci, area, vertical, min, max, stat_markers, largeCI = [0, 0]){
     let text_margin = vis.areas['sec2axis'].height;
     if(! vertical){
         heap(datapoints, area, min, max, false, 5);
@@ -660,51 +660,74 @@ function placeDistribution(datapoints, ci, area, vertical, min, max, stat_marker
         cross_bar.setAttrInit('y1', area.split(2, 1)[1]);
         cross_bar.setAttrInit('y2', area.split(2, 1)[1]);
         cross_bar.setAttrInit('lineWidth', 3);
+        cross_bar.setAttrInit('large_x1', linearScale(largeCI[0], [min, max], [area.left, area.right]));
+        cross_bar.setAttrInit('large_x2', linearScale(largeCI[1], [min, max], [area.left, area.right]));
+
 
         cross_bar_mid.setAttrInit('x1', min_ci_screen_x);
         cross_bar_mid.setAttrInit('x2', max_ci_screen_x);
+        cross_bar_mid.setAttrInit('large_x1', linearScale(largeCI[0], [min, max], [area.left, area.right]));
+        cross_bar_mid.setAttrInit('large_x2', linearScale(largeCI[1], [min, max], [area.left, area.right]));
         cross_bar_mid.setAttrInit('y1', area.split(2, 1)[1]);
         cross_bar_mid.setAttrInit('y2', area.split(2, 1)[1]);
         cross_bar_mid.setAttrInit('lineWidth', 3);
         cross_bar_top.setAttrInit('x1', min_ci_screen_x);
         cross_bar_top.setAttrInit('x2', max_ci_screen_x);
+        cross_bar_top.setAttrInit('large_x1', linearScale(largeCI[0], [min, max], [area.left, area.right]));
+        cross_bar_top.setAttrInit('large_x2', linearScale(largeCI[1], [min, max], [area.left, area.right]));
         cross_bar_top.setAttrInit('y1', area.split(2, 1)[1]);
         cross_bar_top.setAttrInit('y2', area.split(2, 1)[1]);
         cross_bar_top.setAttrInit('lineWidth', 3);
         ci_min.setAttrInit('x1', min_ci_screen_x);
         ci_min.setAttrInit('x2', min_ci_screen_x);
+        ci_min.setAttrInit('large_x1', linearScale(largeCI[0], [min, max], [area.left, area.right]));
+        ci_min.setAttrInit('large_x2', linearScale(largeCI[0], [min, max], [area.left, area.right]));
         ci_min.setAttrInit('y1', area.split(2, 1)[1]);
         ci_min.setAttrInit('y2', area.split(2, 2)[1]);
         ci_max.setAttrInit('x1', max_ci_screen_x);
         ci_max.setAttrInit('x2', max_ci_screen_x);
+        ci_max.setAttrInit('large_x1', linearScale(largeCI[1], [min, max], [area.left, area.right]));
+        ci_max.setAttrInit('large_x2', linearScale(largeCI[1], [min, max], [area.left, area.right]));
         ci_max.setAttrInit('y1', area.split(2, 1)[1]);
         ci_max.setAttrInit('y2', area.split(2, 2)[1]);
         ci_min_text.setAttrInit('x', min_ci_screen_x);
+        ci_min_text.setAttrInit('large_x', linearScale(largeCI[0], [min, max], [area.left, area.right]));
         ci_min_text.setAttrInit('y',area.split(2, 2)[1] + text_margin);
-        ci_min_text.setAttrInit('text', Math.round(ci_min_text.getAttr('value') * 100) / 100);
+        ci_min_text.setAttrInit('text', Math.round(ci_min_text.getAttr('actual_value') * 100) / 100);
+        ci_min_text.setAttrInit('large_text', Math.round(largeCI[0] * 100) / 100);
         ci_min_text.setAttrInit('fill-color', 'red');
         ci_min_text.setAttrInit('align', 'middle');
         ci_max_text.setAttrInit('x', max_ci_screen_x);
+        ci_max_text.setAttrInit('large_x', linearScale(largeCI[1], [min, max], [area.left, area.right]));
         ci_max_text.setAttrInit('y',area.split(2, 2)[1] + text_margin);
-        ci_max_text.setAttrInit('text', Math.round(ci_max_text.getAttr('value') * 100) / 100);
+        ci_max_text.setAttrInit('text', Math.round(ci_max_text.getAttr('actual_value') * 100) / 100);
+        ci_max_text.setAttrInit('large_text', Math.round(largeCI[1] * 100) / 100);
         ci_max_text.setAttrInit('fill-color', 'red');
         ci_max_text.setAttrInit('align', 'middle');
         ci_min_top.setAttrInit('x1', min_ci_screen_x);
         ci_min_top.setAttrInit('x2', min_ci_screen_x);
+        ci_min_top.setAttrInit('large_x1', linearScale(largeCI[0], [min, max], [area.left, area.right]));
+        ci_min_top.setAttrInit('large_x2', linearScale(largeCI[0], [min, max], [area.left, area.right]));
         ci_min_top.setAttrInit('y1', area.split(2, 1)[1]);
         ci_min_top.setAttrInit('y2', area.split(2, 2)[1]);
         ci_max_top.setAttrInit('x1', max_ci_screen_x);
         ci_max_top.setAttrInit('x2', max_ci_screen_x);
+        ci_max_top.setAttrInit('large_x1', linearScale(largeCI[1], [min, max], [area.left, area.right]));
+        ci_max_top.setAttrInit('large_x2', linearScale(largeCI[1], [min, max], [area.left, area.right]));
         ci_max_top.setAttrInit('y1', area.split(2, 1)[1]);
         ci_max_top.setAttrInit('y2', area.split(2, 2)[1]);
         ci_min_text_top.setAttrInit('x', min_ci_screen_x);
+        ci_min_text_top.setAttrInit('large_x', linearScale(largeCI[0], [min, max], [area.left, area.right]));
         ci_min_text_top.setAttrInit('y',area.split(2, 2)[1] + text_margin);
-        ci_min_text_top.setAttrInit('text', Math.round(ci_min_text.getAttr('value') * 100) / 100);
+        ci_min_text_top.setAttrInit('text', Math.round(ci_min_text.getAttr('actual_value') * 100) / 100);
+        ci_min_text_top.setAttrInit('large_text', Math.round(largeCI[0] * 100) / 100);
         ci_min_text_top.setAttrInit('fill-color', 'red');
         ci_min_text_top.setAttrInit('align', 'middle');
         ci_max_text_top.setAttrInit('x', max_ci_screen_x);
+        ci_max_text_top.setAttrInit('large_x', linearScale(largeCI[1], [min, max], [area.left, area.right]));
         ci_max_text_top.setAttrInit('y',area.split(2, 2)[1] + text_margin);
-        ci_max_text_top.setAttrInit('text', Math.round(ci_max_text.getAttr('value') * 100) / 100);
+        ci_max_text_top.setAttrInit('text', Math.round(ci_max_text.getAttr('actual_value') * 100) / 100);
+        ci_max_text_top.setAttrInit('large_text', Math.round(largeCI[1] * 100) / 100);
         ci_max_text_top.setAttrInit('fill-color', 'red');
         ci_max_text_top.setAttrInit('align', 'middle');
         

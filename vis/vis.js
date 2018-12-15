@@ -163,7 +163,7 @@ const vis = {
                 this.module.inCI,
                 getPopulationStatistic(this.dataset, statistic, this.dimensions)
             );
-        placeDistribution(datapoints, ci, area_heap, vertical, min, max, this.staticElements.stat_markers);
+        placeDistribution(datapoints, ci, area_heap, vertical, min, max, this.staticElements.stat_markers, this.dataset.largeCI);
         this.dynamicElements.distribution = {};
         this.dynamicElements.distribution.datapoints = datapoints;
         let prev_all = this.dynamicElements.all || [];
@@ -272,12 +272,12 @@ const vis = {
         }
 
     },
-    initCIAnimation(){
+    initCIAnimation(large){
         this.reps_left = 0;
         let speed = 1;
         this.include_distribution = false;
         let animation = new Animation(`ci`);
-        ma_createCIAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample, this.areas);
+        ma_createCIAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample, this.areas, large);
         this.animation = animation;
         this.animation.start();
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());

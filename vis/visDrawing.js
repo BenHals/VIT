@@ -478,6 +478,7 @@ let defaultSVGUpdates = {
     },
     "text": function(e){
         svgAttrUpdate(e);
+        d3.select('#'+e.svg_id).text(e.getAttr('text'));
     },
     "line": function(e){
         svgAttrUpdate(e);

@@ -748,7 +748,26 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
     return animation;
 }
 
-function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, areas){
+function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, areas, largeCI){
+    stage = new animStage('dist', animation.name, 200);
+    stage.setFunc(function(){
+        for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+            let ci_element = dynamic_elements.distribution.ci[i];
+            for(let e = 0; e < Object.keys(ci_element.attrs).length; e++){
+                let attr = Object.keys(ci_element.attrs)[e];
+                if(attr.includes('init_large') && largeCI){
+                    let attr_value = ci_element.getAttr(attr);
+                    let replace_name = attr.split('_').slice(2).join('_');
+                    ci_element.setAttr(replace_name, attr_value);
+                }else if(attr.includes('init_') && !attr.includes('large_') && !largeCI){
+                    let attr_value = ci_element.getAttr(attr);
+                    let replace_name = attr.split('_').slice(1).join('_');
+                    ci_element.setAttr(replace_name, attr_value);
+                }
+            }
+        }  
+    });
+    animation.addStage(stage);
     if(sample_dimensions.length > 1 && sample_dimensions[1].type == 'categoric' && sample_dimensions[1].factors.length > 1){
         stage = new animStage('dist', animation.name, 1000);
         let text_margin = areas['sec2axis'].height;

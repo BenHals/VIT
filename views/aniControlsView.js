@@ -267,11 +267,19 @@ function generateAniControlsHTML_old(module_name, labels){
                   </button> 
                 </div>
               </div>
-              <div class = "row">
+              <div class = "row" id="CIButton">
                 <div class="panelButton col-md-11 ">
                   <button type="button" class="btn btn-default btn-block" aria-label="Back" onclick="ac_showCI()">
                   <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
                   Show CI
+                  </button> 
+                </div>
+              </div> 
+              <div class = "row" id="largeCIButton">
+                <div class="panelButton col-md-11 ">
+                  <button type="button" class="btn btn-default btn-block" aria-label="Back" onclick="ac_showCI(true)">
+                  <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                  Show CI for 10,000 
                   </button> 
                 </div>
               </div> 
@@ -317,8 +325,8 @@ function ac_readNumSamples(input_elements){
   ac_playAnimation(num, input_elements=="distOptions", track && input_elements=="sampleOptions");
 }
 
-function ac_showCI(){
-  controller.showCI();
+function ac_showCI(large = false){
+  controller.showCI(large);
 }
 $(document).on('change', 'input[type="radio"]', function(){
   if(this.value == 1 && this.name == "sampleOptions"){
@@ -342,6 +350,13 @@ function ac_initHide(module_name){
       $('#trackDiv').hide();
     }else{
       $('#trackDiv').show();
+    }
+    if(module_name == "Bootstrapping"){
+      $('#CIButton').show();
+      $('#largeCIButton').show();
+    }else{
+      $('#CIButton').hide();
+      $('#largeCIButton').hide();
     }
   }
 }

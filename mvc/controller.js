@@ -217,7 +217,7 @@ const controller = {
     },
     updateSampleProgress: function(p){
         ac_updateProgress(p);
-        if(model.samples.length == 1000){
+        if(model.samples.length == 1000 && model.largeSampleFinished){
             ac_loadingDone();
             let ds = model.populationDataset();
             vis.initOptions(model.getOptions());
@@ -245,8 +245,8 @@ const controller = {
     animationDone(){
         return;
     },
-    showCI: function(){
-        vis.initCIAnimation();
+    showCI: function(large){
+        vis.initCIAnimation(large);
         controller.unpause();
     },
     pause: function(){
