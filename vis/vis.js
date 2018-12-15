@@ -163,7 +163,7 @@ const vis = {
                 this.module.inCI,
                 getPopulationStatistic(this.dataset, statistic, this.dimensions)
             );
-        placeDistribution(datapoints, ci, area_heap, vertical, min, max);
+        placeDistribution(datapoints, ci, area_heap, vertical, min, max, this.staticElements.stat_markers);
         this.dynamicElements.distribution = {};
         this.dynamicElements.distribution.datapoints = datapoints;
         let prev_all = this.dynamicElements.all || [];
@@ -432,10 +432,11 @@ const vis = {
     },
     unpause: function(){
         this.paused = false;
-        if(!this.loop_started) {
-            this.loop(window.performance.now());
-            this.loop_started = true;
-        }
+        
+        cancelAnimationFrame(this.reqAnimationFrame); 
+        this.loop(window.performance.now());
+        this.loop_started = true;
+        
     },
     scale: function(scale_x){
         if(!this.ctx) return;

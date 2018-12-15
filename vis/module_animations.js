@@ -41,7 +41,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             if(module.name == "Bootstrapping"){
                 stage.setFunc(()=>{
                     if(!dd_showing) dd_toggle();
-                    dd_clearDatapoints({}, pop_dimensions, sample_dimensions);
+                    dd_clearDatapoints({all: vis.samples[sample_index].all}, pop_dimensions, sample_dimensions);
                     dd_updateDatapoints({all: vis.samples[sample_index].all}, pop_dimensions, sample_dimensions, false)
                 });
             }
@@ -678,10 +678,11 @@ function dist_drop_devi_stage_2(static_elements, dynamic_elements, stage, sample
 function dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index){
     let stat_marker = dynamic_elements.stat_markers[dynamic_elements.stat_markers.length - 1];
     let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
-    stage.setTransition(stat_marker, 'y1', stat_marker.getAttr('init_y1'), dist_elem.getAttr('init_y'), 0, 1);
-    stage.setTransition(stat_marker, 'y2', stat_marker.getAttr('init_y2'), dist_elem.getAttr('init_y'), 0, 1);
-    stage.setTransition(stat_marker, 'x1', stat_marker.getAttr('init_x1'), vis.areas["sec2display"].innerLeft + vis.areas["sec2display"].innerWidth/2, 0,  1);
-    stage.setTransition(stat_marker, 'x2', stat_marker.getAttr('init_x2'), dist_elem.getAttr('init_x'), 0, 1);
+    stage.setTransition(stat_marker, 'y1', stat_marker.getAttr('init_y1'), dist_elem.getAttr('init_y'), 0.2, 1);
+    stage.setTransition(stat_marker, 'y2', stat_marker.getAttr('init_y2'), dist_elem.getAttr('init_y'), 0.2, 1);
+    stage.setTransition(stat_marker, 'x1', stat_marker.getAttr('init_x1'), vis.areas["sec2display"].innerLeft + vis.areas["sec2display"].innerWidth/2, 0.2,  1);
+    stage.setTransition(stat_marker, 'x2', stat_marker.getAttr('init_x2'), dist_elem.getAttr('init_x'), 0.2, 1);
+    stage.setTransition(stat_marker, 'selected', 0, 1, 0, 0.1);
     stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.9, 1);
     stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.9, 1);
 }
@@ -748,67 +749,122 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
 }
 
 function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, areas){
-    stage = new animStage('dist', animation.name, 1000);
-    stage.setFunc(function(){
-        vis.dynamicElements.all = [];
-        for(let i = 0; i < vis.dynamicElements.distribution.stats.length; i++){
-            //vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.stats[i]);
-            vis.dynamicElements.all = vis.dynamicElements.all.concat([vis.dynamicElements.distribution.datapoints[i]]);
+    if(sample_dimensions.length > 1 && sample_dimensions[1].type == 'categoric' && sample_dimensions[1].factors.length > 1){
+        stage = new animStage('dist', animation.name, 1000);
+        let text_margin = areas['sec2axis'].height;
+        stage.setFunc(function(){
+            vis.dynamicElements.all = [];
+            for(let i = 0; i < vis.dynamicElements.distribution.stats.length; i++){
+                //vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.stats[i]);
+                vis.dynamicElements.all = vis.dynamicElements.all.concat([vis.dynamicElements.distribution.datapoints[i]]);
+            }
+            vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.ci);
+        });
+        for(let i = 0; i < dynamic_elements.distribution.datapoints.length; i++){
+            let dist_datapoint = dynamic_elements.distribution.datapoints[i];
+            let opacity = dist_datapoint.getAttr('in_ci') ? 1 : 0.2;
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 1, opacity, 0, 1);
+            stage.setTransition(dist_datapoint, 'fill-opacity', 1, opacity, 0, 1);
         }
-        vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.ci);
-    });
-    for(let i = 0; i < dynamic_elements.distribution.datapoints.length; i++){
-        let dist_datapoint = dynamic_elements.distribution.datapoints[i];
-        let opacity = dist_datapoint.getAttr('in_ci') ? 1 : 0.2;
-        stage.setTransition(dist_datapoint, 'stroke-opacity', 1, opacity, 0, 1);
-        stage.setTransition(dist_datapoint, 'fill-opacity', 1, opacity, 0, 1);
-    }
-    for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
-        let dist_datapoint = dynamic_elements.distribution.ci[i];
-        stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 0, 0, 1);
-        stage.setTransition(dist_datapoint, 'fill-opacity', 0, 0, 0, 1);
-    }
-    animation.addStage(stage);
+        for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+            let dist_datapoint = dynamic_elements.distribution.ci[i];
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 0, 0, 1);
+            stage.setTransition(dist_datapoint, 'fill-opacity', 0, 0, 0, 1);
+        }
+        animation.addStage(stage);
+        let ci_pop_stat_arrow = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_pop_stat_arrow")[0];
+        let ci_pop_stat_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_pop_stat_text")[0];
 
-    stage = new animStage('dist', animation.name, 1000);
-    for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
-        let dist_datapoint = dynamic_elements.distribution.ci[i];
-        stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
-        stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 1);
+        stage = new animStage('dist', animation.name, 1000);
+        stage.setTransition(ci_pop_stat_arrow, 'stroke-opacity', 0, 1, 0, 1);
+        stage.setTransition(ci_pop_stat_arrow, 'fill-opacity', 0, 1, 0, 1);
+        stage.setTransition(ci_pop_stat_text, 'stroke-opacity', 0, 1, 0, 1);
+        stage.setTransition(ci_pop_stat_text, 'fill-opacity', 0, 1, 0, 1);
+        animation.addStage(stage);
+        stage = new animStage('dist', animation.name, 1000);
+        stage.setTransition(ci_pop_stat_arrow, 'x1', ci_pop_stat_arrow.getAttr('init_x1'), ci_pop_stat_arrow.getAttr('dist_x1'), 0, 1);
+        stage.setTransition(ci_pop_stat_arrow, 'x2', ci_pop_stat_arrow.getAttr('init_x2'), ci_pop_stat_arrow.getAttr('dist_x2'), 0, 1);
+        stage.setTransition(ci_pop_stat_text, 'x', ci_pop_stat_text.getAttr('init_x'), sample_dimensions[1].factors.length > 2 ? (ci_pop_stat_arrow.getAttr('dist_x1') + ci_pop_stat_arrow.getAttr('dist_x2')) / 2 : ci_pop_stat_arrow.getAttr('dist_x2'), 0, 1);
+        stage.setTransition(ci_pop_stat_arrow, 'y1', ci_pop_stat_arrow.getAttr('init_y1'), areas['sec2display'].bottom, 0, 1);
+        stage.setTransition(ci_pop_stat_arrow, 'y2', ci_pop_stat_arrow.getAttr('init_y2'), areas['sec2display'].bottom, 0, 1);
+        stage.setTransition(ci_pop_stat_text, 'y', ci_pop_stat_text.getAttr('init_y'), areas['sec2display'].bottom + (sample_dimensions[1].factors.length > 2 ? 0 : (text_margin / 1.5)), 0, 1);
+        //stage.setTransition(ci_pop_stat_text, 'alignment-baseline', 'hanging', 0, 1);
+        animation.addStage(stage);
+        stage = new animStage('dist', animation.name, 1000);
+        for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+            let dist_datapoint = dynamic_elements.distribution.ci[i];
+            if(dist_datapoint == ci_pop_stat_arrow || dist_datapoint == ci_pop_stat_text) continue;
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
+            stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 1);
+        }
+        animation.addStage(stage);
+        
+    }else{
+        stage = new animStage('dist', animation.name, 1000);
+        let text_margin = areas['sec2axis'].height;
+        stage.setFunc(function(){
+            vis.dynamicElements.all = [];
+            for(let i = 0; i < vis.dynamicElements.distribution.stats.length; i++){
+                //vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.stats[i]);
+                vis.dynamicElements.all = vis.dynamicElements.all.concat([vis.dynamicElements.distribution.datapoints[i]]);
+            }
+            vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.ci);
+        });
+        for(let i = 0; i < dynamic_elements.distribution.datapoints.length; i++){
+            let dist_datapoint = dynamic_elements.distribution.datapoints[i];
+            let opacity = dist_datapoint.getAttr('in_ci') ? 1 : 0.2;
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 1, opacity, 0, 1);
+            stage.setTransition(dist_datapoint, 'fill-opacity', 1, opacity, 0, 1);
+        }
+        for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+            let dist_datapoint = dynamic_elements.distribution.ci[i];
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 0, 0, 1);
+            stage.setTransition(dist_datapoint, 'fill-opacity', 0, 0, 0, 1);
+        }
+        animation.addStage(stage);
+    
+        stage = new animStage('dist', animation.name, 1000);
+        for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+            let dist_datapoint = dynamic_elements.distribution.ci[i];
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
+            stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 1);
+        }
+        animation.addStage(stage);
+        stage = new animStage('dist', animation.name, 1000);
+        let cross_bar = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar")[0];
+        let cross_bar_mid = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar_mid")[0];
+        let cross_bar_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar_top")[0];
+        let ci_min = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min")[0];
+        let ci_max = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max")[0];
+        let ci_min_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_text")[0];
+        let ci_max_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_text")[0];
+        let ci_min_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_top")[0];
+        let ci_max_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_top")[0];
+        let ci_min_text_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_text_top")[0];
+        let ci_max_text_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_text_top")[0];
+        stage.setTransition(cross_bar_mid, 'y1', cross_bar.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(cross_bar_mid, 'y2', cross_bar.getAttr('y2'), areas['sec1display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(cross_bar_top, 'y1', cross_bar.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(cross_bar_top, 'y2', cross_bar.getAttr('y2'), areas['sec1display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(ci_min_top, 'y1', ci_min.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(ci_min_top, 'y2', ci_min.getAttr('y2'), areas['sec1display'].split(8, 8)[1], 0, 1);
+        stage.setTransition(ci_max_top, 'y1', ci_max.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(ci_max_top, 'y2', ci_max.getAttr('y2'), areas['sec1display'].split(8, 8)[1], 0, 1);
+        stage.setTransition(ci_min_text_top, 'y', ci_min_text.getAttr('y'), areas['sec1display'].split(8, 8)[1], 0, 1);
+        stage.setTransition(ci_max_text_top, 'y', ci_max_text.getAttr('y'), areas['sec1display'].split(8, 8)[1], 0, 1);
+        animation.addStage(stage);
+        stage = new animStage('dist', animation.name, 1000);
+        stage.setTransition(cross_bar_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(cross_bar_top, 'y2', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(ci_min_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(ci_min_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
+        stage.setTransition(ci_max_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
+        stage.setTransition(ci_max_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
+        stage.setTransition(ci_min_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + text_margin, 0, 1);
+        stage.setTransition(ci_max_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + text_margin, 0, 1);
+        animation.addStage(stage);
+         
     }
-    animation.addStage(stage);
-    stage = new animStage('dist', animation.name, 1000);
-    let cross_bar = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar")[0];
-    let cross_bar_mid = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar_mid")[0];
-    let cross_bar_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_cross_bar_top")[0];
-    let ci_min = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min")[0];
-    let ci_max = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max")[0];
-    let ci_min_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_text")[0];
-    let ci_max_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_text")[0];
-    let ci_min_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_top")[0];
-    let ci_max_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_top")[0];
-    let ci_min_text_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_min_text_top")[0];
-    let ci_max_text_top = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_max_text_top")[0];
-    stage.setTransition(cross_bar_mid, 'y1', cross_bar.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(cross_bar_mid, 'y2', cross_bar.getAttr('y2'), areas['sec1display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(cross_bar_top, 'y1', cross_bar.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(cross_bar_top, 'y2', cross_bar.getAttr('y2'), areas['sec1display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(ci_min_top, 'y1', ci_min.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(ci_min_top, 'y2', ci_min.getAttr('y2'), areas['sec1display'].split(8, 8)[1], 0, 1);
-    stage.setTransition(ci_max_top, 'y1', ci_max.getAttr('y1'), areas['sec1display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(ci_max_top, 'y2', ci_max.getAttr('y2'), areas['sec1display'].split(8, 8)[1], 0, 1);
-    stage.setTransition(ci_min_text_top, 'y', ci_min_text.getAttr('y'), areas['sec1display'].split(8, 8)[1], 0, 1);
-    stage.setTransition(ci_max_text_top, 'y', ci_max_text.getAttr('y'), areas['sec1display'].split(8, 8)[1], 0, 1);
-    animation.addStage(stage);
-    stage = new animStage('dist', animation.name, 1000);
-    stage.setTransition(cross_bar_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(cross_bar_top, 'y2', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(ci_min_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(ci_min_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
-    stage.setTransition(ci_max_top, 'y1', areas['sec1display'].split(8, 7)[1], areas['sec0display'].split(8, 7)[1], 0, 1);
-    stage.setTransition(ci_max_top, 'y2', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1], 0, 1);
-    stage.setTransition(ci_min_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 50, 0, 1);
-    stage.setTransition(ci_max_text_top, 'y', areas['sec1display'].split(8, 8)[1], areas['sec0display'].split(8, 8)[1] + 50, 0, 1);
-    animation.addStage(stage);
+
     return animation;
 }

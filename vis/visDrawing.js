@@ -190,19 +190,23 @@ let defaultDrawFuncs = {
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
+        ctx.lineCap = "round";
+        ctx.lineWidth = 3;
         let x1 = e.getAttr('x1');
         let x2 = e.getAttr('x2');
         let y1 = e.getAttr('y1');
         let y2 = e.getAttr('y2');
+        let arrow_head_size = 10;
         let direction = (x2 - x1) > 0 ? 1 : -1;
-        let arrow_head_x = x2 - direction * 5;
+        let arrow_head_x = x2 - direction * arrow_head_size;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.lineTo(arrow_head_x, y2 + direction * 3);
         ctx.moveTo(x2, y2);
-        ctx.lineTo(arrow_head_x, y2 - direction * 3);
-        ctx.closePath();
+        ctx.lineTo(arrow_head_x, y2 + direction * (arrow_head_size / 2));
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(arrow_head_x, y2 - direction * (arrow_head_size / 2));
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x1, y1);
         ctx.stroke();
         ctx.restore();
     },
