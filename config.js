@@ -13,15 +13,17 @@ const config = {
     NA: ["NA", "na", "N/A", "n/a", ""],
 
     // Colors for factors
-    groupColorsList: ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6",
+    groupColorsList: ["#4A96AD", "#9f1213", "#ff9900", "#109618", "#990099", "#0099c6",
                     "#dd4477", "#66aa00", "#b82e2e", "#316395",
                     "#994499", "#22aa99", "#aaaa11", "#6633cc",
                     "#e67300", "#8b0707", "#651067", "#329262",
                     "#5574a6", "#3b3eac"],
-    
-    // Colors for proportion bars.
-    proportionColorsList: ['#4A96AD' , '#7D1935', "#3366cc", "#dc3912",'#1b9e77','#d95f02','#7570b3'],
+    //dc3912
 
+    // Colors for proportion bars.
+    proportionColorsList: ['#4A96AD' , '#9f1213 ', "#3366cc", "#dc3912",'#1b9e77','#d95f02','#7570b3'],
+    //#9f1213 
+    //#7D1935
     // Function to get statistics options users are able to select.
     initStatistics: function(dimensions){
         if(dimensions[0].type == 'numeric'){

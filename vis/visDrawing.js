@@ -27,7 +27,7 @@ let defaultDrawFuncs = {
         ctx.translate(-0.5, -0.5);
     },
     "prop": function(e, ctx){
-        let backup_color = Math.round(e.getAttr('selected')) ? '#4A96AD' : '#7D1935';
+        let backup_color = Math.round(e.getAttr('selected')) ? config.proportionColorsList[0] : config.proportionColorsList[1];
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color, 1);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;

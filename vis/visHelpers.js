@@ -17,8 +17,8 @@ function elementsFromDataset(dataset, dimensions, bounds, options){
             }
             el.setAttr('factor', y_factor);
             if(num_factors > 1){
-                el.setAttrInit('stroke-color', config.groupColorsList[y_factor_index]);
-                el.setAttrInit('fill-color', d3.color(config.groupColorsList[y_factor_index]).darker());
+                el.setAttrInit('stroke-color', d3.color(config.groupColorsList[y_factor_index]).darker());
+                el.setAttrInit('fill-color', d3.color(config.groupColorsList[y_factor_index]));
             }
             
             el.value = datapoint[dimensions[0].name];
@@ -531,9 +531,11 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
         ci_num_line.setAttrInit('large_x1', linearScale(largeCI[0], [min, max], [bounds.left, bounds.right]));
         ci_num_line.setAttrInit('large_x2', linearScale(largeCI[0], [min, max], [bounds.left, bounds.right]));
         ci_num_text.setAttrInit('x', linearScale(pop_stat_value, [min, max], [bounds.left, bounds.right]));
-        ci_num_text.setAttrInit('text', `${in_ci_count} / ${distribution.length}`);
+        ci_num_text.setAttrInit('text', `${in_ci_count} / ${distribution.length}
+        = ${Math.round(in_ci_count / distribution.length * 100) / 100}`);
         if(largeCI){
-            ci_num_text.setAttrInit('large_text', `${largeCI[2]} / ${10000}`);
+            ci_num_text.setAttrInit('large_text', `${largeCI[2]} / ${10000}
+            = ${Math.round(largeCI[2] / 10000 * 100) / 100}`);
         }
         
 
