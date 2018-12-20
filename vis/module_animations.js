@@ -924,6 +924,8 @@ function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, stat
             }
         }  
     });
+    let ci_num_line = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_num_line")[0];
+    let ci_num_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_num_text")[0];
     animation.addStage(stage);
     if(sample_dimensions.length > 1 && sample_dimensions[1].type == 'categoric' && sample_dimensions[1].factors.length > 1){
         stage = new animStage('dist', animation.name, 1000);
@@ -969,7 +971,7 @@ function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, stat
         stage = new animStage('dist', animation.name, 1000);
         for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
             let dist_datapoint = dynamic_elements.distribution.ci[i];
-            if(dist_datapoint == ci_pop_stat_arrow || dist_datapoint == ci_pop_stat_text) continue;
+            if(dist_datapoint == ci_pop_stat_arrow || dist_datapoint == ci_pop_stat_text || dist_datapoint == ci_num_line || dist_datapoint == ci_num_text) continue;
             stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
             stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 1);
         }
@@ -1041,6 +1043,83 @@ function ma_createCIAnimation(animation, pop_dimensions, sample_dimensions, stat
         animation.addStage(stage);
          
     }
+
+    return animation;
+}
+function ma_createRandTestCIAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index, areas, largeCI){
+    stage = new animStage('dist', animation.name, 200);
+    stage.setFunc(function(){
+        for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+            let ci_element = dynamic_elements.distribution.ci[i];
+            for(let e = 0; e < Object.keys(ci_element.attrs).length; e++){
+                let attr = Object.keys(ci_element.attrs)[e];
+                if(attr.includes('init_large') && largeCI){
+                    let attr_value = ci_element.getAttr(attr);
+                    let replace_name = attr.split('_').slice(2).join('_');
+                    ci_element.setAttr(replace_name, attr_value);
+                }else if(attr.includes('init_') && !attr.includes('large_') && !largeCI){
+                    let attr_value = ci_element.getAttr(attr);
+                    let replace_name = attr.split('_').slice(1).join('_');
+                    ci_element.setAttr(replace_name, attr_value);
+                }
+            }
+        }  
+    });
+    animation.addStage(stage);
+    stage = new animStage('dist', animation.name, 1000);
+    let text_margin = areas['sec2axis'].height;
+    stage.setFunc(function(){
+        vis.dynamicElements.all = [];
+        for(let i = 0; i < vis.dynamicElements.distribution.stats.length; i++){
+            //vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.stats[i]);
+            vis.dynamicElements.all = vis.dynamicElements.all.concat([vis.dynamicElements.distribution.datapoints[i]]);
+        }
+        vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.ci);
+    });
+    for(let i = 0; i < dynamic_elements.distribution.datapoints.length; i++){
+        let dist_datapoint = dynamic_elements.distribution.datapoints[i];
+        let opacity = dist_datapoint.getAttr('in_ci') ? 1 : 0.2;
+        stage.setTransition(dist_datapoint, 'stroke-opacity', 1, opacity, 0, 1);
+        stage.setTransition(dist_datapoint, 'fill-opacity', 1, opacity, 0, 1);
+    }
+    for(let i = 0; i < dynamic_elements.distribution.ci.length; i++){
+        let dist_datapoint = dynamic_elements.distribution.ci[i];
+        stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 0, 0, 1);
+        stage.setTransition(dist_datapoint, 'fill-opacity', 0, 0, 0, 1);
+    }
+    animation.addStage(stage);
+    let ci_pop_stat_arrow = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_pop_stat_arrow")[0];
+    let ci_pop_stat_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_pop_stat_text")[0];
+    let ci_num_line = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_num_line")[0];
+    let ci_num_text = dynamic_elements.distribution.ci.filter((e) => e.id == "ci_num_text")[0];
+
+    stage = new animStage('dist', animation.name, 1000);
+    stage.setTransition(ci_pop_stat_arrow, 'stroke-opacity', 0, 1, 0, 1);
+    stage.setTransition(ci_pop_stat_arrow, 'fill-opacity', 0, 1, 0, 1);
+    stage.setTransition(ci_pop_stat_text, 'stroke-opacity', 0, 1, 0, 1);
+    stage.setTransition(ci_pop_stat_text, 'fill-opacity', 0, 1, 0, 1);
+
+    animation.addStage(stage);
+    stage = new animStage('dist', animation.name, 1000);
+    stage.setTransition(ci_pop_stat_arrow, 'x1', ci_pop_stat_arrow.getAttr('init_x1'), ci_pop_stat_arrow.getAttr('dist_x1'), 0, 1);
+    stage.setTransition(ci_pop_stat_arrow, 'x2', ci_pop_stat_arrow.getAttr('init_x2'), ci_pop_stat_arrow.getAttr('dist_x2'), 0, 1);
+    stage.setTransition(ci_pop_stat_text, 'x', ci_pop_stat_text.getAttr('init_x'), sample_dimensions[1].factors.length > 2 ? (ci_pop_stat_arrow.getAttr('dist_x1') + ci_pop_stat_arrow.getAttr('dist_x2')) / 2 : ci_pop_stat_arrow.getAttr('dist_x2'), 0, 1);
+    stage.setTransition(ci_pop_stat_arrow, 'y1', ci_pop_stat_arrow.getAttr('init_y1'), areas['sec2display'].bottom, 0, 1);
+    stage.setTransition(ci_pop_stat_arrow, 'y2', ci_pop_stat_arrow.getAttr('init_y2'), areas['sec2display'].bottom, 0, 1);
+    stage.setTransition(ci_pop_stat_text, 'y', ci_pop_stat_text.getAttr('init_y'), areas['sec2display'].bottom + (sample_dimensions[1].factors.length > 2 ? 0 : (text_margin / 1.5)), 0, 1);
+    //stage.setTransition(ci_pop_stat_text, 'alignment-baseline', 'hanging', 0, 1);
+    animation.addStage(stage);
+
+    stage = new animStage('dist', animation.name, 1000);
+    stage.setTransition(ci_num_line, 'stroke-opacity', 0, 1, 0, 1);
+    stage.setTransition(ci_num_line, 'fill-opacity', 0, 1, 0, 1);
+    stage.setTransition(ci_num_line, 'selected', 0, 1, 0, 0);
+    stage.setTransition(ci_num_text, 'stroke-opacity', 0, 1, 0, 1);
+    stage.setTransition(ci_num_text, 'fill-opacity', 0, 1, 0, 1);
+    stage.setTransition(ci_num_text, 'selected', 0, 1, 0, 0);
+    animation.addStage(stage);
+    
+    
 
     return animation;
 }

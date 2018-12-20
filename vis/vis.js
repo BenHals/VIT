@@ -161,7 +161,8 @@ const vis = {
                 min,
                 max,
                 this.module.inCI,
-                getPopulationStatistic(this.dataset, statistic, this.dimensions)
+                getPopulationStatistic(this.dataset, statistic, this.dimensions),
+                this.dataset.largeCI
             );
         placeDistribution(datapoints, ci, area_heap, vertical, min, max, this.staticElements.stat_markers, this.dataset.largeCI);
         this.dynamicElements.distribution = {};
@@ -290,6 +291,23 @@ const vis = {
             this.loop_started = true;
         }
     },
+    initRandTestCIAnimation(large){
+        this.reps_left = 0;
+        let speed = 1;
+        this.include_distribution = false;
+        let animation = new Animation(`ci`);
+        ma_createRandTestCIAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample, this.areas, large);
+        this.animation = animation;
+        this.animation.start();
+        [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
+        this.paused = false;
+        ac_unpause();
+        this.last_frame = window.performance.now();
+        if(!this.loop_started) {
+            this.loop(window.performance.now());
+            this.loop_started = true;
+        }
+    },
     initInterpolators: function(interpolators){
         this.interpolators = interpolators;
     },
@@ -403,6 +421,9 @@ const vis = {
             this.speed = null;
             controller.pause();
             controller.animationDone();
+            this.updateDynamic(1);
+            this.drawDynamic();
+            this.drawStatic();
         }
         
     },

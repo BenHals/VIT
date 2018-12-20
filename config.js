@@ -300,17 +300,17 @@ config.modules =  {
         },
         generateInCi: function(dimensions){
             if(dimensions.length < 1) return;
-            if(dimensions.length > 1 && dimensions[1].factors.length > 2){
+            // if(dimensions.length > 1 && dimensions[1].factors.length > 2){
                 this.inCI = function(distribution_sorted, dist_element, population_statistic){
                     return dist_element > population_statistic;
                 }
-            }else{
-                this.inCI = function(distribution_sorted, dist_element, population_statistic){
-                    let top_index = Math.floor(distribution_sorted.length * 0.95);
-                    let middle_95 = distribution_sorted.slice(0, top_index);
-                    return middle_95.includes(dist_element);
-                }
-            }
+            // }else{
+            //     this.inCI = function(distribution_sorted, dist_element, population_statistic){
+            //         let top_index = Math.floor(distribution_sorted.length * 0.95);
+            //         let middle_95 = distribution_sorted.slice(0, top_index);
+            //         return middle_95.includes(dist_element);
+            //     }
+            // }
         },
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
                 ],

@@ -245,8 +245,13 @@ const controller = {
     animationDone(){
         return;
     },
-    showCI: function(large){
-        vis.initCIAnimation(large);
+    showCI: function(large, type){
+        if(type == 'CI'){
+            vis.initCIAnimation(large);
+        }else if(type == 'randTestCI'){
+            vis.initRandTestCIAnimation(large);
+        }
+        
         controller.unpause();
     },
     pause: function(){

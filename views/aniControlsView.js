@@ -282,6 +282,22 @@ function generateAniControlsHTML_old(module_name, labels){
                   Show CI for 10,000 
                   </button> 
                 </div>
+              </div>
+              <div class = "row" id="RandTestCIButton">
+                <div class="panelButton col-md-11 ">
+                  <button type="button" class="btn btn-default btn-block" aria-label="Back" onclick="ac_showRandTestCI()">
+                  <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                  Show Tail Proportion
+                  </button> 
+                </div>
+              </div>
+              <div class = "row" id="largeRandTestCIButton">
+                <div class="panelButton col-md-11 ">
+                  <button type="button" class="btn btn-default btn-block" aria-label="Back" onclick="ac_showRandTestCI(true)">
+                  <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                  Show Tail Proportion for 10,000
+                  </button> 
+                </div>
               </div> 
             </div>
           </div>
@@ -326,7 +342,10 @@ function ac_readNumSamples(input_elements){
 }
 
 function ac_showCI(large = false){
-  controller.showCI(large);
+  controller.showCI(large, 'CI');
+}
+function ac_showRandTestCI(large = false){
+  controller.showCI(large, 'randTestCI');
 }
 $(document).on('change', 'input[type="radio"]', function(){
   if(this.value == 1 && this.name == "sampleOptions"){
@@ -357,6 +376,13 @@ function ac_initHide(module_name){
     }else{
       $('#CIButton').hide();
       $('#largeCIButton').hide();
+    }
+    if(module_name == "Randomisation Test"){
+      $('#RandTestCIButton').show();
+      $('#RandTestCIButton').show();
+    }else{
+      $('#RandTestCIButton').hide();
+      $('#largeRandTestCIButton').hide();
     }
   }
 }

@@ -394,7 +394,7 @@ const model = {
             let sample_dataset = null;
             setTimeout(()=> {this.genSample(population_data, sample_size, sample_generator, stat, i)}, 0);
         }
-        if(this.selected_module.name == "Bootstrapping"){
+        if(this.selected_module.name == "Bootstrapping" || this.selected_module.name == "Randomisation Test"){
             this.largeSampleStats = [];
             for(let i = 1; i <= 10000; i++){
                 setTimeout(()=> {this.genLargeSample(population_data, sample_size, sample_generator, stat, i)}, 0);
@@ -452,13 +452,15 @@ const model = {
             let sorted_dist = this.largeSampleStats.sort(function(a, b){return Math.abs(a - stat) - Math.abs(b-stat)});
             let min_stat = null;
             let max_stat = null;
+            let in_ci_count = 0;
             for(let ls = 0; ls < sorted_dist.length; ls++){
                 let in_ci = this.selected_module.inCI(sorted_dist, sorted_dist[ls], stat);
+                if(in_ci) in_ci_count++;
                 if(in_ci && (min_stat == null || sorted_dist[ls] < min_stat)) min_stat = sorted_dist[ls];
                 if(in_ci && (max_stat == null || sorted_dist[ls] > max_stat)) max_stat = sorted_dist[ls];
             }
-            this.largeCI = [min_stat, max_stat];
-            this.populationDS.largeCI = [min_stat, max_stat];
+            this.largeCI = [min_stat, max_stat, in_ci_count];
+            this.populationDS.largeCI = [min_stat, max_stat, in_ci_count];
             this.largeSampleFinished = true;
             controller.updateSampleProgress(i/1000);
             this.largeSampleStats = [];
