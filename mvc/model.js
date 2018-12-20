@@ -334,10 +334,12 @@ const model = {
         let stat = this.genStatistics(this.cleaned_data, this.dimensions);
         this.populationDS = createDataset(this.cleaned_data, this.dimensions, stat);
         // want to sort factors in terms of statistic
-        if(this.dimensions.has_factors && this.dimensions[0].type == 'numeric'){
+        if(this.dimensions.has_factors){
             let factors = this.populationDS[this.dimensions[0].name][this.dimensions[1].name];
+            let sort_stat = this.dimensions[0].type == 'numeric' ? "Mean" : "proportion";
             this.dimensions[1].factors.sort((a, b)=> {
-                return factors[a].statistics["Mean"] - factors[b].statistics["Mean"];
+                
+                return factors[a].statistics[sort_stat] - factors[b].statistics[sort_stat];
             });
         }
         this.populationDS.largeCI = this.largeCI;
