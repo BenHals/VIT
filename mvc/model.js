@@ -461,6 +461,7 @@ const model = {
             this.populationDS.largeCI = [min_stat, max_stat];
             this.largeSampleFinished = true;
             controller.updateSampleProgress(i/1000);
+            this.largeSampleStats = [];
         }
     },
 
