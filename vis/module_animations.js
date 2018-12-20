@@ -65,13 +65,21 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
     }else if(module.name == "Randomisation Variation" || module.name == "Randomisation Test"){
         if(pop_dimensions[0].type == 'numeric'){
             if(!skip){
-                stage = new animStage('fade', animation.name, include_distribution ? 500/speed : 2500/speed);
-                randomisation_point_fade(static_elements, dynamic_elements, stage, sample_index);
-                animation.addStage(stage);
-                delayStage(animation, 1000/speed);
-                stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
-                point_center_drop_stage(static_elements, dynamic_elements, stage);
-                animation.addStage(stage);
+                if(speed < 2){
+                    stage = new animStage('fade', animation.name, include_distribution ? 500/speed : 2500/speed);
+                    randomisation_point_fade(static_elements, dynamic_elements, stage, sample_index);
+                    animation.addStage(stage);
+                    delayStage(animation, 1000/speed);
+                    stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
+                    point_center_drop_stage(static_elements, dynamic_elements, stage);
+                    animation.addStage(stage);
+                }else{
+                    stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
+                    point_center_skip_drop_stage(static_elements, dynamic_elements, stage, sample_index);
+                    animation.addStage(stage);
+                }
+
+
                 stage = new animStage('drop2', animation.name, include_distribution ? 1000/speed : 5000/speed);
                 point_center_split_stage(static_elements, dynamic_elements, stage);
 
@@ -693,6 +701,37 @@ function point_center_drop_stage(static_elements, dynamic_elements, stage){
         stage.setTransition(element, 'y', pop_element.getAttr('init_y'), middle_y, 0, 0.75);
         stage.setTransition(element, 'fill-color', pop_element.getAttr("init_fill-color"), element.getAttr("init_fill-color"), 0.75, 1);
         stage.setTransition(element, 'stroke-color', pop_element.getAttr("init_stroke-color"), element.getAttr("init_stroke-color"), 0.75, 1);
+    }
+
+}
+function point_center_skip_drop_stage(static_elements, dynamic_elements, stage, sample_index){
+    let middle_y = vis.areas['sec1display'].innerTop + vis.areas['sec1display'].innerHeight/2;
+    for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
+        let element = dynamic_elements.datapoints.all[i];
+        let element_id = element.getAttr('id');
+        let pop_element = static_elements.datapoints.all.filter((e)=>e.getAttr('id')== element_id)[0];
+        stage.setTransition(element, 'y', pop_element.getAttr('init_y'), middle_y, 0, 0);
+        stage.setTransition(element, 'fill-color', pop_element.getAttr("init_fill-color"), element.getAttr("init_fill-color"), 0.75, 1);
+        stage.setTransition(element, 'stroke-color', pop_element.getAttr("init_stroke-color"), element.getAttr("init_stroke-color"), 0.75, 1);
+        stage.setTransition(element, 'fill-opacity', 0, 1, 0, 1);
+        stage.setTransition(element, 'stroke-opacity', 0, 1, 0, 1);
+        stage.setTransition(element, 'selected', 0, 1, 0, 1);
+    }
+
+    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index);
+    
+    for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
+        let stat_marker = dynamic_elements.stat_markers[i];
+        stage.setTransition(stat_marker, 'stroke-opacity', 0, 0, 0, 1);
+    }
+
+    let dimensions = model.getSampleDimensions();
+
+    if(dimensions.length > 1 && dimensions[1].type == 'numeric'){
+        let distribution_slopes = dynamic_elements.all.filter((e)=>e.id == "dist_stat_lineline");
+        for(let i = 0; i < distribution_slopes.length; i++){
+            stage.setTransition(distribution_slopes[i], 'stroke-opacity', 0, i == distribution_slopes.length -1 ? 0 : 0.2, 0, 0);
+        }
     }
 
 }
