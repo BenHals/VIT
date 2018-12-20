@@ -229,6 +229,7 @@ const vis = {
         }
     },
     initAnimation: function(reps, include_distribution, track, inherit_speed = false){
+        this.pause();
         this.reps_left = reps - 1;
         // let speed = this.speed || 1 + 0.75*(reps - 1);
         let speed = inherit_speed ? this.speed : (1 + 0.75*(reps - 1)) * (1 + 1 * include_distribution);
@@ -267,7 +268,7 @@ const vis = {
         ac_unpause();
         this.last_frame = window.performance.now();
         if(!this.loop_started) {
-            this.loop(window.performance.now());
+            this.loop(window.performance.now(), true);
             this.loop_started = true;
         }
 
@@ -366,25 +367,29 @@ const vis = {
             }
         }
     },
-    loop: function(ts){
+    loop: function(ts, new_loop = false){
         //let start_t = window.performance.now();
         //if(!this.loop_started) return;
         this.last_frame = this.last_frame || ts;
+        if(new_loop) this.last_frame = ts;
+        let stage_not_done = true;
         if(!this.paused){
             this.current_animation_percent += (ts-this.last_frame) / this.animation.total_duration;
-            this.setProgress(this.current_animation_percent);
+            stage_not_done = this.setProgress(this.current_animation_percent);
         }
         
         //this.drawStatic();
-        
-        this.drawDynamic();
-        if(this.static_draw_index == 0){
-            this.drawStatic();
+        if(stage_not_done){
+            this.drawDynamic();
+            if(this.static_draw_index == 0){
+                this.drawStatic();
+            }
+            this.static_draw_index += 1;
+            this.static_draw_index %= 3;
+            this.last_frame = ts;
+            //console.log(window.performance.now() - start_t);
         }
-        this.static_draw_index += 1;
-        this.static_draw_index %= 3;
-        this.last_frame = ts;
-        //console.log(window.performance.now() - start_t);
+
         if(!this.paused){
             this.reqAnimationFrame = requestAnimationFrame(this.loop.bind(this));
         }
@@ -416,10 +421,12 @@ const vis = {
         
         controller.setPlaybackProgress(p);
 
-        if(this.paused){
+        if(this.paused && stage_percentage != 1){
             this.drawDynamic();
             this.drawStatic();
         }
+
+        return stage_percentage != 1;
         
     },
     pause: function(){

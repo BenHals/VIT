@@ -44,28 +44,28 @@ const config = {
         }
     },
 
-    // element_draw_type: {
-    //     "datapoint": "canvas",
-    //     "prop": "canvas",
-    //     "prop-text": "canvas",
-    //     "text": "canvas",
-    //     "line": "canvas",
-    //     "down-arrow": "canvas",
-    //     "arrow": "canvas",
-    //     "distribution": "canvas",
-    //     "axis": "canvas"    
-    // }
     element_draw_type: {
-        "datapoint": "svg",
+        "datapoint": "canvas",
         "prop": "canvas",
         "prop-text": "canvas",
-        "text": "svg",
+        "text": "canvas",
         "line": "canvas",
         "down-arrow": "canvas",
         "arrow": "canvas",
         "distribution": "canvas",
-        "axis": "svg"    
+        "axis": "canvas"    
     }
+    // element_draw_type: {
+    //     "datapoint": "svg",
+    //     "prop": "canvas",
+    //     "prop-text": "canvas",
+    //     "text": "svg",
+    //     "line": "canvas",
+    //     "down-arrow": "canvas",
+    //     "arrow": "canvas",
+    //     "distribution": "canvas",
+    //     "axis": "svg"    
+    // }
 
 }
 
