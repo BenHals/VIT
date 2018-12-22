@@ -431,13 +431,14 @@ function statisticsFromDistribution(distribution_stat, dataset, dimensions, boun
     }
     if(statistic == 'proportion'){
         for(let f = 0; f < num_factors; f++){
+            let stats = dataset[dimensions[0].name][dimensions[1].name][dimensions[1].factors[f]].statistics;
             let factor_bounds = {left:bounds.innerLeft, right: bounds.innerRight, top:bounds.split(num_factors, f)[1], bottom: bounds.split(num_factors, f+1)[1]};
-            let stat = distribution_stat;
-            let screen_stat = linearScale(stat, [0, 1], [factor_bounds.left, factor_bounds.right]);
+            let factor_stat = stats[statistic];
+            let screen_factor_stat = linearScale(factor_stat, [popMin, popMax], [factor_bounds.left, factor_bounds.right]);
             let el = new visElement('dist_stat_line' + f, 'line');
-            el.setAttrInit('x1', screen_stat);
+            el.setAttrInit('x1', screen_factor_stat);
             el.setAttrInit('y1', factor_bounds.bottom);
-            el.setAttrInit('x2', screen_stat);
+            el.setAttrInit('x2', screen_factor_stat);
             el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
             el.setAttrInit('stat', distribution_stat);
             new_elements.push(el);
@@ -653,7 +654,7 @@ function placeCI(ci, area, min, max, dimensions){
 
 }
 function placeDistribution(datapoints, ci, area, vertical, min, max, stat_markers, largeCI = [0, 0, 0]){
-    let text_margin = vis.areas['sec2axis'].height;
+    let text_margin = vis.areas['sec2axis'].height / 1.5;
     if(! vertical){
         heap(datapoints, area, min, max, false, 5);
     }else{
