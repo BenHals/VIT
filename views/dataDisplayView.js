@@ -249,6 +249,7 @@ function dd_linkSingleDatapoint(dataset, dimensions, sample_dimensions, sample_i
     let boxs_to = []
     rows.each(function(r){
         let td_elements = $(this).children();
+        let line_drawn = false;
         td_elements.each(function(d){
             let fs = $(this).css('font-size');
             let ofs = $(this).attr('data-ofont');
@@ -284,7 +285,10 @@ function dd_linkSingleDatapoint(dataset, dimensions, sample_dimensions, sample_i
                 augCtx.textBaseline = 'middle';
                 augCtx.fillStyle = 'red';
                 augCtx.fillText(dataset.all[display_index][sample_dimensions[dim_index].name], (box.left + box.right)/2 - canvasBox.left, (box.top + box.bottom) / 2 - canvasBox.top);
-                boxs_to.push(box);
+                if(!line_drawn){
+                    boxs_to.push(box);
+                    line_drawn = true;
+                }
             }else{
                 $(this).css('font-weight', 'Normal');
                 $(this).css('font-size', ofs);
