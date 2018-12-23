@@ -560,6 +560,7 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
         el.setAttrInit('x', vis.areas['sec2display'].split(4, 3)[0]);
         el.setAttrInit('y', vis.areas['sec2display'].split(2, 1)[1]);
         el.setAttrInit('text', "0 / 0");
+        el.setAttrInit('percentage-text', "0%");
         distribution_extra.push(el);
     }
     let cross_bar = new visElement('ci_cross_bar', 'line');

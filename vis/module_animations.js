@@ -764,12 +764,12 @@ function point_drop_stage(static_elements, dynamic_elements, stage, sample_index
 function point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index){
     let range_bar = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_range"))[0];
     let range_bar_stay = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_stay"))[0];
-    stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0, 1);
-    stage.setTransition(range_bar, "opacity", 0, 1, 0, 1);
-    stage.setTransition(range_bar, "selected", 0, 1, 0, 0);
-    stage.setTransition(range_bar, "lineWidth", 1, 3, 0, 0);
-    stage.setTransition(range_bar_stay, "stroke-opacity", 0, 1, 0, 1);
-    stage.setTransition(range_bar_stay, "opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0.8, 1);
+    stage.setTransition(range_bar, "opacity", 0, 1, 0.8, 1);
+    stage.setTransition(range_bar, "selected", 0, 1, 0.8, 0);
+    stage.setTransition(range_bar, "lineWidth", 1, 3, 0.8, 0);
+    stage.setTransition(range_bar_stay, "stroke-opacity", 0, 1, 0.8, 1);
+    stage.setTransition(range_bar_stay, "opacity", 0, 1, 0.8, 1);
     stage.setTransition(range_bar_stay, "selected", 0, 1, 0, 0);
     stage.setTransition(range_bar_stay, "lineWidth", 1, 3, 0, 0);
     stage.setFunc(function(){
@@ -918,12 +918,15 @@ function dist_drop_point_cirange_stage(static_elements, dynamic_elements, stage,
         total_count++;
     }
     let old_text = `${in_count} / ${total_count}`;
+    let old_percent_text = `${Math.round(in_count / total_count * 10000)/100}%`;
     if(dist_elem.getAttr('in_ci')) in_count++;
     total_count++;
     let new_text = `${in_count} / ${total_count}`;
+    let new_percent_text = `${Math.round(in_count / total_count * 10000)/100}%`;
     let textbox = static_elements.all.filter((e) => e.id.includes('range_textbox'))[0];
     if(textbox){
         stage.setTransition(textbox, 'text', old_text, new_text, 0.5 , 0.5);
+        stage.setTransition(textbox, 'percentage-text', old_percent_text, new_percent_text, 0.5 , 0.5);
     }
 }
 
@@ -1089,12 +1092,15 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
                 total_count++;
             }
             let old_text = `${in_count} / ${total_count}`;
+            let old_percent_text = `${Math.round(in_count / total_count * 10000)/100}%`;
             if(dynamic_elements.distribution.datapoints[i].getAttr('in_ci')) in_count++;
             total_count++;
             let new_text = `${in_count} / ${total_count}`;
+            let new_percent_text = `${Math.round(in_count / total_count * 10000)/100}%`;
             let textbox = static_elements.all.filter((e) => e.id.includes('range_textbox'))[0];
             if(textbox){
-                stage.setTransition(textbox, 'text', new_text, new_text, 0.5 , 0.5);
+                stage.setTransition(textbox, 'text', old_text, new_text, 0.5 , 0.5);
+                stage.setTransition(textbox, 'percentage-text', old_percent_text, new_percent_text, 0.5 , 0.5);
             }
         }
         animation.addStage(stage);

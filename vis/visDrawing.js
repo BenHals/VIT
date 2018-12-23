@@ -152,7 +152,9 @@ let defaultDrawFuncs = {
         ctx.font = '15px sans-serif';
         ctx.textAlign = e.attrs['align'];
         ctx.textBaseline = e.attrs['baseline'];
+        ctx.fillText("Coverage", e.attrs.x, e.attrs.y - 15);
         ctx.fillText(e.attrs.text, e.attrs.x, e.attrs.y);
+        ctx.fillText(e.getAttr('percentage-text'), e.attrs.x, e.attrs.y + 15);
         //ctx.strokeText(e.attrs.text, e.attrs.x, e.attrs.y);
     },
     "line": function(e, ctx){
