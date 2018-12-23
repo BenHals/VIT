@@ -215,19 +215,17 @@ const vis = {
     },
     initSampleDistElements(datapoints){
         this.dynamicElements.all = [].concat(datapoints.all);
-        if(this.dynamicElements.ghosts){
-            this.dynamicElements.ghosts = this.dynamicElements.ghosts.concat(this.dynamicElements.new_ghosts);
-            this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.new_ghosts);
-        }else{
-            this.dynamicElements.ghosts = [];
-        }
+        this.dynamicElements.ghosts = [];
         this.dynamicElements.new_ghosts = [];
         this.dynamicElements.stat_markers = [];
-        for(let i = 0; i < this.dynamicElements.distribution.stats.length && i <= this.current_sample; i++){
+        for(let i = 0; i < this.dynamicElements.distribution.stats.length && i < this.current_sample; i++){
             //this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.distribution.stats[i]);
-            this.dynamicElements.new_ghosts = this.dynamicElements.new_ghosts.concat(this.dynamicElements.distribution.stats[i]);
+            this.dynamicElements.ghosts = this.dynamicElements.ghosts.concat(this.dynamicElements.distribution.stats[i]);
+            this.dynamicElements.all = this.dynamicElements.all.concat(this.dynamicElements.distribution.stats[i]);
             this.dynamicElements.all = this.dynamicElements.all.concat([this.dynamicElements.distribution.datapoints[i]]);
         }
+        this.dynamicElements.new_ghosts.push(this.dynamicElements.distribution.stats[this.current_sample]);
+        this.dynamicElements.all.push(this.dynamicElements.distribution.datapoints[this.current_sample]);
     },
     initAnimation: function(reps, include_distribution, track, inherit_speed = false){
         this.pause();
