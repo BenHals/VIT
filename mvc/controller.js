@@ -164,6 +164,10 @@ const controller = {
         let required_options = model.selected_module.options;
         oc_populateOptions(required_options);
     },
+    gotoHome: function(){
+        deleteFromUrl(['file','d0','d1','focus', 'statistic', 'ss', 'option']);
+        this.loadModule("Home");
+    },
     optionBack: function(){
         view.loadControls(generateFileControls);
         let columns = model.getColumnNamesTypes();

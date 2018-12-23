@@ -1,7 +1,7 @@
 function generateFileOptionsHTML(module){
     return `
           <div id="fileOptions">
-              <button type="button" class="bluebutton btn btn-default" aria-label="Back" onclick="fc_loadModule('Home')">
+              <button type="button" class="bluebutton btn btn-default" aria-label="Back" onclick="fc_gotoHome('Home')">
                   <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
                   Back to Main Menu
               </button>
@@ -88,7 +88,7 @@ function generateFileOptionsHTML(module){
 function generateFileOptionsHTML_old(module){
 return `
         <div id="fileOptions">
-            <button type="button" class="bluebutton btn btn-default" aria-label="Back" onclick="fc_loadModule('Home')">
+            <button type="button" class="bluebutton btn btn-default" aria-label="Back" onclick="fc_gotoHome('Home')">
                 <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
                 Back to Main Menu
             </button>
@@ -170,8 +170,8 @@ function generateFocusHTML(factors, focus){
 }
 
 // ********** File Control Events **********
-function fc_loadModule(module_name){
-    controller.loadModule(module_name);
+function fc_gotoHome(module_name){
+    controller.gotoHome(module_name);
 }
 
 function fc_localFile(){
