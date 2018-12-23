@@ -991,6 +991,7 @@ function dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_
     stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.9, 1);
 }
 function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimensions, static_elements, dynamic_elements, module, speed, sample_index){
+    let length = 3000;
     stage = new animStage('dist', animation.name, 10);
     if(module.name == "Bootstrapping"){
         stage.setFunc(()=>{
@@ -1017,24 +1018,28 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
         stage.setTransition(dist_datapoint, 'fill-opacity', 0, 0, 0, 0);
     }
     animation.addStage(stage);
-    for(let i = 0; i < 1000; i++){
-        stage = new animStage('dist', animation.name, 10);
+    let step = 10;
+    for(let i = 0; i < 1000; i += step){
+        stage = new animStage('dist', animation.name, length / (1000 / step));
         stage.setFunc(function(){
             vis.dynamicElements.all = [];
-            for(let i = 0; i < vis.dynamicElements.distribution.stats.length; i++){
-                vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.stats[i]);
-                vis.dynamicElements.all = vis.dynamicElements.all.concat([vis.dynamicElements.distribution.datapoints[i]]);
+            for(let n = 0; n < vis.dynamicElements.distribution.stats.length && n <= i; n++){
+                vis.dynamicElements.all = vis.dynamicElements.all.concat(vis.dynamicElements.distribution.stats[n]);
+                vis.dynamicElements.all = vis.dynamicElements.all.concat([vis.dynamicElements.distribution.datapoints[n]]);
             }
             vis.initSample(vis.samples[i], vis.dynamicElements.distribution.stats[i], false);
         });
-        let sample_markers = dynamic_elements.distribution.stats[i];
-        for(let n = 0; n < sample_markers.length; n++){
-            let sample_mark = sample_markers[n];
-            stage.setTransition(sample_mark, 'stroke-opacity', 0, 0.2, 0, 0);
+        for(let j = i - step + 1; j <= i; j++ ){
+            if(j < 0) continue;
+            let sample_markers = dynamic_elements.distribution.stats[j];
+            for(let n = 0; n < sample_markers.length; n++){
+                let sample_mark = sample_markers[n];
+                stage.setTransition(sample_mark, 'stroke-opacity', 0, 0.2, 0, 0);
+            }
+            let dist_datapoint = dynamic_elements.distribution.datapoints[j];
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
+            stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 0);
         }
-        let dist_datapoint = dynamic_elements.distribution.datapoints[i];
-        stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 0);
-        stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 0);
         animation.addStage(stage);
     }
     return animation;

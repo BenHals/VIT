@@ -165,7 +165,7 @@ const controller = {
         oc_populateOptions(required_options);
     },
     gotoHome: function(){
-        deleteFromUrl(['file','d0','d1','focus', 'statistic', 'ss', 'option']);
+        deleteFromUrl(['file','d0','d1','focus', 'statistic', 'ss', 'options']);
         this.loadModule("Home");
     },
     optionBack: function(){
