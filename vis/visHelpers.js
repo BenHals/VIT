@@ -711,10 +711,14 @@ function placeCI(ci, area, min, max, dimensions){
 }
 function placeDistribution(datapoints, ci, area, vertical, min, max, stat_markers, largeCI = [0, 0, 0]){
     let text_margin = vis.areas['sec2axis'].height / 1.5;
-    if(! vertical){
-        heap(datapoints, area, min, max, false, 5);
+    if(datapoints[0].type == "distribution"){   
+        if(! vertical){
+            heap(datapoints, area, min, max, false, 5);
+        }else{
+            heap(datapoints, area, min, max, true, 5);
+        }
     }else{
-        heap(datapoints, area, min, max, true, 5);
+        heap_line(datapoints, area, min, max, false, 5);
     }
     let min_ci_screen_x = null;
     let max_ci_screen_x = null;
@@ -908,6 +912,22 @@ function heap(elements, bounds, min, max, vertical, base_margin){
             }
 
         }
+    }
+}
+function heap_line(elements, bounds, min, max, vertical, base_margin){
+    let max_v = max == undefined ? elements.reduce((a, c)=> c.value > a ? c.value : a, -100000) : max;
+    let min_v = min == undefined ? elements.reduce((a, c)=> c.value < a ? c.value : a, 1000000) : min;
+    let screen_range = !vertical ? [bounds.left, bounds.right] : [bounds.bottom, bounds.top];
+    let screen_range_vert = !vertical ? [bounds.bottom, bounds.top] : [bounds.left, bounds.right];
+    var spaceAvaliable = Math.abs(screen_range_vert[0] - screen_range_vert[1]);
+    let base_margin_value = base_margin || Math.abs(bounds.bottom - bounds.top)/4
+    var spacePerElement = Math.min(spaceAvaliable/elements.length, 5);
+    for(let e = 0; e < elements.length; e++){
+        let y = spacePerElement * e;
+        let element = elements[e];
+        let screen_x = linearScale(element.value, [min_v, max_v], screen_range);
+        element.setAttrInit('y', bounds.bottom  - base_margin_value - y);
+        element.setAttrInit('x', screen_x);
     }
 }
 
