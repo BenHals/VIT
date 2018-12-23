@@ -209,8 +209,8 @@ config.modules =  {
             let CI_range = [stat_value - (multiplier * sample_se), stat_value + (multiplier * sample_se)];
             return {"point_value": stat_value, "CI_range": CI_range};
         },
-        labels:["Population", "Sample", "Sample Distribution"],
-        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
+        labels:["Population", "Sample", "CI History"],
+        playSectionLabels:["Sampling","CI History", "Statistics"]
     },
     "Bootstrapping": {
         name: "Bootstrapping",

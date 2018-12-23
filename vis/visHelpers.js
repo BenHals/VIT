@@ -421,6 +421,13 @@ function statisticsFromDistribution(distribution_item, dataset, dimensions, boun
                     el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
                     el.setAttrInit('stat', distribution_stat);
                     new_elements.push(el); 
+                    el = new visElement('dist_stat_stay' + f, 'line');
+                    el.setAttrInit('x1', linearScale(ci_range[0], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('x2', linearScale(ci_range[1], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('stat', distribution_stat);
+                    new_elements.push(el); 
                 }
             }    
         }else {
@@ -456,6 +463,13 @@ function statisticsFromDistribution(distribution_item, dataset, dimensions, boun
                 new_elements.push(el);
                 if(ci_range){
                     let el = new visElement('dist_stat_range' + f, 'line');
+                    el.setAttrInit('x1', linearScale(ci_range[0], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('x2', linearScale(ci_range[1], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('stat', distribution_stat);
+                    new_elements.push(el); 
+                    el = new visElement('dist_stat_stay' + f, 'line');
                     el.setAttrInit('x1', linearScale(ci_range[0], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
                     el.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
                     el.setAttrInit('x2', linearScale(ci_range[1], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));

@@ -686,12 +686,18 @@ function point_skip_drop(static_elements, dynamic_elements, stage, sample_index)
 }
 function point_skip_drop_ci_range(static_elements, dynamic_elements, stage, sample_index){
     let range_bar = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_range"))[0];
+    let range_bar_stay = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_stay"))[0];
     stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0, 1);
     stage.setTransition(range_bar, "opacity", 0, 1, 0, 1);
     stage.setTransition(range_bar, "selected", 0, 1, 0, 0);
     stage.setTransition(range_bar, "lineWidth", 1, 3, 0, 0);
+    stage.setTransition(range_bar_stay, "stroke-opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar_stay, "opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar_stay, "selected", 0, 1, 0, 0);
+    stage.setTransition(range_bar_stay, "lineWidth", 1, 3, 0, 0);
     stage.setFunc(function(){
         if(!dynamic_elements.all.includes(range_bar)) dynamic_elements.all.push(range_bar);
+        if(!dynamic_elements.all.includes(range_bar_stay)) dynamic_elements.all.push(range_bar_stay);
     });
 }
 
@@ -757,13 +763,18 @@ function point_drop_stage(static_elements, dynamic_elements, stage, sample_index
 }
 function point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index){
     let range_bar = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_range"))[0];
-    stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0.8, 1);
-    stage.setTransition(range_bar, "opacity", 0, 1, 0.8, 1);
-    stage.setTransition(range_bar, "selected", 0, 1, 0.8, 0);
-    stage.setTransition(range_bar, "lineWidth", 1, 3, 0.8, 0);
+    let range_bar_stay = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_stay"))[0];
+    stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar, "opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar, "selected", 0, 1, 0, 0);
+    stage.setTransition(range_bar, "lineWidth", 1, 3, 0, 0);
+    stage.setTransition(range_bar_stay, "stroke-opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar_stay, "opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar_stay, "selected", 0, 1, 0, 0);
+    stage.setTransition(range_bar_stay, "lineWidth", 1, 3, 0, 0);
     stage.setFunc(function(){
-        
         if(!dynamic_elements.all.includes(range_bar)) dynamic_elements.all.push(range_bar);
+        if(!dynamic_elements.all.includes(range_bar_stay)) dynamic_elements.all.push(range_bar_stay);
     });
 }
 
@@ -784,12 +795,18 @@ function prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_
 }
 function prop_point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements){
     let range_bar = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_range"))[0];
+    let range_bar_stay = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_stay"))[0];
     stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0, 1);
     stage.setTransition(range_bar, "opacity", 0, 1, 0, 1);
     stage.setTransition(range_bar, "selected", 0, 1, 0, 0);
     stage.setTransition(range_bar, "lineWidth", 1, 3, 0, 0);
+    stage.setTransition(range_bar_stay, "stroke-opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar_stay, "opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar_stay, "selected", 0, 1, 0, 0);
+    stage.setTransition(range_bar_stay, "lineWidth", 1, 3, 0, 0);
     stage.setFunc(function(){
         if(!dynamic_elements.all.includes(range_bar)) dynamic_elements.all.push(range_bar);
+        if(!dynamic_elements.all.includes(range_bar_stay)) dynamic_elements.all.push(range_bar_stay);
     });
 }
 
