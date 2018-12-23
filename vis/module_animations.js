@@ -902,6 +902,8 @@ function dist_drop_point_cirange_stage(static_elements, dynamic_elements, stage,
             stage.setTransition(element, 'selected', 1, 0, 0, 0);
         }
     }
+    let total_count = 0;
+    let in_count = 0;
     for(let j = 0; j < sample_index; j++){
         let elements_to_fit = 40;
         let bottom_index = Math.max(sample_index - elements_to_fit, 0);
@@ -912,6 +914,16 @@ function dist_drop_point_cirange_stage(static_elements, dynamic_elements, stage,
         let new_y = d_element.calcLineHeapY(index);
         let old_y = d_element.calcLineHeapY(last_index);
         stage.setTransition(d_element, 'y', old_y, new_y, 0, 1);
+        if(d_element.getAttr('in_ci')) in_count++;
+        total_count++;
+    }
+    let old_text = `${in_count} / ${total_count}`;
+    if(dist_elem.getAttr('in_ci')) in_count++;
+    total_count++;
+    let new_text = `${in_count} / ${total_count}`;
+    let textbox = static_elements.all.filter((e) => e.id.includes('range_textbox'))[0];
+    if(textbox){
+        stage.setTransition(textbox, 'text', old_text, new_text, 0.5 , 0.5);
     }
 }
 
@@ -1061,6 +1073,8 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
             stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 0);
         }
         if(dynamic_elements.distribution.datapoints[0].type == "distribution_range"){
+            let total_count = 0;
+            let in_count = 0;
             for(let j = 0; j < i; j++){
                 let elements_to_fit = 40;
                 let bottom_index = Math.max(i - elements_to_fit, 0);
@@ -1071,6 +1085,16 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
                 let new_y = d_element.calcLineHeapY(index);
                 let old_y = d_element.calcLineHeapY(last_index);
                 stage.setTransition(d_element, 'y', old_y, new_y, 0, 1);
+                if(d_element.getAttr('in_ci')) in_count++;
+                total_count++;
+            }
+            let old_text = `${in_count} / ${total_count}`;
+            if(dynamic_elements.distribution.datapoints[i].getAttr('in_ci')) in_count++;
+            total_count++;
+            let new_text = `${in_count} / ${total_count}`;
+            let textbox = static_elements.all.filter((e) => e.id.includes('range_textbox'))[0];
+            if(textbox){
+                stage.setTransition(textbox, 'text', new_text, new_text, 0.5 , 0.5);
             }
         }
         animation.addStage(stage);

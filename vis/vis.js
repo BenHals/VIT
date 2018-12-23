@@ -152,7 +152,7 @@ const vis = {
             area_axis = this.areas["sec2regRaxis"];
             vertical = true;
         }
-        let [datapoints, stats, ci] = elementsFromDistribution(
+        let [datapoints, stats, ci, extra] = elementsFromDistribution(
                 distribution,
                 this.samples,
                 this.sample_dimensions,
@@ -177,6 +177,8 @@ const vis = {
         let axis = axisFromDataset(area_axis, min, max, vertical);
         this.staticElements.dist_axis = axis;
         this.staticElements.all = this.staticElements.all.concat(axis);
+
+        if(extra) this.staticElements.all = this.staticElements.all.concat(extra);
 
         this.drawDynamic();
     },

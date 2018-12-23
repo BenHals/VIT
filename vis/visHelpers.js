@@ -530,6 +530,7 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
     let distribution_elements = [];
     let distribution_stat_elements = [];
     let distribution_CI_elements = [];
+    let distribution_extra = [];
     let min_in_CI = null;
     let max_in_CI = null;
     let pop_stat_value = population_statistic[0];
@@ -553,6 +554,13 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
         distribution_elements.push(el);
         let dist_stat_els = statisticsFromDistribution(distribution[i], datasets[i], dimensions, bounds, options, popMin, popMax, min, max, i);
         distribution_stat_elements.push(dist_stat_els);
+    }
+    if(distribution[0].CI_range){
+        let el = new visElement("range_textbox", "dist_textbox");
+        el.setAttrInit('x', vis.areas['sec2display'].split(4, 3)[0]);
+        el.setAttrInit('y', vis.areas['sec2display'].split(2, 1)[1]);
+        el.setAttrInit('text', "0 / 0");
+        distribution_extra.push(el);
     }
     let cross_bar = new visElement('ci_cross_bar', 'line');
     cross_bar.setAttr('selected', 1);
@@ -599,7 +607,7 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
     }
 
     distribution_CI_elements = [cross_bar, cross_bar_mid, cross_bar_top,  ci_min, ci_max, ci_min_text, ci_max_text, ci_min_top, ci_max_top, ci_min_text_top, ci_max_text_top, ci_pop_stat_arrow, ci_pop_stat_text, ci_num_line, ci_num_text];
-    return [distribution_elements, distribution_stat_elements, distribution_CI_elements];
+    return [distribution_elements, distribution_stat_elements, distribution_CI_elements, distribution_extra];
 }
 
 function placeElements(elements, dimensions, bounds, options, min, max){

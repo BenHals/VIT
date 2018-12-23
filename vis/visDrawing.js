@@ -144,6 +144,17 @@ let defaultDrawFuncs = {
         ctx.fillText(e.attrs.text, e.attrs.x, e.attrs.y);
         //ctx.strokeText(e.attrs.text, e.attrs.x, e.attrs.y);
     },
+    "dist_textbox": function(e, ctx){
+        let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#000000';
+        let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color, 1);
+        ctx.fillStyle = fill_color;
+        ctx.strokeStyle = stroke_color;
+        ctx.font = '15px sans-serif';
+        ctx.textAlign = e.attrs['align'];
+        ctx.textBaseline = e.attrs['baseline'];
+        ctx.fillText(e.attrs.text, e.attrs.x, e.attrs.y);
+        //ctx.strokeText(e.attrs.text, e.attrs.x, e.attrs.y);
+    },
     "line": function(e, ctx){
         ctx.save();
         let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#000000';
