@@ -7,6 +7,7 @@ let defaultDrawFuncs = {
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
         let offset = 5;
+        ctx.lineWidth = 1;
         ctx.translate(0.5, 0.5);
         // ctx.fillRect(parseInt(e.attrs.x - offset),
         //             parseInt(e.attrs.y - offset),
@@ -232,6 +233,7 @@ let defaultDrawFuncs = {
         ctx.translate(-0.5, -0.5);
     },
     "distribution_range": function(e, ctx){
+        if(e.getAttr('y') > e.lower_draw_bound) return;
         let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#1C3F95';
         backup_color = Math.round(e.getAttr('in_ci')) ? 'green' : 'red';
         // if(!(e.getAttr('in_ci'))){

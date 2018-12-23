@@ -891,6 +891,8 @@ function dist_drop_point_cirange_stage(static_elements, dynamic_elements, stage,
     stage.setTransition(range_bar, 'x2', range_bar.getAttr('init_x2'), dist_elem.getAttr('init_ci_max'), 0, 1);
     stage.setTransition(range_bar, 'y1', range_bar.getAttr('init_y1'), dist_elem.getAttr('init_y'), 0, 1);
     stage.setTransition(range_bar, 'y2', range_bar.getAttr('init_y2'), dist_elem.getAttr('init_y'), 0, 1);
+    stage.setTransition(range_bar, 'selected', 1, 0, 0, 1);
+    stage.setTransition(range_bar, 'stroke-color', "orange", dist_elem.getAttr('in_ci') ? "green" : "red", 0, 1);
     stage.setTransition(dist_elem, 'stroke-opacity', 0, 1, 0.8, 1);
     stage.setTransition(dist_elem, 'fill-opacity', 0, 1, 0.8, 1);
 
@@ -899,6 +901,17 @@ function dist_drop_point_cirange_stage(static_elements, dynamic_elements, stage,
             let element = dynamic_elements.datapoints.all[i];
             stage.setTransition(element, 'selected', 1, 0, 0, 0);
         }
+    }
+    for(let j = 0; j < sample_index; j++){
+        let elements_to_fit = 40;
+        let bottom_index = Math.max(sample_index - elements_to_fit, 0);
+        let index = j - bottom_index;
+        let last_bottom_index = Math.max(sample_index - 1 - elements_to_fit, 0);
+        let last_index = j - last_bottom_index;
+        let d_element = dynamic_elements.distribution.datapoints[j];
+        let new_y = d_element.calcLineHeapY(index);
+        let old_y = d_element.calcLineHeapY(last_index);
+        stage.setTransition(d_element, 'y', old_y, new_y, 0, 1);
     }
 }
 
@@ -1009,8 +1022,15 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
             let x1 = sample_mark.getAttr('init_x1');
             let x2 = sample_mark.getAttr('init_x2');
             stage.setTransition(sample_mark, 'stroke-opacity', 0, 0, 0, 0);
-            if(x1 != x2) continue;
-            stage.setTransition(sample_mark, 'y2', y2 + (y1-y2)/1.5, y2 + (y1-y2)/1.5, 0, 1);
+            stage.setTransition(sample_mark, 'fill-opacity', 0, 0, 0, 0);
+            if(x1 != x2){
+                stage.setTransition(sample_mark, 'y1', y1, y1, 0, 0);
+                stage.setTransition(sample_mark, 'y2', y2, y2, 0, 0);
+
+            }else{
+
+                stage.setTransition(sample_mark, 'y2', y2 + (y1-y2)/1.5, y2 + (y1-y2)/1.5, 0, 1);
+            }
             
         }
         let dist_datapoint = dynamic_elements.distribution.datapoints[x];
@@ -1037,8 +1057,21 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
                 stage.setTransition(sample_mark, 'stroke-opacity', 0, 0.2, 0, 0);
             }
             let dist_datapoint = dynamic_elements.distribution.datapoints[j];
-            stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 1);
+            stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 0.2);
             stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 0);
+        }
+        if(dynamic_elements.distribution.datapoints[0].type == "distribution_range"){
+            for(let j = 0; j < i; j++){
+                let elements_to_fit = 40;
+                let bottom_index = Math.max(i - elements_to_fit, 0);
+                let index = j - bottom_index;
+                let last_bottom_index = Math.max(i - 1 - elements_to_fit, 0);
+                let last_index = j - last_bottom_index;
+                let d_element = dynamic_elements.distribution.datapoints[j];
+                let new_y = d_element.calcLineHeapY(index);
+                let old_y = d_element.calcLineHeapY(last_index);
+                stage.setTransition(d_element, 'y', old_y, new_y, 0, 1);
+            }
         }
         animation.addStage(stage);
     }

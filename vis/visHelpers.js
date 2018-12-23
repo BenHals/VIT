@@ -921,13 +921,21 @@ function heap_line(elements, bounds, min, max, vertical, base_margin){
     let screen_range_vert = !vertical ? [bounds.bottom, bounds.top] : [bounds.left, bounds.right];
     var spaceAvaliable = Math.abs(screen_range_vert[0] - screen_range_vert[1]);
     let base_margin_value = base_margin || Math.abs(bounds.bottom - bounds.top)/4
-    var spacePerElement = Math.min(spaceAvaliable/elements.length, 5);
+    // let elements_to_fit = elements.length;
+    let elements_to_fit = 40;
+    var spacePerElement = spaceAvaliable/elements_to_fit
     for(let e = 0; e < elements.length; e++){
-        let y = spacePerElement * e;
+        let y = spacePerElement * Math.min(e, elements_to_fit);
         let element = elements[e];
         let screen_x = linearScale(element.value, [min_v, max_v], screen_range);
         element.setAttrInit('y', bounds.bottom  - base_margin_value - y);
         element.setAttrInit('x', screen_x);
+        element.setAttrInit('lineWidth', spacePerElement - 2);
+        element.calcLineHeapY = function(index){
+            let y = bounds.bottom - base_margin_value - (spacePerElement * index);
+            return y; 
+        }
+        element.lower_draw_bound = bounds.bottom;
     }
 }
 
