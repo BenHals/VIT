@@ -923,7 +923,7 @@ function dist_drop_point_cirange_stage(static_elements, dynamic_elements, stage,
     total_count++;
     let new_text = `${in_count} / ${total_count}`;
     let new_percent_text = `${Math.round(in_count / total_count * 10000)/100}%`;
-    let textbox = static_elements.all.filter((e) => e.id.includes('range_textbox'))[0];
+    let textbox = static_elements.all.filter((e) => String(e.id).includes('range_textbox'))[0];
     if(textbox){
         stage.setTransition(textbox, 'text', old_text, new_text, 0.5 , 0.5);
         stage.setTransition(textbox, 'percentage-text', old_percent_text, new_percent_text, 0.5 , 0.5);
@@ -1097,7 +1097,7 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
             total_count++;
             let new_text = `${in_count} / ${total_count}`;
             let new_percent_text = `${Math.round(in_count / total_count * 10000)/100}%`;
-            let textbox = static_elements.all.filter((e) => e.id.includes('range_textbox'))[0];
+            let textbox = static_elements.all.filter((e) => String(e.id).includes('range_textbox'))[0];
             if(textbox){
                 stage.setTransition(textbox, 'text', old_text, new_text, 0.5 , 0.5);
                 stage.setTransition(textbox, 'percentage-text', old_percent_text, new_percent_text, 0.5 , 0.5);
