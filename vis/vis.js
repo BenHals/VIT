@@ -28,6 +28,7 @@ const vis = {
         this.reqAnimationFrame = undefined;
         this.static_draw_index = 0;
         this.current_sample = 0;
+        this.last_animation_type = undefined;
 
     },
     initModule: function(module, options){
@@ -262,6 +263,7 @@ const vis = {
             this.current_sample = 1000;
             this.reps_left = 0;
         }
+        this.last_animation_type = "normal";
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
         this.paused = false;
         ac_unpause();
@@ -280,7 +282,12 @@ const vis = {
         ma_createCIAnimation(animation, this.population_dimensions, this.sample_dimensions, this.staticElements, this.dynamicElements, this.module, speed, this.current_sample, this.areas, large);
         this.animation = animation;
         this.animation.start();
+        
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
+        if(this.last_animation_type == "ci"){
+            this.setProgress(1);
+        }
+        this.last_animation_type = "ci";
         this.paused = false;
         ac_unpause();
         this.last_frame = window.performance.now();
@@ -298,6 +305,10 @@ const vis = {
         this.animation = animation;
         this.animation.start();
         [this.current_stage, this.current_animation_percent]  = this.animation.progress_time(window.performance.now());
+        if(this.last_animation_type == "randci"){
+            this.setProgress(1);
+        }
+        this.last_animation_type = "randci";
         this.paused = false;
         ac_unpause();
         this.last_frame = window.performance.now();
