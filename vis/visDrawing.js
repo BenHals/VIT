@@ -231,6 +231,28 @@ let defaultDrawFuncs = {
         ctx.stroke();
         ctx.translate(-0.5, -0.5);
     },
+    "distribution_range": function(e, ctx){
+        let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#1C3F95';
+        // if(!(e.getAttr('in_ci'))){
+        //     backup_color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
+        // }
+        let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color);
+        ctx.fillStyle = fill_color;
+        ctx.strokeStyle = stroke_color;
+        let offset = 5;
+        if(e.getAttr("dashed")){
+            ctx.setLineDash([5, 8]);
+        }
+        ctx.lineWidth = e.getAttr('lineWidth') ? e.getAttr('lineWidth') : 1;
+        ctx.translate(0.5, 0.5);
+        ctx.beginPath();
+        ctx.moveTo(parseInt(e.getAttr('ci_min')), parseInt(e.getAttr('y')));
+        ctx.lineTo(parseInt(e.getAttr('ci_max')), parseInt(e.getAttr('y')));
+        ctx.closePath();
+        ctx.stroke();
+        ctx.translate(-0.5, -0.5);
+        ctx.restore();
+    },
     "axis": function(e, ctx){
         ctx.translate(0.5, 0.5);
         ctx.beginPath();

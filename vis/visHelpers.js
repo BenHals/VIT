@@ -388,10 +388,12 @@ function statisticsFromElements(elements, dimensions, bounds, options, dataset, 
     return new_elements;
 }
 
-function statisticsFromDistribution(distribution_stat, dataset, dimensions, bounds, options, popMin, popMax, min, max, s_i){
+function statisticsFromDistribution(distribution_item, dataset, dimensions, bounds, options, popMin, popMax, min, max, s_i){
     let new_elements = [];
     let statistic = options.Statistic;
     let num_factors = dimensions.length > 1 ? dimensions[1].factors.length : 1;
+    let distribution_stat = distribution_item.point_value;
+    let ci_range = distribution_item.CI_range;
     if(statistic == 'Mean' || statistic == 'Median'){
         if(num_factors > 0 && num_factors < 2 ){
             for(let f = 0; f < num_factors; f++){
@@ -404,13 +406,22 @@ function statisticsFromDistribution(distribution_stat, dataset, dimensions, boun
                 let screen_factor_stat = linearScale(factor_stat, [popMin, popMax], [factor_bounds.left, factor_bounds.right]);
                 let screen_overall_stat = linearScale(overall_stat, [popMin, popMax], [factor_bounds.left, factor_bounds.right]);
                 let screen_stat = linearScale(stat, [popMin, popMax], [factor_bounds.left, factor_bounds.right]);
-                let el = new visElement('dist_stat_arrow' + f, 'line');
+                let el = new visElement('dist_stat_line' + f, 'line');
                 el.setAttrInit('x1', screen_stat);
                 el.setAttrInit('y1', factor_bounds.bottom);
                 el.setAttrInit('x2', screen_stat);
                 el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
                 el.setAttrInit('stat', distribution_stat);
                 new_elements.push(el);
+                if(ci_range){
+                    let el = new visElement('dist_stat_range' + f, 'line');
+                    el.setAttrInit('x1', linearScale(ci_range[0], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('x2', linearScale(ci_range[1], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('stat', distribution_stat);
+                    new_elements.push(el); 
+                }
             }    
         }else {
             for(let f = 0; f < num_factors; f++){
@@ -443,6 +454,15 @@ function statisticsFromDistribution(distribution_stat, dataset, dimensions, boun
                 el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/2);
                 el.setAttrInit('stat', distribution_stat);
                 new_elements.push(el);
+                if(ci_range){
+                    let el = new visElement('dist_stat_range' + f, 'line');
+                    el.setAttrInit('x1', linearScale(ci_range[0], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y1', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('x2', linearScale(ci_range[1], [popMin, popMax], [factor_bounds.left, factor_bounds.right]));
+                    el.setAttrInit('y2', factor_bounds.bottom - (factor_bounds.bottom - factor_bounds.top)/8);
+                    el.setAttrInit('stat', distribution_stat);
+                    new_elements.push(el); 
+                }
             }
         }else{
             for(let f = 0; f < num_factors; f++){
@@ -502,6 +522,12 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
     let in_ci_count = 0;
     for(let i = 0; i < distribution.length; i++){
         let el = new visElement(i, 'distribution');
+        if(distribution[i].CI_range){
+            el = new visElement(i, 'distribution_range');
+            el.setAttrInit("range", distribution[i].CI_range);
+            el.setAttrInit("ci_min", linearScale(distribution[i].CI_range[0], [min, max], [bounds.left, bounds.right]));
+            el.setAttrInit("ci_max", linearScale(distribution[i].CI_range[1], [min, max], [bounds.left, bounds.right]));
+        }
         el.setAttr('stat', options.Statistic);
         el.value = distribution[i].point_value;
         let dist_distance_from_pop = distribution.slice().sort(function(a, b){return Math.abs(a.point_value - pop_stat_value) - Math.abs(b.point_value - pop_stat_value)});
@@ -511,7 +537,7 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
         if(in_ci && (min_in_CI == null || el.value < min_in_CI)) min_in_CI = el.value;
         if(in_ci && (max_in_CI == null || el.value > max_in_CI)) max_in_CI = el.value;
         distribution_elements.push(el);
-        let dist_stat_els = statisticsFromDistribution(distribution[i].point_value, datasets[i], dimensions, bounds, options, popMin, popMax, min, max, i);
+        let dist_stat_els = statisticsFromDistribution(distribution[i], datasets[i], dimensions, bounds, options, popMin, popMax, min, max, i);
         distribution_stat_elements.push(dist_stat_els);
     }
     let cross_bar = new visElement('ci_cross_bar', 'line');

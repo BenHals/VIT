@@ -365,6 +365,7 @@ const model = {
             generator.both.push(medianGen('Median', dimensions[0].name));
             generator.overall.push(lqGen('lq', dimensions[0].name));
             generator.overall.push(uqGen('uq', dimensions[0].name));
+            generator.overall.push(stdGen('std', dimensions[0].name));
             if(dimensions.length > 1){
                 generator.overall.push(avDev('Average Deviation', dimensions[0].name, dimensions[1].name, dimensions[1].factors, meanGen('', dimensions[0].name)[1]));
                 generator.overall.push(fStat('F Stat', dimensions[0].name, dimensions[1].name, dimensions[1].factors, meanGen('', dimensions[0].name)[1]));
@@ -375,6 +376,7 @@ const model = {
         }else{
             if(dimensions.length > 1) generator.fac2.push(propGen('proportion', dimensions[0].name, dimensions[0].focus, cleaned_data.length));
             generator.overall.push(propGen('proportion', dimensions[0].name, dimensions[0].focus, cleaned_data.length));
+            generator.overall.push(stdGen('std', dimensions[0].name, dimensions[0].focus));
             if(dimensions.length > 1){
                 generator.overall.push(avDev('Average Deviation', dimensions[0].name, dimensions[1].name, dimensions[1].factors, propGen('', dimensions[0].name, dimensions[0].focus, cleaned_data.length)[1] ));
                 generator.overall.push(fStat('F Stat', dimensions[0].name, dimensions[1].name, dimensions[1].factors, propGen('', dimensions[0].name, dimensions[0].focus, cleaned_data.length)[1]));

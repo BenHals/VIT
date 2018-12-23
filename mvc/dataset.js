@@ -105,6 +105,23 @@ function meanGen(stat_name, dim_name){
         return isNaN(avg) ? 0 : avg;
     }];
 }
+function stdGen(stat_name, dim_name, focus){
+    return [stat_name, function(dp){
+        dp = dp || [];
+        if(dp.length < 1) return 0;
+        let values = dp.map(function(c){
+            let val = c[dim_name];
+
+            // Account for categorical, A categorical value is a category name so we convert to 0 or 1.
+            if(isNaN(val)){
+                val = val == focus ? 1 : 0;
+            }
+            return val;
+        });
+        let std = d3.deviation(values);
+        return isNaN(std) ? 0 : std;
+    }];
+}
 function medianGen(stat_name, dim_name){
     return [stat_name, function(dp){
         if (dp.length < 1) return 0;

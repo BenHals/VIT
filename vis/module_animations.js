@@ -129,6 +129,66 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             }
         }
         delayStage(animation, 1000/speed);
+    }else if(module.name == "Confidence Interval"){
+        if(pop_dimensions[0].type == 'numeric'){
+            if(!skip){
+                stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
+                point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+                animation.addStage(stage);
+                delayStage(animation, 1000/speed);
+                stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
+
+                point_drop_stage(static_elements, dynamic_elements, stage, sample_index);
+                point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index);
+                
+                
+                animation.addStage(stage);
+            }else{
+                stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 2000/speed);
+                point_skip_drop(static_elements, dynamic_elements, stage, sample_index);
+                point_skip_drop_ci_range(static_elements, dynamic_elements, stage, sample_index);
+                animation.addStage(stage);
+            }
+        }else{
+            stage = new animStage('fadePoint', animation.name, include_distribution ? 1000/speed : 5000/speed);
+            let selected_elements = prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+            animation.addStage(stage);
+            stage = new animStage('pointDrop', animation.name, include_distribution ? 1000/speed : 5000/speed);
+            prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
+            prop_point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
+            animation.addStage(stage);
+            stage = new animStage('fadeBar', animation.name, include_distribution ? 1000/speed : 5000/speed);
+            prop_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+            animation.addStage(stage);
+        }
+        delayStage(animation, 1000/speed);
+        if(include_distribution){
+            delayStage(animation, 1000/speed);
+    
+            stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
+            if(sample_dimensions.length > 1){
+                if(sample_dimensions[1].type == 'numeric'){
+                    dist_drop_slope_stage(static_elements, dynamic_elements, stage, sample_index);
+                }else{
+                    if(sample_dimensions[1].factors.length == 2){
+                        dist_drop_diff_stage(static_elements, dynamic_elements, stage, sample_index);
+                    }else if(sample_dimensions[1].factors.length > 2){
+                        dist_drop_devi_stage(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
+                    }
+                }
+            }else if(sample_dimensions.length < 2){
+                dist_drop_point_stage(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
+            }
+            
+            animation.addStage(stage);
+    
+            if(sample_dimensions.length > 1 && sample_dimensions[1].factors.length > 2){
+                stage = new animStage('devi2', animation.name, 5000/speed);
+                dist_drop_devi_stage_2(static_elements, dynamic_elements, stage, sample_index, sample_dimensions[0].type == 'numeric');
+                animation.addStage(stage);
+            }
+        }
+        delayStage(animation, 1000/speed);
     }else{
         if(pop_dimensions[0].type == 'numeric'){
             if(!skip){
@@ -152,7 +212,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             let selected_elements = prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
             animation.addStage(stage);
             stage = new animStage('pointDrop', animation.name, include_distribution ? 1000/speed : 5000/speed);
-            prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
+            prop_point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
             animation.addStage(stage);
             stage = new animStage('fadeBar', animation.name, include_distribution ? 1000/speed : 5000/speed);
             prop_fade_stage(static_elements, dynamic_elements, stage, sample_index);
@@ -624,6 +684,15 @@ function point_skip_drop(static_elements, dynamic_elements, stage, sample_index)
         stage.setTransition(stat_marker, 'stroke-opacity', 1, 1, 0, 0);
     }
 }
+function point_skip_drop_ci_range(static_elements, dynamic_elements, stage, sample_index){
+    let range_bar = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_range"))[0];
+    stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar, "opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar, "selected", 0, 1, 0, 0);
+    stage.setFunc(function(){
+        dynamic_elements.all.push(range_bar);
+    });
+}
 
 
 function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index){
@@ -654,7 +723,8 @@ function stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_inde
         let x2 = element.getAttr('init_x2');
         stage.setTransition(element, 'fill-opacity', 0.2, 0.2, 0, 1);
         stage.setTransition(element, 'stroke-opacity', 0.2, 0.2, 0, 1);
-        if(x1 != x2) return;
+        stage.setTransition(element, 'selected', 0, 0, 0, 1);
+        if(x1 != x2) continue;
         stage.setTransition(element, 'y2', y2 + (y1-y2)/1.5, y2 + (y1-y2)/1.5, 0, 1);
     }
     let dist_elem = dynamic_elements.distribution.datapoints[sample_index];
@@ -676,6 +746,16 @@ function point_drop_stage(static_elements, dynamic_elements, stage, sample_index
     }
 
 }
+function point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index){
+    let range_bar = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_range"))[0];
+    stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0.8, 1);
+    stage.setTransition(range_bar, "opacity", 0, 1, 0.8, 1);
+    stage.setTransition(range_bar, "selected", 0, 1, 0.8, 0);
+    stage.setFunc(function(){
+        dynamic_elements.all.push(range_bar);
+    });
+}
+
 function prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements){
     for(let i = 0; i < selected_elements.length; i++){
         let element = dynamic_elements.datapoints.all.filter((e) => e.type == 'datapoint')[i];
@@ -690,6 +770,15 @@ function prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_
     //     stage.setTransition(stat_marker, 'stroke-opacity', 0, 1, 0.8, 1);
     // }
 
+}
+function prop_point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements){
+    let range_bar = dynamic_elements.distribution.stats[sample_index].filter((e) => e.id.includes("dist_stat_range"))[0];
+    stage.setTransition(range_bar, "stroke-opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar, "opacity", 0, 1, 0, 1);
+    stage.setTransition(range_bar, "selected", 0, 1, 0, 0);
+    stage.setFunc(function(){
+        dynamic_elements.all.push(range_bar);
+    });
 }
 
 function point_center_drop_stage(static_elements, dynamic_elements, stage){

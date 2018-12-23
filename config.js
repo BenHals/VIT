@@ -55,6 +55,7 @@ const config = {
         "down-arrow": "canvas",
         "arrow": "canvas",
         "distribution": "canvas",
+        "distribution_range": "canvas",
         "axis": "canvas"    
     }
     // element_draw_type: {
@@ -66,6 +67,7 @@ const config = {
     //     "down-arrow": "canvas",
     //     "arrow": "canvas",
     //     "distribution": "canvas",
+    //     "distribution_range": "canvas",
     //     "axis": "svg"    
     // }
 
@@ -200,7 +202,12 @@ config.modules =  {
             return sample;
         },
         generateDistribution: function(dataset, stat){
-            return {"point_value": dataset.statistics[stat]};
+            let sample_std = dataset.statistics.std;
+            let sample_se = sample_std / Math.sqrt(dataset.all.length);
+            let multiplier = 1.96;
+            let stat_value = dataset.statistics[stat];
+            let CI_range = [stat_value - (multiplier * sample_se), stat_value + (multiplier * sample_se)];
+            return {"point_value": stat_value, "CI_range": CI_range};
         },
         labels:["Population", "Sample", "Sample Distribution"],
         playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
