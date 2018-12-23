@@ -233,6 +233,7 @@ let defaultDrawFuncs = {
     },
     "distribution_range": function(e, ctx){
         let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#1C3F95';
+        backup_color = Math.round(e.getAttr('in_ci')) ? 'green' : 'red';
         // if(!(e.getAttr('in_ci'))){
         //     backup_color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`;
         // }

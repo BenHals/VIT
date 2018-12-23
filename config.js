@@ -132,7 +132,7 @@ config.modules =  {
             if(dimensions.length < 1) return;
             if(dimensions.length > 1 && dimensions[1].factors.length > 2){
                 this.inCI = function(distribution_sorted, dist_element, population_statistic){
-                    return dist_element > population_statistic;
+                    return dist_element.point_value > population_statistic;
                 }
             }else{
                 this.inCI = function(distribution_sorted, dist_element, population_statistic){
@@ -179,17 +179,11 @@ config.modules =  {
         },
         generateInCi: function(dimensions){
             if(dimensions.length < 1) return;
-            if(dimensions.length > 1 && dimensions[1].factors.length > 2){
-                this.inCI = function(distribution_sorted, dist_element, population_statistic){
-                    return dist_element > population_statistic;
-                }
-            }else{
-                this.inCI = function(distribution_sorted, dist_element, population_statistic){
-                    let top_index = Math.floor(distribution_sorted.length * 0.95);
-                    let middle_95 = distribution_sorted.slice(0, top_index);
-                    return middle_95.includes(dist_element);
-                }
+
+            this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                return population_statistic >= dist_element.CI_range[0] && population_statistic <= dist_element.CI_range[1];
             }
+            
         },
         options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
                 {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
@@ -238,7 +232,7 @@ config.modules =  {
             if(dimensions.length < 1) return;
             if(dimensions.length > 1 && dimensions[1].factors.length > 2){
                 this.inCI = function(distribution_sorted, dist_element, population_statistic){
-                    return dist_element > population_statistic;
+                    return dist_element.point_value > population_statistic;
                 }
             }else{
                 this.inCI = function(distribution_sorted, dist_element, population_statistic){
@@ -370,7 +364,7 @@ config.modules =  {
             if(dimensions.length < 1) return;
             // if(dimensions.length > 1 && dimensions[1].factors.length > 2){
                 this.inCI = function(distribution_sorted, dist_element, population_statistic){
-                    return dist_element > population_statistic;
+                    return dist_element.point_value > population_statistic;
                 }
             // }else{
             //     this.inCI = function(distribution_sorted, dist_element, population_statistic){
