@@ -442,26 +442,26 @@ const model = {
         let sample = sample_generator(population_data, sample_size);
         let ds = createDataset(sample, this.getSampleDimensions(), this.genStatistics(sample, this.getSampleDimensions()));
         let dim = this.getSampleDimensions();
-        let stat_value = ds.statistics[stat];
+        let stat_value = this.selected_module.generateDistribution(ds, stat);
         if(dim.length > 1 && dim[1].factors.length == 2){
             let f0_stat = ds[dim[0].name][dim[1].name][dim[1].factors[0]].statistics[stat];
             let f1_stat = ds[dim[0].name][dim[1].name][dim[1].factors[1]].statistics[stat];
-            stat_value = f1_stat - f0_stat;
+            stat_value.point_value = f1_stat - f0_stat;
         }
         this.largeSampleStats.push(stat_value);
         controller.updateSampleProgress(i/1000);
         if(this.largeSampleStats.length == 10000){
             
             let stat = getPopulationStatistic(this.populationDS, this.getOptions().Statistic, this.dimensions)[0];
-            let sorted_dist = this.largeSampleStats.sort(function(a, b){return Math.abs(a - stat) - Math.abs(b-stat)});
+            let sorted_dist = this.largeSampleStats.sort(function(a, b){return Math.abs(a.point_value - stat) - Math.abs(b.point_value - stat)});
             let min_stat = null;
             let max_stat = null;
             let in_ci_count = 0;
             for(let ls = 0; ls < sorted_dist.length; ls++){
                 let in_ci = this.selected_module.inCI(sorted_dist, sorted_dist[ls], stat);
                 if(in_ci) in_ci_count++;
-                if(in_ci && (min_stat == null || sorted_dist[ls] < min_stat)) min_stat = sorted_dist[ls];
-                if(in_ci && (max_stat == null || sorted_dist[ls] > max_stat)) max_stat = sorted_dist[ls];
+                if(in_ci && (min_stat == null || sorted_dist[ls].point_value < min_stat)) min_stat = sorted_dist[ls].point_value;
+                if(in_ci && (max_stat == null || sorted_dist[ls].point_value > max_stat)) max_stat = sorted_dist[ls].point_value;
             }
             this.largeCI = [min_stat, max_stat, in_ci_count];
             this.populationDS.largeCI = [min_stat, max_stat, in_ci_count];
