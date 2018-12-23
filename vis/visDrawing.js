@@ -147,11 +147,17 @@ let defaultDrawFuncs = {
     "dist_textbox": function(e, ctx){
         let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#000000';
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color, 1);
-        ctx.fillStyle = fill_color;
+        let color = d3.color("white");
+        color.opacity = 0.8;
+        ctx.fillStyle = color;
         ctx.strokeStyle = stroke_color;
         ctx.font = '15px sans-serif';
         ctx.textAlign = e.attrs['align'];
         ctx.textBaseline = e.attrs['baseline'];
+        let max_width = Math.max(ctx.measureText("Coverage").width, ctx.measureText(e.attrs.text).width, ctx.measureText(e.getAttr("percentage-text")).width) + 5;
+        ctx.fillRect(e.attrs.x - max_width / 2, e.attrs.y - 30, max_width, 50);
+        ctx.fillStyle = fill_color;
+        ctx.textAlign = "center";
         ctx.fillText("Coverage", e.attrs.x, e.attrs.y - 15);
         ctx.fillText(e.attrs.text, e.attrs.x, e.attrs.y);
         ctx.fillText(e.getAttr('percentage-text'), e.attrs.x, e.attrs.y + 15);

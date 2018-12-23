@@ -33,6 +33,7 @@ const view = {
         $('#visualisation').html(`<div id="canvasWrapper">
             <canvas id="popCanvas" class="mainCanvas"></canvas>
             <canvas id="dynamicCanvas" class="mainCanvas"></canvas>
+            <canvas id="staticOnTopCanvas" class="mainCanvas"></canvas>
             <svg id="popSVG" class="mainCanvas"><g id="popSvgContainer"></g></svg>
             <svg id="dynamicSVG" class="mainCanvas"><g id="dynSvgContainer"></g></svg>
             </div>`);
@@ -46,11 +47,15 @@ const view = {
         let scale_factor = ($('#popCanvas').attr('width') / $('#popCanvas').attr('data-normWidth'))
         $('#dynamicCanvas').attr('width', vis_width);
         $('#dynamicCanvas').attr('height', vis_height);
+        $('#staticOnTopCanvas').attr('width', vis_width);
+        $('#staticOnTopCanvas').attr('height', vis_height);
         if(init){
             $('#dynamicSVG').attr('data-normWidth', vis_width);
             $('#dynamicSVG').attr('data-normHeight', vis_height);
             $('#dynamicCanvas').attr('data-normWidth', vis_width);
             $('#dynamicCanvas').attr('data-normHeight', vis_height);
+            $('#staticOnTopCanvas').attr('data-normWidth', vis_width);
+            $('#staticOnTopCanvas').attr('data-normHeight', vis_height);
             $('#popCanvas').attr('data-normWidth', vis_width);
             $('#popCanvas').attr('data-normHeight', vis_height);
             $('#dynamicSVG').attr('width', vis_width);

@@ -557,7 +557,7 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
     }
     if(distribution[0].CI_range){
         let el = new visElement("range_textbox", "dist_textbox");
-        el.setAttrInit('x', vis.areas['sec2display'].split(4, 3)[0]);
+        el.setAttrInit('x', vis.areas['sec2display'].split(10, 1)[0]);
         el.setAttrInit('y', vis.areas['sec2display'].split(2, 1)[1]);
         el.setAttrInit('text', "0 / 0");
         el.setAttrInit('percentage-text', "0%");

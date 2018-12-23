@@ -3,8 +3,10 @@ const vis = {
         this.destroy();
         this.canvas = document.getElementById('popCanvas');
         this.dynamicCanvas = document.getElementById('dynamicCanvas');
+        this.staticOnTopCanvas = document.getElementById('staticOnTopCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.dynamicCtx = this.dynamicCanvas.getContext('2d');
+        this.staticOnTopCtx = this.staticOnTopCanvas.getContext('2d');
         this.ctx.imageSmoothingEnabled = false;
         this.ctx.mozImageSmoothingEnabled = false;
         this.ctx.oImageSmoothingEnabled = false;
@@ -15,6 +17,7 @@ const vis = {
         this.dynamicCtx.webkitImageSmoothingEnabled = false;
 
         this.staticElements = {};
+        this.staticElements.ontop = [];
         this.dynamicElements = {};
         this.interpolators = [];
         let canvas_bounds = this.canvas.getBoundingClientRect();
@@ -178,7 +181,7 @@ const vis = {
         this.staticElements.dist_axis = axis;
         this.staticElements.all = this.staticElements.all.concat(axis);
 
-        if(extra) this.staticElements.all = this.staticElements.all.concat(extra);
+        if(extra) this.staticElements.ontop = this.staticElements.ontop.concat(extra);
 
         this.drawDynamic();
     },
@@ -214,6 +217,7 @@ const vis = {
 
         this.drawDynamic();
         this.drawStatic();
+        this.drawStaticOnTop();
         dd_updateDatapoints(dataset, this.population_dimensions, this.sample_dimensions);
     },
     initSampleDistElements(datapoints){
@@ -347,7 +351,7 @@ const vis = {
         for(let i = 0; i < this.interpolators.length; i++){
             let interpolator = this.interpolators[i];
             let element = interpolator.el;
-            
+
             let attr = interpolator.attr;
             let value = interpolator.value(stage_percentage);
             element.setAttr(attr, value);
@@ -358,6 +362,25 @@ const vis = {
         clearCtx(ctx);
         for(let i = 0; i < this.staticElements.all.length; i++){
             let element = this.staticElements.all[i];
+
+            if(config.element_draw_type[element.type] == "canvas"){
+                element.draw(ctx);
+            }else if(config.element_draw_type[element.type] == "svg"){
+                if(!element.svg_initialised || d3.select('#' + element.svg_id).empty()){
+                    let svg_id = '#popSvgContainer';
+                    defaultSVGFuncs[element.type](element, svg_id);
+                    element.svg_initialised = true;
+                }
+                element.svgUpdate();
+            }
+            
+        }
+    },
+    drawStaticOnTop: function(){
+        let ctx = this.staticOnTopCtx;
+        clearCtx(ctx);
+        for(let i = 0; i < this.staticElements.ontop.length; i++){
+            let element = this.staticElements.ontop[i];
 
             if(config.element_draw_type[element.type] == "canvas"){
                 element.draw(ctx);
@@ -413,6 +436,7 @@ const vis = {
             if(this.static_draw_index == 0){
                 this.drawStatic();
             }
+            this.drawStaticOnTop();
             this.static_draw_index += 1;
             this.static_draw_index %= 3;
             this.last_frame = ts;
@@ -435,6 +459,7 @@ const vis = {
             this.updateDynamic(1);
             this.drawDynamic();
             this.drawStatic();
+            this.drawStaticOnTop();
         }
         
     },
@@ -456,6 +481,7 @@ const vis = {
         if(this.paused && stage_percentage != 1){
             this.drawDynamic();
             this.drawStatic();
+            this.drawStaticOnTop();
         }
 
         return stage_percentage != 1;
