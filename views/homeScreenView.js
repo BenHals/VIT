@@ -12,6 +12,7 @@ var homeHTML = `
             <button class="btn btn-primary btn-block" onclick="hs_loadModuleEvent('Bootstrapping')">Bootstrapping</button>
             <button class="btn btn-primary btn-block" onclick="hs_loadModuleEvent('Randomisation Variation')">Randomisation Variation</button>
             <button class="btn btn-primary btn-block" onclick="hs_loadModuleEvent('Randomisation Test')">Randomisation Test</button>
+            <button class="btn btn-primary btn-block" onclick="hs_loadModuleEvent('Confidence Interval')">Confidence Interval</button>
         </div>
     </div>
 </div>

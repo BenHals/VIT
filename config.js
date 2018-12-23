@@ -106,12 +106,62 @@ config.modules =  {
         },
         generateOptions: function(){return},
         generateInCi: function(){return},
+        generateDistribution: function(){return},
     },
     "Sampling Variation": {
         name: "Sampling Variation",
         baseHTML: generateModuleHTML,
         baseControls: generateFileControls,
         allowedVariables:[['n', null], ['c', null], ['n', 'c'], ['c','c'], ['n', 'n']],
+        generateOptions: function(dimensions){
+            if(dimensions.length < 1) return;
+            this.options = [];
+            let statistics = {name: 'Statistic', type: 'category', values: config.initStatistics(dimensions), default: config.initStatistics(dimensions)[0], validate: (v, o)=> o.values.includes(v)};
+            this.options.push(statistics);
+            let sample_size = {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])};
+            this.options.push(sample_size);
+        },
+        inCI: function(distribution_sorted, dist_element, population_statistic){
+            let top_index = Math.floor(distribution_sorted.length * 0.95);
+            let middle_95 = distribution_sorted.slice(0, top_index);
+            return middle_95.includes(dist_element);
+        },
+        generateInCi: function(dimensions){
+            if(dimensions.length < 1) return;
+            if(dimensions.length > 1 && dimensions[1].factors.length > 2){
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    return dist_element > population_statistic;
+                }
+            }else{
+                this.inCI = function(distribution_sorted, dist_element, population_statistic){
+                    let top_index = Math.floor(distribution_sorted.length * 0.95);
+                    let middle_95 = distribution_sorted.slice(0, top_index);
+                    return middle_95.includes(dist_element);
+                }
+            }
+            
+        },
+        options: [{name: 'Statistic', type: 'category', values: ["Mean", "Median"], default: "Mean", validate: (v, o)=> o.values.includes(v)}, 
+                {name: 'Sample Size', type: "number", range: [0, 'max'], default: 10, validate: (v, o)=> (v > o.range[0] && v < o.range[1])}],
+        generateSample:function(population_rows, sampleSize,){
+            // Each sample should be sampleSize elements taken from the pop
+            // without replacement (can't take the same element twice).
+            var sample = population_rows.slice(0, population_rows.length);
+            d3.shuffle(sample);
+            sample = sample.slice(0, sampleSize);
+            return sample;
+        },
+        generateDistribution: function(dataset, stat){
+            return {"point_value": dataset.statistics[stat]};
+        },
+        labels:["Population", "Sample", "Sample Distribution"],
+        playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
+    },
+    "Confidence Interval": {
+        name: "Confidence Interval",
+        baseHTML: generateModuleHTML,
+        baseControls: generateFileControls,
+        allowedVariables:[['n', null], ['c', null]],
         generateOptions: function(dimensions){
             if(dimensions.length < 1) return;
             this.options = [];
@@ -148,6 +198,9 @@ config.modules =  {
             d3.shuffle(sample);
             sample = sample.slice(0, sampleSize);
             return sample;
+        },
+        generateDistribution: function(dataset, stat){
+            return {"point_value": dataset.statistics[stat]};
         },
         labels:["Population", "Sample", "Sample Distribution"],
         playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
@@ -201,6 +254,9 @@ config.modules =  {
 
             }
             return sample;
+        },
+        generateDistribution: function(dataset, stat){
+            return {"point_value": dataset.statistics[stat]};
         },
         labels:['Data','Re-Sample','Bootstrap Distribution'],
         playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
@@ -274,6 +330,9 @@ config.modules =  {
             }
             return sample;
         },
+        generateDistribution: function(dataset, stat){
+            return {"point_value": dataset.statistics[stat]};
+        },
         labels:['Data','Random Variation','Randomisation Distribution'],
         playSectionLabels:["Sampling","Sampling Distribution", "Statistics"]
     },
@@ -340,6 +399,9 @@ config.modules =  {
 
             }
             return sample;
+        },
+        generateDistribution: function(dataset, stat){
+            return {"point_value": dataset.statistics[stat]};
         },
         labels:['Data','Re-Randomised Data','Re-Randomisation Distribution'],
         playSectionLabels:["Sampling","Sampling Distribution", "Statistics"],

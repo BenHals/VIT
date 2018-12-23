@@ -123,8 +123,8 @@ const vis = {
         let min = 0;
         let max = 1;
         if(statistic == "Slope"){
-            max = distribution.reduce((a, c)=> c > a ? c : a, -100000);
-            min = distribution.reduce((a, c)=> c < a ? c : a, 100000);
+            max = distribution.reduce((a, c)=> c.point_value > a.point_value ? c.point_value : a.point_value, -100000);
+            min = distribution.reduce((a, c)=> c.point_value < a.point_value ? c.point_value : a.point_value, 100000);
             min =Math.min(min, 0);
             max = Math.max(0, max);
         }else if(this.sample_dimensions.length < 2 && statistic == 'proportion'){
