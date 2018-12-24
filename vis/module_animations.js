@@ -212,7 +212,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             let selected_elements = prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
             animation.addStage(stage);
             stage = new animStage('pointDrop', animation.name, include_distribution ? 1000/speed : 5000/speed);
-            prop_point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
+            prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
             animation.addStage(stage);
             stage = new animStage('fadeBar', animation.name, include_distribution ? 1000/speed : 5000/speed);
             prop_fade_stage(static_elements, dynamic_elements, stage, sample_index);

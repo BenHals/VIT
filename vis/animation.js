@@ -120,6 +120,9 @@ class animStage {
 		this.functions = [];
 	}
 	setTransition(element, attr, attrFrom, changeTo, start, end){
+		if(element == undefined){
+			console.log('no element!');
+		}
 		this.transitions.push({element:element, attr:attr, attrFrom:attrFrom, changeTo:changeTo, start:start, end:end});
 		this.elements.push(element);
 	}
