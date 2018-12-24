@@ -127,8 +127,8 @@ const vis = {
         let min = 0;
         let max = 1;
         if(statistic == "Slope"){
-            max = distribution.reduce((a, c)=> c.point_value > a.point_value ? c.point_value : a.point_value, -100000);
-            min = distribution.reduce((a, c)=> c.point_value < a.point_value ? c.point_value : a.point_value, 100000);
+            max = distribution.reduce((a, c)=> c.point_value > a ? c.point_value : a, -100000);
+            min = distribution.reduce((a, c)=> c.point_value < a ? c.point_value : a, 100000);
             min =Math.min(min, 0);
             max = Math.max(0, max);
         }else if(this.sample_dimensions.length < 2 && statistic == 'proportion'){
@@ -351,7 +351,6 @@ const vis = {
         for(let i = 0; i < this.interpolators.length; i++){
             let interpolator = this.interpolators[i];
             let element = interpolator.el;
-
             let attr = interpolator.attr;
             let value = interpolator.value(stage_percentage);
             element.setAttr(attr, value);

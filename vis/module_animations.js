@@ -515,7 +515,7 @@ function point_fade_stage(static_elements, dynamic_elements, stage, sample_index
     if(dimensions.length > 1 && dimensions[1].type == 'numeric'){
         let distribution_slopes = dynamic_elements.all.filter((e)=>e.id == "dist_stat_lineline");
         for(let i = 0; i < distribution_slopes.length; i++){
-            stage.setTransition(distribution_slopes[i], 'stroke-opacity', 0, i == distribution_slopes.length -1 ? 0 : 0.2, 0, 0);
+            stage.setTransition(distribution_slopes[i], 'stroke-opacity', 0, i == distribution_slopes.length -1 ? 0.2 : 0.2, 0, 0);
         }
     }
 }

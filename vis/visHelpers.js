@@ -612,7 +612,6 @@ function elementsFromDistribution(distribution, datasets, dimensions, bounds, op
 }
 
 function placeElements(elements, dimensions, bounds, options, min, max){
-    console.log(bounds.width, bounds.left, min, max);
     let num_factors = elements.factors.length;
     let max_x = max == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] > a ? c.attrs[dimensions[0].name] : a, -100000) : max;
     let min_x = min == undefined ? elements.all.reduce((a, c)=> c.attrs[dimensions[0].name] < a ? c.attrs[dimensions[0].name] : a, 100000) : min;
