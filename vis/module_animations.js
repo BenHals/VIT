@@ -133,7 +133,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
         if(pop_dimensions[0].type == 'numeric'){
             if(!skip){
                 stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 5000/speed);
-                point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
+                point_fade_stage(static_elements, dynamic_elements, stage, sample_index, false);
                 animation.addStage(stage);
                 delayStage(animation, 1000/speed);
                 stage = new animStage('drop', animation.name, include_distribution ? 1000/speed : 5000/speed);
@@ -146,7 +146,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             }else{
                 stage = new animStage('fade', animation.name, include_distribution ? 1000/speed : 2000/speed);
                 point_skip_drop_ci_range(static_elements, dynamic_elements, stage, sample_index);
-                point_skip_drop(static_elements, dynamic_elements, stage, sample_index);
+                point_skip_drop(static_elements, dynamic_elements, stage, sample_index, false);
                 animation.addStage(stage);
             }
         }else{
@@ -154,7 +154,7 @@ function ma_createAnimation(animation, pop_dimensions, sample_dimensions, static
             let selected_elements = prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_index);
             animation.addStage(stage);
             stage = new animStage('pointDrop', animation.name, include_distribution ? 1000/speed : 5000/speed);
-            prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
+            prop_point_drop_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements, false);
             prop_point_drop_cirange_stage(static_elements, dynamic_elements, stage, sample_index, selected_elements);
             animation.addStage(stage);
             stage = new animStage('fadeBar', animation.name, include_distribution ? 1000/speed : 5000/speed);
@@ -485,7 +485,7 @@ function prop_bootstrap_animate_points(animation, pop_dimensions, sample_dimensi
 
 }
 
-function point_fade_stage(static_elements, dynamic_elements, stage, sample_index){
+function point_fade_stage(static_elements, dynamic_elements, stage, sample_index, stat_mark = true){
     let pop_elements = [];
     let delay = 1/dynamic_elements.datapoints.all.length;
     for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
@@ -503,7 +503,7 @@ function point_fade_stage(static_elements, dynamic_elements, stage, sample_index
         let fill = pop_elements.includes(element) ? 1 : 0;
         stage.setTransition(element, 'fill-opacity', 0, fill, fill, fill);
     }
-    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index);
+    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index, stat_mark);
     
     for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
         let stat_marker = dynamic_elements.stat_markers[i];
@@ -639,7 +639,7 @@ function prop_point_fade_stage(static_elements, dynamic_elements, stage, sample_
 
 }
 
-function point_skip_drop(static_elements, dynamic_elements, stage, sample_index){
+function point_skip_drop(static_elements, dynamic_elements, stage, sample_index, stat_mark = true){
     let pop_elements = [];
     let delay = 1/dynamic_elements.datapoints.all.length;
     for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
@@ -657,7 +657,7 @@ function point_skip_drop(static_elements, dynamic_elements, stage, sample_index)
         let fill = pop_elements.includes(element) ? 1 : 0;
         stage.setTransition(element, 'fill-opacity', fill, fill, 0, 1);
     }
-    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index);
+    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index, stat_mark);
     
     for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
         let stat_marker = dynamic_elements.stat_markers[i];
@@ -702,7 +702,7 @@ function point_skip_drop_ci_range(static_elements, dynamic_elements, stage, samp
 }
 
 
-function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index){
+function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index, stat_mark = true){
     for(let i = 0; i < dynamic_elements.datapoints.all.length; i++){
         let element = dynamic_elements.datapoints.all[i];
         let element_id = element.getAttr('id');
@@ -714,14 +714,14 @@ function prop_fade_stage(static_elements, dynamic_elements, stage, sample_index)
     element = dynamic_elements.stat_markers[0];
     stage.setTransition(element, 'fill-opacity', 0, 1, 0, 1);
     stage.setTransition(element, 'stroke-opacity', 0, 1, 0, 1);
-    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index);
+    stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index, stat_mark);
     for(let i = 0; i < dynamic_elements.stat_markers.length; i++){
         let stat_marker = dynamic_elements.stat_markers[i];
         stage.setTransition(stat_marker, 'stroke-opacity', 0, 1, 0.5, 1);
     }
 }
 
-function stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index){
+function stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_index, show_stat_mark = true){
     for(let i = 0; i < dynamic_elements.ghosts.length; i++){
         let element = dynamic_elements.ghosts[i];
         
@@ -729,7 +729,7 @@ function stat_mark_fade_in(static_elements, dynamic_elements, stage, sample_inde
         let y2 = element.getAttr('init_y2');
         let x1 = element.getAttr('init_x1');
         let x2 = element.getAttr('init_x2');
-        if(element.id.includes("range")){
+        if(element.id.includes("range") || !show_stat_mark){
             stage.setTransition(element, 'fill-opacity', 0, 0, 0, 1);
             stage.setTransition(element, 'stroke-opacity', 0, 0, 0, 1);
         }else{
@@ -1066,14 +1066,31 @@ function ma_createDistributionAnimation(animation, pop_dimensions, sample_dimens
         });
         for(let j = i - step + 1; j <= i; j++ ){
             if(j < 0) continue;
-            let sample_markers = dynamic_elements.distribution.stats[j];
-            for(let n = 0; n < sample_markers.length; n++){
-                let sample_mark = sample_markers[n];
-                stage.setTransition(sample_mark, 'stroke-opacity', 0, 0.2, 0, 0);
+            if(module.name != "Confidence Interval"){
+                let sample_markers = dynamic_elements.distribution.stats[j];
+                for(let n = 0; n < sample_markers.length; n++){
+                    let sample_mark = sample_markers[n];
+                    stage.setTransition(sample_mark, 'stroke-opacity', 0, 0.2, 0, 0);
+                }
             }
             let dist_datapoint = dynamic_elements.distribution.datapoints[j];
             stage.setTransition(dist_datapoint, 'stroke-opacity', 0, 1, 0, 0.2);
             stage.setTransition(dist_datapoint, 'fill-opacity', 0, 1, 0, 0);
+        }
+        let range_bar = dynamic_elements.distribution.stats[i].filter((e) => String(e.id).includes('stay'))[0];
+        if(range_bar){
+            stage.setTransition(range_bar, 'stroke-opacity', 0, 1, 0, 0);
+            stage.setTransition(range_bar, 'fill-opacity', 0, 1, 0, 0);
+            stage.setTransition(range_bar, 'selected', 0, 1, 0, 0);
+            stage.setTransition(range_bar, 'lineWidth', 1, 3, 0, 0);
+        }
+        if(i - step > 0){
+            let last_range_bar = dynamic_elements.distribution.stats[i - step].filter((e) => String(e.id).includes('stay'))[0];
+            if(range_bar){
+                stage.setTransition(last_range_bar, 'stroke-opacity', 0, 0, 0, 0);
+                stage.setTransition(last_range_bar, 'fill-opacity', 0, 0, 0, 0);
+                stage.setTransition(last_range_bar, 'selected', 0, 0, 0, 0);
+            }
         }
         if(dynamic_elements.distribution.datapoints[0].type == "distribution_range"){
             let total_count = 0;
