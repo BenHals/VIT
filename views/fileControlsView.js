@@ -1,3 +1,4 @@
+const use_var_dropdown = true;
 function generateFileOptionsHTML(module){
     return `
           <div id="fileOptions">
@@ -117,8 +118,10 @@ return `
             <div id="variableSelectHeader" class="panel-heading">
                 <h3 class="panel-title">Variables</h3>
             </div>
-            <select id="variableSelect" class="panel-body selectpicker" multiple='multiple'>
+            <select id="variableSelect" class="panel-body selectpicker varselect" ${use_var_dropdown ? "" : "multiple='multiple'"}>
             </select>
+            ${!use_var_dropdown ? "" : `<select id="variableSelect2" class="panel-body selectpicker varselect" ${use_var_dropdown ? "" : "multiple='multiple'"}>
+            </select>`}
             </div>
             <div id="var-error" class="alert alert-danger" style="display:none;">
                 <strong>Success!</strong> You should <a href="#" class="alert-link">read this message</a>.
@@ -152,11 +155,16 @@ function generateExampleFilesHTML(example_files){
     return html;
 }
 
-function generateColumnsHTML(columns, selected){
+function generateColumnsHTML(columns, selected, selected_index = 0){
     let html = ``;
+    html += (`<option class="list-group-item" value="None">None</option>`);
     for(var c in columns){
         let letter = columns[c][1].slice(0, 1);
-        html += (`<option class="list-group-item" value="${columns[c][0]}" ${$.inArray(columns[c][0], selected) != -1 ? "selected" : ""}>${columns[c][0]} (${letter})</option>`);
+        let is_selected = $.inArray(columns[c][0], selected.slice(selected_index)) != -1;
+        if(use_var_dropdown){
+            is_selected = columns[c][0] == selected[selected_index];
+        }
+        html += (`<option class="list-group-item" value="${columns[c][0]}" ${ is_selected ? "selected" : ""}>${columns[c][0]} (${letter})</option>`);
     }
     return html;
 }
@@ -193,7 +201,7 @@ $(document).on('click', '.exampleItems', function(){
     controller.exampleFileSelected(data);
 });
 
-$(document).on('change', '#variableSelect', function(e){
+$(document).on('change', '.varselect', function(e){
     $('.varAlert').remove();
     //$('#focusPanel').addClass('invisible');
     $('#focusPanel').hide();
@@ -223,10 +231,16 @@ async function populateExampleFiles(){
 function fc_populateColumnSelect(columns, selected){
     $('#variablePanel').removeClass('invisible');
     //$('#variablePanel').show();
-    $('#variablePanel .panel-body').attr('size', Math.min(columns.length, 10));
+    if(! use_var_dropdown){
+        $('#variablePanel #variableSelect').attr('size', Math.min(columns.length, 10));
+    }
     
     let columns_html = generateColumnsHTML(columns, selected);
-    $('#variablePanel .panel-body').html(columns_html);
+    $('#variablePanel #variableSelect').html(columns_html);
+    if(use_var_dropdown){
+        let columns_html = generateColumnsHTML(columns, selected, 1);
+        $('#variablePanel #variableSelect2').html(columns_html);
+    }
 
 }
 
@@ -254,6 +268,10 @@ function fc_formatError(err){
 
 function fc_tooManyVariables(err){
     $('#var-error').text("Too many columns selected");
+    $('#var-error').show();
+}
+function fc_notEnoughVariables(err){
+    $('#var-error').text("Select a primary variable");
     $('#var-error').show();
 }
 

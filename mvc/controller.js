@@ -78,9 +78,22 @@ const controller = {
         model.newColumnReset();
         // Reset URL
         deleteFromUrl(['d0', 'd1', 'focus']);
-  
-        let selected_labels = [...Array.prototype.slice.call(e.target.selectedOptions)].map(function(option){return option.innerHTML.slice(0, option.innerHTML.length-4)});
-        model.columnSelection(selected_labels);
+        let selected_labels = [];
+        if(!use_var_dropdown){
+            selected_labels = [...Array.prototype.slice.call(e.target.selectedOptions)].map(function(option){return option.innerHTML.slice(0, option.innerHTML.length-4)});
+        }else{
+            let var_select_main = $('#variablePanel #variableSelect').children("option:selected").val();
+            let var_select_secondary = $('#variablePanel #variableSelect2').children("option:selected").val();
+            if(var_select_main == undefined | var_select_main == "None"){
+                fc_notEnoughVariables();
+                return;
+            }
+            selected_labels.push(var_select_main);
+            if(!(var_select_secondary == undefined | var_select_secondary == "None")){
+                selected_labels.push(var_select_secondary);
+            }
+        }
+        model.columnSelection(selected_labels, true);
         this.validateSelectedColumns();
 
 

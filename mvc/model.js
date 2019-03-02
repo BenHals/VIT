@@ -223,7 +223,15 @@ const model = {
         });
     },
 
-    columnSelection: function(selected_labels){
+    columnSelection: function(selected_labels, direct){
+        if(direct){
+            this.selected_columns = new Set();
+            let selOptions = new Set(selected_labels);
+            for (let index = 0; index < selected_labels.length; index++){
+                this.selected_columns.add(this.columns[selected_labels[index]]);
+            }
+            return [...this.selected_columns];
+        }
         // Select inputs dont have ordering, so we must keep track ourselves
         let selOptions = new Set(selected_labels);
         for (let index = 0; index < selected_labels.length; index++){
