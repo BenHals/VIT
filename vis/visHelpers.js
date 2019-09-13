@@ -949,44 +949,44 @@ function heap_line(elements, bounds, min, max, vertical, base_margin){
 
 function sectionAreas(overall_bounds){
     let areas = {};
-    areas.overall = new Area(overall_bounds.left, overall_bounds.right, overall_bounds.top, overall_bounds.bottom);
+    areas.overall = new Area(overall_bounds.left, overall_bounds.right, overall_bounds.top, overall_bounds.bottom, overall_bounds.PIXEL_RATIO);
     let num_sections = 3;
     for(let i = 0; i < num_sections; i++){
         let sec_bounds = {left: overall_bounds.left, right: overall_bounds.right, top: (i) * (overall_bounds.height / num_sections), bottom: (i+1) * (overall_bounds.height / num_sections)};
-        areas["sec"+i] = new Area(sec_bounds.left, sec_bounds.right, sec_bounds.top, sec_bounds.bottom);
+        areas["sec"+i] = new Area(sec_bounds.left, sec_bounds.right, sec_bounds.top, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
         let ten = areas["sec"+i].split(10, 1)[1];
-        areas["sec"+i+"title"] = new Area(sec_bounds.left, sec_bounds.right, sec_bounds.top, ten);
+        areas["sec"+i+"title"] = new Area(sec_bounds.left, sec_bounds.right, sec_bounds.top, ten, overall_bounds.PIXEL_RATIO);
         let ninty = areas["sec"+i].split(10, 9)[1];
-        areas["sec"+i+"display"] = new Area(sec_bounds.left, sec_bounds.right, ten, ninty);
-        areas["sec"+i+"axis"] = new Area(sec_bounds.left, sec_bounds.right, ninty, sec_bounds.bottom);
+        areas["sec"+i+"display"] = new Area(sec_bounds.left, sec_bounds.right, ten, ninty, overall_bounds.PIXEL_RATIO);
+        areas["sec"+i+"axis"] = new Area(sec_bounds.left, sec_bounds.right, ninty, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
     }
     let sec_bounds = {left: overall_bounds.left, right: overall_bounds.right, top: (2) * (overall_bounds.height / num_sections), bottom: (3) * (overall_bounds.height / num_sections)};
     let seventy = areas["sec2"].split(10, 7)[0];
-    areas["sec2regL"] = new Area(sec_bounds.left, seventy, sec_bounds.top, sec_bounds.bottom);
+    areas["sec2regL"] = new Area(sec_bounds.left, seventy, sec_bounds.top, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
     let ten = areas["sec2regL"].split(10, 1)[1];
-    areas["sec2regL"+"title"] = new Area(sec_bounds.left, seventy, sec_bounds.top, ten);
+    areas["sec2regL"+"title"] = new Area(sec_bounds.left, seventy, sec_bounds.top, ten, overall_bounds.PIXEL_RATIO);
     let ninty = areas["sec2regL"].split(10, 9)[1];
-    areas["sec2regL"+"display"] = new Area(sec_bounds.left, seventy, sec_bounds.top, sec_bounds.bottom);
-    areas["sec2regL"+"axis"] = new Area(sec_bounds.left, seventy, ninty, sec_bounds.bottom);
+    areas["sec2regL"+"display"] = new Area(sec_bounds.left, seventy, sec_bounds.top, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
+    areas["sec2regL"+"axis"] = new Area(sec_bounds.left, seventy, ninty, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
 
-    areas["sec2regR"] = new Area(seventy, sec_bounds.right, sec_bounds.top, sec_bounds.bottom);
+    areas["sec2regR"] = new Area(seventy, sec_bounds.right, sec_bounds.top, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
     ten = areas["sec2regR"].split(10, 1)[0];
     ninty = areas["sec2regR"].split(10, 9)[0];
-    areas["sec2regR"+"title"] = new Area(ninty, sec_bounds.right, sec_bounds.top, sec_bounds.bottom);
+    areas["sec2regR"+"title"] = new Area(ninty, sec_bounds.right, sec_bounds.top, sec_bounds.bottom), overall_bounds.PIXEL_RATIO;
     
-    areas["sec2regR"+"display"] = new Area(ten, ninty, sec_bounds.top, sec_bounds.bottom);
-    areas["sec2regR"+"axis"] = new Area(seventy, ten, sec_bounds.top, sec_bounds.bottom);
+    areas["sec2regR"+"display"] = new Area(ten, ninty, sec_bounds.top, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
+    areas["sec2regR"+"axis"] = new Area(seventy, ten, sec_bounds.top, sec_bounds.bottom, overall_bounds.PIXEL_RATIO);
 
     return areas;
 }
 
 class Area {
-    constructor(l, r, t, b){
+    constructor(l, r, t, b, pr){
         this.top = t;
         this.bottom = b;
         this.left = l;
         this.right = r;
-        this.margin = 5;
+        this.margin = 5 * pr;
         this.innerLeft = this.left + this.margin;
         this.innerRight = this.right - this.margin;
         this.innerTop = this.top + this.margin;

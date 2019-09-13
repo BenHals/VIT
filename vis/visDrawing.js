@@ -1,3 +1,4 @@
+let COMPONENT_SCALE = 1
 var colorScale = ['#4A96AD','#7D1935', '#1b9e77', '#d95f02', '#7570b3']
 let defaultDrawFuncs = {
     "datapoint": function(e, ctx){
@@ -7,7 +8,7 @@ let defaultDrawFuncs = {
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
         let offset = 5;
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1 * COMPONENT_SCALE;
         ctx.translate(0.5, 0.5);
         // ctx.fillRect(parseInt(e.attrs.x - offset),
         //             parseInt(e.attrs.y - offset),
@@ -20,7 +21,7 @@ let defaultDrawFuncs = {
         ctx.beginPath();
         ctx.arc(parseInt(e.attrs.x),
                 parseInt(e.attrs.y),
-                e.getAttr('r') || 5,
+                (e.getAttr('r') || 5) * COMPONENT_SCALE,
                 0,
                 Math.PI * 2);
         ctx.stroke();
@@ -46,7 +47,7 @@ let defaultDrawFuncs = {
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        let font = Math.min(e.attrs.height, e.attrs.width);
+        let font = Math.min(e.attrs.height, e.attrs.width) * COMPONENT_SCALE;
         ctx.font = font+'px sans-serif';
         ctx.fillStyle = d3.color(fill_color).brighter(1.5);
         ctx.fillText(Math.round(e.getAttr('items')),
@@ -138,7 +139,7 @@ let defaultDrawFuncs = {
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color, 1);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
-        ctx.font = '15px sans-serif';
+        ctx.font = `${15 * COMPONENT_SCALE}px sans-serif`;
         ctx.textAlign = e.attrs['align'];
         ctx.textBaseline = e.attrs['baseline'];
         ctx.fillText(e.attrs.text, e.attrs.x, e.attrs.y);
@@ -151,7 +152,7 @@ let defaultDrawFuncs = {
         color.opacity = 0.8;
         ctx.fillStyle = color;
         ctx.strokeStyle = stroke_color;
-        ctx.font = '15px sans-serif';
+        ctx.font = `${15 * COMPONENT_SCALE}px sans-serif`;
         ctx.textAlign = e.attrs['align'];
         ctx.textBaseline = e.attrs['baseline'];
         let max_width = Math.max(ctx.measureText("Coverage").width, ctx.measureText(e.attrs.text).width, ctx.measureText(e.getAttr("percentage-text")).width) + 5;
@@ -172,7 +173,7 @@ let defaultDrawFuncs = {
         if(e.getAttr("dashed")){
             ctx.setLineDash([5, 8]);
         }
-        ctx.lineWidth = e.getAttr('lineWidth') ? e.getAttr('lineWidth') : 1;
+        ctx.lineWidth = (e.getAttr('lineWidth') ? e.getAttr('lineWidth') : 1) * COMPONENT_SCALE;
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
         ctx.moveTo(parseInt(e.getAttr('x1')), parseInt(e.getAttr('y1')));
@@ -188,6 +189,7 @@ let defaultDrawFuncs = {
         let [stroke_color, fill_color] = elementColor(e, backup_color, backup_color);
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
+        ctx.lineWidth = 3 * COMPONENT_SCALE
         let x1 = e.getAttr('x1');
         let x2 = e.getAttr('x2');
         let y1 = e.getAttr('y1');
@@ -211,7 +213,7 @@ let defaultDrawFuncs = {
         ctx.fillStyle = fill_color;
         ctx.strokeStyle = stroke_color;
         ctx.lineCap = "round";
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 3 * COMPONENT_SCALE;
         let x1 = e.getAttr('x1');
         let x2 = e.getAttr('x2');
         let y1 = e.getAttr('y1');
@@ -244,7 +246,7 @@ let defaultDrawFuncs = {
         ctx.beginPath();
         ctx.arc(parseInt(e.attrs.x),
                 parseInt(e.attrs.y),
-            5,
+            5 * COMPONENT_SCALE,
             0,
             Math.PI * 2);
         //ctx.fill();
@@ -293,7 +295,7 @@ let defaultDrawFuncs = {
         ctx.closePath();
         ctx.stroke();
         let tick_x = e.getAttr('min');
-        ctx.font = '10px serif';
+        ctx.font = `${10 * COMPONENT_SCALE }px serif`;
         ctx.fillStyle = '#000';
         ctx.textAlign = !vertical ? 'center' : 'end';
         ctx.textBaseline = !vertical ? 'hanging' : 'middle';
@@ -357,7 +359,7 @@ let defaultSVGFuncs = {
     },
     "prop-text": function(e, ctx){
 
-    },
+    }, 
     "text": function(e, svg_id){
         let backup_color = Math.round(e.getAttr('selected')) ? '#C63D0F' : '#000000';
         let backup_opacity = 0;

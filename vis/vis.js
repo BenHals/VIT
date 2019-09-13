@@ -21,7 +21,8 @@ const vis = {
         this.dynamicElements = {};
         this.interpolators = [];
         let canvas_bounds = this.canvas.getBoundingClientRect();
-        this.areas = sectionAreas({top: 0, left: 0, right: canvas_bounds.width, bottom: canvas_bounds.height, width: canvas_bounds.width, height: canvas_bounds.height});
+        let PIXEL_RATIO = 1
+        this.areas = sectionAreas({top: 0, left: 0, right: canvas_bounds.width, bottom: canvas_bounds.height, width: canvas_bounds.width, height: canvas_bounds.height, PIXEL_RATIO: PIXEL_RATIO});
 
         this.current_stage = 0;
         this.last_frame = null;
@@ -502,12 +503,15 @@ const vis = {
         this.loop_started = true;
         
     },
-    scale: function(scale_x){
+    scale: function(scale_x, scale_y, PIXEL_RATIO){
         if(!this.ctx) return;
-        this.ctx.scale(scale_x, 1);
-        this.dynamicCtx.scale(scale_x, 1);
+        // this.drawDynamic();
+        // this.drawStatic();
+        // this.ctx.scale(scale_x, scale_y);
+        // this.dynamicCtx.scale(scale_x, scale_y);
         clearCtx(this.ctx);
         this.drawDynamic();
+        this.drawStatic();
     },
     stopAndClear(){
         controller.pause();

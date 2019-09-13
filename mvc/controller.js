@@ -157,8 +157,8 @@ const controller = {
         this.resizeVis(vis_space, $("#display").innerHeight());
     },
     resizeVis: function(width, height){
-        let scale_x = view.resizeCanvas();
-        vis.scale(scale_x);
+        let {scale_x, scale_y, PIXEL_RATIO} = view.resizeCanvas();
+        vis.scale(scale_x, scale_y, PIXEL_RATIO);
     },
     doneSetup: function(){
         let ds = model.populationDataset();

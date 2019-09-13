@@ -1,4 +1,11 @@
 
+let PIXEL_RATIO = window.devicePixelRatio;      
+function windowResize(){
+    PIXEL_RATIO = window.devicePixelRatio > 1 ? window.devicePixelRatio  : 1;
+    console.log(PIXEL_RATIO);
+    controller.resizeVis(true);
+}
+window.addEventListener("resize", windowResize);
 
 const view = {
     switchModule: function(module_html, genControls){
@@ -40,24 +47,49 @@ const view = {
         this.resizeCanvas(true);
     },
     resizeCanvas: function(init){
+        let canvas = document.getElementById('popCanvas');
+        let dynamicCanvas = document.getElementById('dynamicCanvas');
+        let staticOnTopCanvas = document.getElementById('staticOnTopCanvas');
+        if(canvas == null){
+            return {"scale_x": 1, "scale_y": 1,  "PIXEL_RATIO": 1};
+        }
+        let ctx = canvas.getContext('2d');
+        let dynamicCtx = dynamicCanvas.getContext('2d');
+        let staticOnTopCtx = staticOnTopCanvas.getContext('2d');
+
+        
         vis_width = $('#canvasWrapper').innerWidth();
         vis_height = $('#canvasWrapper').innerHeight();
-        $('#popCanvas').attr('width', vis_width);
-        $('#popCanvas').attr('height', vis_height);
-        let scale_factor = ($('#popCanvas').attr('width') / $('#popCanvas').attr('data-normWidth'))
-        $('#dynamicCanvas').attr('width', vis_width);
-        $('#dynamicCanvas').attr('height', vis_height);
-        $('#staticOnTopCanvas').attr('width', vis_width);
-        $('#staticOnTopCanvas').attr('height', vis_height);
+        $('#popCanvas').attr('width', vis_width * PIXEL_RATIO);
+        $('#popCanvas').attr('height', vis_height * PIXEL_RATIO);
+        $('#dynamicCanvas').attr('data-pixelratio', PIXEL_RATIO);
+        $('#popCanvas').attr('data-pixelratio', PIXEL_RATIO);
+        $('#staticOnTopCanvas').attr('data-pixelratio', PIXEL_RATIO);
+
+        let scale_factor = (($('#popCanvas').attr('width')) / $('#popCanvas').attr('data-normWidth'))
+        $('#dynamicCanvas').attr('width', vis_width * PIXEL_RATIO);
+        $('#dynamicCanvas').attr('height', vis_height * PIXEL_RATIO);
+        
+        $('#staticOnTopCanvas').attr('width', vis_width * PIXEL_RATIO);
+        $('#staticOnTopCanvas').attr('height', vis_height * PIXEL_RATIO);
+        
+        ctx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
+        dynamicCtx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
+        staticOnTopCtx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
+        // ctx.scale(scale_factor / PIXEL_RATIO, 1 / PIXEL_RATIO);
         if(init){
+            
             $('#dynamicSVG').attr('data-normWidth', vis_width);
             $('#dynamicSVG').attr('data-normHeight', vis_height);
-            $('#dynamicCanvas').attr('data-normWidth', vis_width);
-            $('#dynamicCanvas').attr('data-normHeight', vis_height);
-            $('#staticOnTopCanvas').attr('data-normWidth', vis_width);
-            $('#staticOnTopCanvas').attr('data-normHeight', vis_height);
-            $('#popCanvas').attr('data-normWidth', vis_width);
-            $('#popCanvas').attr('data-normHeight', vis_height);
+            $('#dynamicCanvas').attr('data-normWidth', vis_width * PIXEL_RATIO);
+            $('#dynamicCanvas').attr('data-normHeight', vis_height * PIXEL_RATIO);
+            
+            $('#staticOnTopCanvas').attr('data-normWidth', vis_width * PIXEL_RATIO);
+            $('#staticOnTopCanvas').attr('data-normHeight', vis_height * PIXEL_RATIO);
+            
+            $('#popCanvas').attr('data-normWidth', vis_width * PIXEL_RATIO);
+            $('#popCanvas').attr('data-normHeight', vis_height * PIXEL_RATIO);
+            
             $('#dynamicSVG').attr('width', vis_width);
             $('#dynamicSVG').attr('height', vis_height);
             $('#popSVG').attr('width', vis_width);
@@ -83,6 +115,6 @@ const view = {
         //$('#popSVG').attr('transform', "translate("+$('#popSVG').attr('width')/2+","+$('#popSVG').attr('height')/2 + ") scale("+scale_factor+",1) translate("+-1*$('#popSVG').attr('width')/2+","+-1*$('#popSVG').attr('height')/2 + ")");
         $('#popSVG').attr('transform', "scale("+scale_factor+",1) translate("+(canvas_rect.left - pRect.left)/scale_factor+",0)");
 
-        return scale_factor;
+        return {"scale_x": 1, "scale_y": 1,  "PIXEL_RATIO": 1};
     }
 }
