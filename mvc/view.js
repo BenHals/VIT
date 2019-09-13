@@ -72,10 +72,17 @@ const view = {
         
         $('#staticOnTopCanvas').attr('width', vis_width * PIXEL_RATIO);
         $('#staticOnTopCanvas').attr('height', vis_height * PIXEL_RATIO);
+        // $('#popCanvas').attr('transform', "scale("+scale_factor / PIXEL_RATIO+",1)");
+        $('#popCanvas').attr('style', `width: ${vis_width}px; height: ${vis_height}px`);
+        $('#dynamicCanvas').attr('style', `width: ${vis_width}px; height: ${vis_height}px`);
+        $('#staticOnTopCanvas').attr('style', `width: ${vis_width}px; height: ${vis_height}px`);
         
-        ctx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
-        dynamicCtx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
-        staticOnTopCtx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
+        // ctx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
+        // dynamicCtx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
+        // staticOnTopCtx.setTransform(scale_factor / PIXEL_RATIO, 0, 0, 1 / PIXEL_RATIO, 0, 0);
+        ctx.setTransform(scale_factor, 0, 0, 1 , 0, 0);
+        dynamicCtx.setTransform(scale_factor , 0, 0, 1 , 0, 0);
+        staticOnTopCtx.setTransform(scale_factor , 0, 0, 1 , 0, 0);
         // ctx.scale(scale_factor / PIXEL_RATIO, 1 / PIXEL_RATIO);
         if(init){
             
