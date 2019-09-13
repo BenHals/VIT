@@ -21,6 +21,8 @@ const vis = {
         this.dynamicElements = {};
         this.interpolators = [];
         let canvas_bounds = this.canvas.getBoundingClientRect();
+        canvas_bounds.width = this.canvas.getAttribute("width");
+        canvas_bounds.height = this.canvas.getAttribute("height");
         let PIXEL_RATIO = 1
         this.areas = sectionAreas({top: 0, left: 0, right: canvas_bounds.width, bottom: canvas_bounds.height, width: canvas_bounds.width, height: canvas_bounds.height, PIXEL_RATIO: PIXEL_RATIO});
 
